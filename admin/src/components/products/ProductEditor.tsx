@@ -147,8 +147,8 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
       }
 
       toast.success(product ? "Produto actualizado." : "Produto criado.");
-      if (!product && result.id) {
-        router.push(`/produtos/${result.id}`);
+      if (!product && (result as any).id) {
+        router.push(`/produtos/${(result as any).id}`);
       } else {
         router.refresh();
       }

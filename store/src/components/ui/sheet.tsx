@@ -51,7 +51,7 @@ export function SheetTrigger({ asChild = false, children }: SheetTriggerProps) {
   const { onOpenChange } = useSheetContext();
 
   if (asChild && isValidElement(children)) {
-    return cloneElement(children, {
+    return cloneElement(children as any, {
       onClick: () => {
         onOpenChange(true);
       },

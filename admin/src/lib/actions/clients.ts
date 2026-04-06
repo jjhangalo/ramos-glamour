@@ -106,7 +106,10 @@ export async function getClient(id: string) {
       email: userData.user.email ?? null,
     },
     addresses: (addresses ?? []) as AddressRecord[],
-    orders: (orders ?? []) as OrderRecord[],
+    orders: (orders ?? []).map((order: any) => ({
+      ...order,
+      addresses: Array.isArray(order.addresses) ? order.addresses[0] : order.addresses,
+    })) as OrderRecord[],
   };
 }
 

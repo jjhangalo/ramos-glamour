@@ -25,7 +25,11 @@ export async function getOrders(status?: string) {
     throw new Error(error.message);
   }
 
-  return (data ?? []) as OrderRecord[];
+  return (data ?? []).map((order: any) => ({
+    ...order,
+    profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles,
+    addresses: Array.isArray(order.addresses) ? order.addresses[0] : order.addresses,
+  })) as OrderRecord[];
 }
 
 export async function getOrder(id: string) {
@@ -42,7 +46,13 @@ export async function getOrder(id: string) {
     throw new Error(error.message);
   }
 
-  return data as OrderRecord;
+  if (!data) return null;
+
+  return {
+    ...data,
+    profiles: Array.isArray(data.profiles) ? data.profiles[0] : data.profiles,
+    addresses: Array.isArray(data.addresses) ? data.addresses[0] : data.addresses,
+  } as unknown as OrderRecord;
 }
 
 export async function updateOrderStatus(
@@ -63,6 +73,9 @@ export async function updateOrderStatus(
 
 export async function getOrderWhatsappLink(id: string) {
   const order = await getOrder(id);
+  if (!order) {
+    return null;
+  }
   const profile = order.profiles;
   const phone = profile?.whatsapp || profile?.phone;
 
