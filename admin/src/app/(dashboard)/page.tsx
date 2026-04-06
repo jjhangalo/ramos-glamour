@@ -103,9 +103,13 @@ export default async function DashboardPage() {
                     #{shortId(order.id)}
                   </td>
                   <td className="px-5 py-4 text-slate-700">
-                    {order.profiles?.full_name ||
-                      order.profiles?.display_name ||
-                      "Cliente sem nome"}
+                    {Array.isArray(order.profiles)
+                      ? order.profiles[0]?.full_name ||
+                        order.profiles[0]?.display_name ||
+                        "Cliente sem nome"
+                      : (order.profiles as any)?.full_name ||
+                        (order.profiles as any)?.display_name ||
+                        "Cliente sem nome"}
                   </td>
                   <td className="px-5 py-4 text-slate-700">
                     {formatPrice(order.total)}
