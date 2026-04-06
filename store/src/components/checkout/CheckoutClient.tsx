@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
+import { Pencil } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { createOrder } from "@/lib/actions/orders";
@@ -151,8 +152,9 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           onClick={() => {
             router.push("/carrinho");
           }}
-          className="mt-5 text-sm font-medium text-brand-charcoal transition hover:text-brand-olive"
+          className="mt-5 inline-flex items-center gap-2 rounded-full border border-brand-charcoal px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
         >
+          <Pencil className="h-4 w-4" />
           Editar no carrinho
         </button>
       </section>

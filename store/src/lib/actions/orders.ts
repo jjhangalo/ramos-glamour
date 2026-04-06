@@ -1,5 +1,6 @@
 "use server";
 
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 type CartItemPayload = {
@@ -167,7 +168,7 @@ export async function createOrder(input: CreateOrderInput) {
 
   const orderItems = input.items.map((item) => ({
     order_id: order.id,
-    product_id: item.id,
+    product_id: null,
     product_name: item.name,
     product_price: item.price,
     quantity: item.quantity,
@@ -196,10 +197,13 @@ export async function createOrder(input: CreateOrderInput) {
     })),
   };
 
-  const { error: notificationError } = await supabase.from("notifications").insert({
-    type: "new_order",
-    payload,
-  });
+  const adminSupabase = createAdminClient();
+  const { error: notificationError } = await adminSupabase
+    .from("notifications")
+    .insert({
+      type: "new_order",
+      payload,
+    });
 
   if (notificationError) {
     throw new Error(notificationError.message);
