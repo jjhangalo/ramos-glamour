@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+
+import { AppToaster } from "@/components/shared/AppToaster";
+
 import "./globals.css";
 
 const inter = Inter({
@@ -19,15 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="pt"
-      className={`${inter.variable} h-full antialiased`}
-    >
+    <html lang="pt" className={`${inter.variable} h-full antialiased`}>
       <head>
         <meta name="apple-mobile-web-app-title" content="Ramos Glamour | Administração" />
       </head>
       <body className="min-h-full bg-slate-100 font-sans text-slate-950">
         {children}
+        <AppToaster />
       </body>
     </html>
   );
