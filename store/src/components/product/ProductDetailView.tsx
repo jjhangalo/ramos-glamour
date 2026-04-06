@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { Minus, Plus, Star } from "lucide-react";
 
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import type { Product } from "@/lib/mock/products";
 import { formatPrice } from "@/lib/utils/format";
 
@@ -143,15 +144,11 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              console.log("Adicionar ao carrinho", product.id, quantity);
-            }}
-            className="w-full rounded-full bg-brand-olive px-6 py-4 text-base font-medium text-brand-white transition hover:bg-[#8a904d]"
-          >
-            Adicionar ao carrinho
-          </button>
+          <AddToCartButton
+            product={product}
+            quantity={quantity}
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-olive px-6 py-4 text-base font-medium text-brand-white transition hover:bg-[#8a904d]"
+          />
         </div>
       </section>
 

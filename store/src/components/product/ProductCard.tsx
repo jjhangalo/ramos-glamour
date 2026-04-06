@@ -3,8 +3,9 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { ShoppingBag, Star } from "lucide-react";
+import { Star } from "lucide-react";
 
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import type { Product } from "@/lib/mock/products";
 import { formatPrice } from "@/lib/utils/format";
 
@@ -66,17 +67,11 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="text-lg font-semibold text-brand-charcoal">
             {formatPrice(product.price)}
           </p>
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              console.log("Adicionar ao carrinho", product.id);
-            }}
+          <AddToCartButton
+            product={product}
+            compact
             className="inline-flex items-center gap-2 rounded-full bg-brand-olive px-4 py-2 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"
-          >
-            <ShoppingBag className="h-4 w-4" />
-            Adicionar ao carrinho
-          </button>
+          />
         </div>
       </div>
     </article>

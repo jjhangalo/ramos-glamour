@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Playfair_Display } from "next/font/google";
-import { ShoppingBag } from "lucide-react";
+import { Toaster } from "react-hot-toast";
 
 import { AuthButton } from "@/components/auth/AuthButton";
+import { CartHeaderButton } from "@/components/cart/CartHeaderButton";
 import "./globals.css";
 
 const playfairDisplay = Playfair_Display({
@@ -61,16 +62,7 @@ export default function RootLayout({
               </Link>
 
               <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
-                <Link
-                  href="/catalogo"
-                  className="inline-flex items-center gap-2 rounded-full border border-brand-charcoal/10 bg-brand-bg/50 px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
-                >
-                  <ShoppingBag className="h-4 w-4" />
-                  <span>Carrinho</span>
-                  <span className="rounded-full bg-brand-charcoal px-2 py-0.5 text-xs text-brand-white">
-                    0
-                  </span>
-                </Link>
+                <CartHeaderButton />
                 <AuthButton />
               </div>
             </div>
@@ -85,6 +77,17 @@ export default function RootLayout({
             </div>
           </footer>
         </div>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: "#FFFFFF",
+              color: "#626260",
+              borderRadius: "999px",
+              padding: "14px 18px",
+            },
+          }}
+        />
       </body>
     </html>
   );
