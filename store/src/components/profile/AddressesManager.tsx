@@ -6,6 +6,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
+import { ProfileSectionHeader } from "@/components/profile/ProfileSectionHeader";
 import {
   createAddress,
   deleteAddress,
@@ -112,15 +113,12 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
 
   return (
     <div className="space-y-6">
+      <ProfileSectionHeader
+        title="As minhas moradas"
+        description="Guarda e organiza as moradas de entrega para acelerar o checkout."
+      />
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm uppercase tracking-[0.24em] text-brand-charcoal/60">
-            Moradas
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold text-brand-charcoal">
-            As minhas moradas
-          </h1>
-        </div>
         <button
           type="button"
           onClick={() => {
@@ -233,7 +231,7 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
       </div>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent>
+        <SheetContent className="w-full max-w-xl">
           <SheetHeader>
             <SheetTitle>
               {editingAddress ? "Editar morada" : "Adicionar morada"}

@@ -1,3 +1,4 @@
+import { ProfileSectionHeader } from "@/components/profile/ProfileSectionHeader";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils/format";
 
@@ -39,14 +40,10 @@ export default async function OrdersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-sm uppercase tracking-[0.24em] text-brand-charcoal/60">
-          Encomendas
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold text-brand-charcoal">
-          As minhas encomendas
-        </h1>
-      </div>
+      <ProfileSectionHeader
+        title="As minhas encomendas"
+        description="Acompanha o estado de cada pedido e revê os itens de forma rápida."
+      />
 
       <div className="space-y-5">
         {(orders ?? []).map((order) => (

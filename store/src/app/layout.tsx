@@ -29,14 +29,14 @@ export default function RootLayout({
   return (
     <html
       lang="pt"
-      className={`${playfairDisplay.variable} h-full antialiased`}
+      className={`${playfairDisplay.variable} h-full overflow-x-hidden antialiased`}
     >
       <head>
         <meta name="apple-mobile-web-app-title" content="Ramos Glamour" />
       </head>
-      <body className="min-h-full bg-brand-bg font-sans text-brand-charcoal">
-        <div className="flex min-h-screen flex-col">
-          <header className="sticky top-0 z-50 border-b border-brand-charcoal/10 bg-white/95 shadow-sm backdrop-blur">
+      <body className="min-h-full w-full overflow-x-hidden bg-brand-bg font-sans text-brand-charcoal">
+        <div className="flex min-h-screen w-full flex-col overflow-x-hidden">
+          <header className="sticky top-0 z-50 w-full border-b border-brand-charcoal/10 bg-white/95 shadow-sm backdrop-blur">
             <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
               <Link
                 href="/"
@@ -70,7 +70,7 @@ export default function RootLayout({
 
           <div className="flex flex-1 flex-col pt-2">{children}</div>
 
-          <footer className="mt-12 border-t border-brand-charcoal/10 bg-white/80">
+          <footer className="mt-12 w-full border-t border-brand-charcoal/10 bg-white/80">
             <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-6 text-sm text-brand-charcoal/75 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
               <p>Ramos Glamour</p>
               <p>{currentYear}</p>

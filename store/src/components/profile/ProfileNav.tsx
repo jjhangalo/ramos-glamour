@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/perfil", label: "Os meus dados" },
+  { href: "/perfil/dados", label: "Os meus dados" },
   { href: "/perfil/moradas", label: "As minhas moradas" },
   { href: "/perfil/encomendas", label: "As minhas encomendas" },
 ];
@@ -16,7 +16,7 @@ export function ProfileNav() {
 
   return (
     <>
-      <nav className="hidden lg:flex lg:flex-col lg:gap-2">
+      <nav className="hidden md:flex md:flex-col md:gap-2">
         {links.map((link) => {
           const isActive = pathname === link.href;
 
@@ -37,7 +37,7 @@ export function ProfileNav() {
         })}
       </nav>
 
-      <nav className="flex gap-2 overflow-x-auto pb-1 lg:hidden">
+      <nav className="flex gap-2 overflow-x-auto pb-1 md:hidden">
         {links.map((link) => {
           const isActive = pathname === link.href;
 

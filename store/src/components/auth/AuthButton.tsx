@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import type { User } from "@supabase/supabase-js";
+import { UserCircle } from "lucide-react";
 
 import { signInWithGoogle, signOut } from "@/lib/actions/auth";
 import { createClient } from "@/lib/supabase/client";
@@ -45,7 +47,16 @@ export function AuthButton() {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm text-brand-charcoal">{userName}</span>
+      <span className="hidden text-sm text-brand-charcoal md:inline">
+        {userName}
+      </span>
+      <Link
+        href="/perfil"
+        className="inline-flex items-center gap-2 text-sm text-brand-charcoal transition hover:text-brand-olive"
+      >
+        <UserCircle className="h-4 w-4" />
+        <span className="hidden sm:inline">O meu perfil</span>
+      </Link>
       <form action={signOut}>
         <button
           type="submit"

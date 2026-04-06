@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
+import { ProfileSectionHeader } from "@/components/profile/ProfileSectionHeader";
 import { updateProfile } from "@/lib/actions/profile";
 
 type ProfileFormProps = {
@@ -30,10 +31,15 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   });
 
   return (
-    <section className="rounded-[2rem] bg-white/90 p-6 shadow-[0_16px_35px_rgba(98,98,96,0.08)] sm:p-8">
+    <section className="space-y-6 rounded-[2rem] bg-white/90 p-4 shadow-[0_16px_35px_rgba(98,98,96,0.08)] sm:p-6">
+      <ProfileSectionHeader
+        title="Os meus dados"
+        description="Atualiza os dados principais da tua conta e mantém o contacto sempre correto."
+      />
+
       <div className="grid gap-8 lg:grid-cols-[200px_minmax(0,1fr)]">
         <aside className="space-y-4">
-          <div className="relative h-28 w-28 overflow-hidden rounded-full border border-brand-charcoal/10 bg-brand-bg">
+          <div className="relative aspect-square w-28 overflow-hidden rounded-full border border-brand-charcoal/10 bg-brand-bg">
             {profile.avatar_url ? (
               <Image
                 src={profile.avatar_url}
