@@ -157,6 +157,9 @@ export async function getProducts(filters: ProductFilters = {}) {
     query = query.ilike("name", `%${filters.search}%`);
   }
 
+  // Aplica limite absoluto de 20 itens como requisito de UX
+  query = query.limit(20);
+
   const { data, error } = await query;
 
   if (error) {

@@ -3,9 +3,19 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowUp, Images, Pencil, Trash2, Upload } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Images,
+  Loader2,
+  Pencil,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 import toast from "react-hot-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
   createProduct,
@@ -24,36 +34,31 @@ import {
 } from "@/lib/actions/variants";
 import { allowedImageMimeTypes, maxImageSize } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
-import type { CategoryRecord, ProductRecord, ProductVariantRecord } from "@/lib/types";
+import type {
+  CategoryRecord,
+  ProductRecord,
+  ProductVariantRecord,
+} from "@/lib/types";
+import {
+  productSchema,
+  variantSchema,
+  type ProductFormValues,
+  type VariantFormValues,
+} from "@/lib/validations/product";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { cn } from "@/lib/utils";
 
 type ProductEditorProps = {
   product: ProductRecord | null;
   categories: CategoryRecord[];
-};
-
-type ProductFormState = {
-  name: string;
-  description: string;
-  price: string;
-  category_ids: string[];
-  is_active: boolean;
-};
-
-type VariantFormState = {
-  id?: string;
-  size: string;
-  color: string;
-  stock: string;
-  is_available: boolean;
-  price_override: string;
-};
-
-const initialVariantForm: VariantFormState = {
-  size: "",
-  color: "",
-  stock: "0",
-  is_available: true,
-  price_override: "",
 };
 
 function validateClientFile(file: File) {
@@ -71,17 +76,30 @@ function validateClientFile(file: File) {
 export function ProductEditor({ product, categories }: ProductEditorProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [productForm, setProductForm] = useState<ProductFormState>({
-    name: product?.name ?? "",
-    description: product?.description ?? "",
-    price: product ? String(product.price) : "",
-    category_ids: product?.categories?.map((category) => category.id) ?? [],
-    is_active: product?.is_active ?? true,
-  });
-  const [variantForm, setVariantForm] =
-    useState<VariantFormState>(initialVariantForm);
   const [activeVariantForImages, setActiveVariantForImages] =
     useState<ProductVariantRecord | null>(null);
+
+  const productForm = useForm<ProductFormValues>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: product?.name ?? "",
+      description: product?.description ?? "",
+      price: product?.price ?? 0,
+      category_ids: product?.categories?.map((category) => category.id) ?? [],
+      is_active: product?.is_active ?? true,
+    },
+  });
+
+  const variantForm = useForm<VariantFormValues>({
+    resolver: zodResolver(variantSchema),
+    defaultValues: {
+      size: "",
+      color: "",
+      stock: 0,
+      is_available: true,
+      price_override: null,
+    },
+  });
 
   const images = useMemo(
     () =>
@@ -90,6 +108,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
       ),
     [product?.product_images],
   );
+
   const variants = useMemo(
     () =>
       [...(product?.product_variants ?? [])].sort((left, right) =>
@@ -97,10 +116,16 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
       ),
     [product?.product_variants],
   );
+
   const flatCategories = useMemo(
     () =>
       categories.flatMap((category) => [
-        { id: category.id, name: category.name, slug: category.slug, parent_id: category.parent_id },
+        {
+          id: category.id,
+          name: category.name,
+          slug: category.slug,
+          parent_id: category.parent_id,
+        },
         ...(category.children ?? []).map((child) => ({
           id: child.id,
           name: child.name,
@@ -110,39 +135,28 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
       ]),
     [categories],
   );
-  const selectedCategories = useMemo(
-    () =>
-      flatCategories.filter((category) =>
-        productForm.category_ids.includes(category.id),
-      ),
-    [flatCategories, productForm.category_ids],
-  );
+
+  const selectedCategories = useMemo(() => {
+    const ids = productForm.watch("category_ids") ?? [];
+    return flatCategories.filter((category) => ids.includes(category.id));
+  }, [flatCategories, productForm.watch("category_ids")]);
 
   function toggleCategory(categoryId: string) {
-    setProductForm((current) => ({
-      ...current,
-      category_ids: current.category_ids.includes(categoryId)
-        ? current.category_ids.filter((id) => id !== categoryId)
-        : [...current.category_ids, categoryId],
-    }));
+    const currentIds = productForm.getValues("category_ids");
+    const newIds = currentIds.includes(categoryId)
+      ? currentIds.filter((id) => id !== categoryId)
+      : [...currentIds, categoryId];
+    productForm.setValue("category_ids", newIds, { shouldValidate: true });
   }
 
-  function handleSaveProduct() {
+  const onProductSubmit = (values: ProductFormValues) => {
     startTransition(async () => {
-      const payload = {
-        name: productForm.name,
-        description: productForm.description,
-        price: Number(productForm.price || 0),
-        category_ids: productForm.category_ids,
-        is_active: productForm.is_active,
-      };
-
       const result = product
-        ? await updateProduct(product.id, payload)
-        : await createProduct(payload);
+        ? await updateProduct(product.id, values)
+        : await createProduct(values);
 
       if (!result.success) {
-        toast.error(result.error ?? "Não foi possível guardar o produto.");
+        toast.error(result.error ?? "Erro ao guardar o produto.");
         return;
       }
 
@@ -153,17 +167,41 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
         router.refresh();
       }
     });
-  }
+  };
+
+  const onVariantSubmit = (values: VariantFormValues) => {
+    if (!product) return;
+
+    startTransition(async () => {
+      const result = values.id
+        ? await updateVariant(values.id, product.id, values)
+        : await createVariant(product.id, values);
+
+      if (!result.success) {
+        toast.error(result.error ?? "Erro ao guardar a variação.");
+        return;
+      }
+
+      toast.success(values.id ? "Variação actualizada." : "Variação criada.");
+      variantForm.reset({
+        size: "",
+        color: "",
+        stock: 0,
+        is_available: true,
+        price_override: null,
+      });
+      router.refresh();
+    });
+  };
 
   function handleDeleteProduct() {
-    if (!product) {
-      return;
-    }
+    if (!product) return;
+    if (!confirm("Tens a certeza que pretendes remover este produto?")) return;
 
     startTransition(async () => {
       const result = await deleteProduct(product.id);
       if (!result.success) {
-        toast.error(result.error ?? "Não foi possível remover o produto.");
+        toast.error(result.error ?? "Erro ao remover o produto.");
         return;
       }
 
@@ -174,9 +212,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   }
 
   function handleProductImageUpload(fileList: FileList | null) {
-    if (!product || !fileList?.length) {
-      return;
-    }
+    if (!product || !fileList?.length) return;
 
     const file = fileList[0];
     const clientError = validateClientFile(file);
@@ -191,7 +227,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
     startTransition(async () => {
       const result = await uploadProductImage(product.id, formData);
       if (!result.success) {
-        toast.error(result.error ?? "Não foi possível enviar a imagem.");
+        toast.error(result.error ?? "Erro ao enviar a imagem.");
         return;
       }
 
@@ -201,9 +237,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   }
 
   function handleVariantImageUpload(fileList: FileList | null) {
-    if (!activeVariantForImages || !fileList?.length) {
-      return;
-    }
+    if (!activeVariantForImages || !fileList?.length) return;
 
     const file = fileList[0];
     const clientError = validateClientFile(file);
@@ -216,9 +250,12 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
     formData.append("file", file);
 
     startTransition(async () => {
-      const result = await uploadVariantImage(activeVariantForImages.id, formData);
+      const result = await uploadVariantImage(
+        activeVariantForImages.id,
+        formData,
+      );
       if (!result.success) {
-        toast.error(result.error ?? "Não foi possível enviar a imagem.");
+        toast.error(result.error ?? "Erro ao enviar a imagem.");
         return;
       }
 
@@ -228,17 +265,14 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   }
 
   function handleImageReorder(imageId: string, direction: "up" | "down") {
-    if (!product) {
-      return;
-    }
+    if (!product) return;
 
     const orderedIds = [...images].map((image) => image.id);
     const currentIndex = orderedIds.indexOf(imageId);
-    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    const targetIndex =
+      direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
-    if (targetIndex < 0 || targetIndex >= orderedIds.length) {
-      return;
-    }
+    if (targetIndex < 0 || targetIndex >= orderedIds.length) return;
 
     [orderedIds[currentIndex], orderedIds[targetIndex]] = [
       orderedIds[targetIndex],
@@ -248,43 +282,9 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
     startTransition(async () => {
       const result = await reorderProductImages(product.id, orderedIds);
       if (!result.success) {
-        toast.error(result.error ?? "Não foi possível reordenar as imagens.");
+        toast.error(result.error ?? "Erro ao reordenar as imagens.");
         return;
       }
-
-      router.refresh();
-    });
-  }
-
-  function handleVariantSubmit() {
-    if (!product) {
-      return;
-    }
-
-    startTransition(async () => {
-      const payload = {
-        size: variantForm.size,
-        color: variantForm.color,
-        stock: Number(variantForm.stock || 0),
-        is_available: variantForm.is_available,
-        price_override: variantForm.price_override
-          ? Number(variantForm.price_override)
-          : null,
-      };
-
-      const result = variantForm.id
-        ? await updateVariant(variantForm.id, product.id, payload)
-        : await createVariant(product.id, payload);
-
-      if (!result.success) {
-        toast.error(result.error ?? "Não foi possível guardar a variação.");
-        return;
-      }
-
-      toast.success(
-        variantForm.id ? "Variação actualizada." : "Variação criada.",
-      );
-      setVariantForm(initialVariantForm);
       router.refresh();
     });
   }
@@ -310,137 +310,194 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
           {product ? (
             <button
               type="button"
+              disabled={isPending}
               onClick={handleDeleteProduct}
-              className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50"
             >
+              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Remover produto
             </button>
           ) : null}
           <button
-            type="button"
+            type="submit"
+            form="product-form"
             disabled={isPending}
-            onClick={handleSaveProduct}
-            className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
           >
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Guardar produto
           </button>
         </div>
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="text-lg font-semibold text-slate-950">Informação base</h2>
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <div className="space-y-2 md:col-span-2">
-            <label className="text-sm font-medium text-slate-700">Nome</label>
-            <input
-              value={productForm.name}
-              onChange={(event) =>
-                setProductForm({ ...productForm, name: event.target.value })
-              }
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500"
-            />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <label className="text-sm font-medium text-slate-700">
-              Descrição
-            </label>
-            <textarea
-              value={productForm.description}
-              onChange={(event) =>
-                setProductForm({ ...productForm, description: event.target.value })
-              }
-              rows={5}
-              className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">
-              Preço base
-            </label>
-            <input
-              value={productForm.price}
-              onChange={(event) =>
-                setProductForm({ ...productForm, price: event.target.value })
-              }
-              type="number"
-              min="0"
-              step="0.01"
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500"
-            />
-          </div>
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-700">
-              Categorias
-            </label>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="space-y-4">
-                {categories.map((category) => (
-                  <div key={category.id}>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {category.name}
-                    </p>
-                    {category.children?.length ? (
-                      <div className="mt-3 space-y-2 border-l border-slate-200 pl-4">
-                        {category.children.map((child) => (
-                          <label
-                            key={child.id}
-                            className="flex items-center gap-3 text-sm text-slate-700"
+      <Form {...productForm}>
+        <form
+          id="product-form"
+          onSubmit={productForm.handleSubmit(onProductSubmit)}
+          className="space-y-6"
+        >
+          <section className="rounded-2xl border border-slate-200 bg-white p-5">
+            <h2 className="text-lg font-semibold text-slate-950">
+              Informação base
+            </h2>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <FormField
+                control={productForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Nome</FormLabel>
+                    <FormControl>
+                      <input
+                        {...field}
+                        disabled={isPending}
+                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={productForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Descrição</FormLabel>
+                    <FormControl>
+                      <textarea
+                        {...field}
+                        disabled={isPending}
+                        rows={5}
+                        className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={productForm.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Preço base</FormLabel>
+                    <FormControl>
+                      <input
+                        {...field}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        disabled={isPending}
+                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={productForm.control}
+                name="category_ids"
+                render={() => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Categorias</FormLabel>
+                    <FormControl>
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <div className="space-y-4">
+                          {categories.map((category) => (
+                            <div key={category.id}>
+                              <p className="text-sm font-semibold text-slate-900">
+                                {category.name}
+                              </p>
+                              {category.children?.length ? (
+                                <div className="mt-3 space-y-2 border-l border-slate-200 pl-4">
+                                  {category.children.map((child) => (
+                                    <label
+                                      key={child.id}
+                                      className="flex cursor-pointer items-center gap-3 text-sm text-slate-700"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        disabled={isPending}
+                                        checked={productForm
+                                          .watch("category_ids")
+                                          .includes(child.id)}
+                                        onChange={() => toggleCategory(child.id)}
+                                        className="h-4 w-4 rounded border-slate-300 cursor-pointer"
+                                      />
+                                      <span>{child.name}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              ) : (
+                                <label className="mt-3 flex cursor-pointer items-center gap-3 text-sm text-slate-700">
+                                  <input
+                                    type="checkbox"
+                                    disabled={isPending}
+                                    checked={productForm
+                                      .watch("category_ids")
+                                      .includes(category.id)}
+                                    onChange={() => toggleCategory(category.id)}
+                                    className="h-4 w-4 rounded border-slate-300 cursor-pointer"
+                                  />
+                                  <span>{category.name}</span>
+                                </label>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </FormControl>
+                    {selectedCategories.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedCategories.map((category) => (
+                          <span
+                            key={category.id}
+                            className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
                           >
-                            <input
-                              type="checkbox"
-                              checked={productForm.category_ids.includes(child.id)}
-                              onChange={() => toggleCategory(child.id)}
-                              className="h-4 w-4 rounded border-slate-300"
-                            />
-                            <span>{child.name}</span>
-                          </label>
+                            {category.name}
+                          </span>
                         ))}
                       </div>
                     ) : (
-                      <label className="mt-3 flex items-center gap-3 text-sm text-slate-700">
-                        <input
-                          type="checkbox"
-                          checked={productForm.category_ids.includes(category.id)}
-                          onChange={() => toggleCategory(category.id)}
-                          className="h-4 w-4 rounded border-slate-300"
-                        />
-                        <span>{category.name}</span>
-                      </label>
+                      <p className="text-sm text-slate-500">
+                        Nenhuma categoria seleccionada.
+                      </p>
                     )}
-                  </div>
-                ))}
-              </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+
+              <FormField
+                control={productForm.control}
+                name="is_active"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        disabled={isPending}
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="h-4 w-4 rounded border-slate-300 cursor-pointer"
+                      />
+                    </FormControl>
+                    <FormLabel className="cursor-pointer">
+                      Produto activo
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
             </div>
-            {selectedCategories.length ? (
-              <div className="flex flex-wrap gap-2">
-                {selectedCategories.map((category) => (
-                  <span
-                    key={category.id}
-                    className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
-                  >
-                    {category.name}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500">
-                Nenhuma categoria seleccionada.
-              </p>
-            )}
-          </div>
-          <label className="inline-flex items-center gap-3 text-sm font-medium text-slate-700">
-            <input
-              type="checkbox"
-              checked={productForm.is_active}
-              onChange={(event) =>
-                setProductForm({ ...productForm, is_active: event.target.checked })
-              }
-              className="h-4 w-4 rounded border-slate-300"
-            />
-            Produto activo
-          </label>
-        </div>
-      </section>
+          </section>
+        </form>
+      </Form>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -452,14 +509,23 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               Formatos aceites: JPEG, PNG, WebP. Máximo 5 MB.
             </p>
           </div>
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-            <Upload className="h-4 w-4" />
+          <label
+            className={cn(
+              "inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100",
+              (!product || isPending) && "opacity-50 cursor-not-allowed",
+            )}
+          >
+            {isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4" />
+            )}
             Carregar imagem
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
               className="hidden"
-              disabled={!product}
+              disabled={!product || isPending}
               onChange={(event) => handleProductImageUpload(event.target.files)}
             />
           </label>
@@ -485,7 +551,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                     <button
                       type="button"
                       onClick={() => handleImageReorder(image.id, "up")}
-                      disabled={index === 0}
+                      disabled={index === 0 || isPending}
                       className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
                     >
                       <ArrowUp className="h-4 w-4" />
@@ -493,7 +559,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                     <button
                       type="button"
                       onClick={() => handleImageReorder(image.id, "down")}
-                      disabled={index === images.length - 1}
+                      disabled={index === images.length - 1 || isPending}
                       className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
                     >
                       <ArrowDown className="h-4 w-4" />
@@ -501,27 +567,35 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                   </div>
                   <button
                     type="button"
+                    disabled={isPending}
                     onClick={() =>
                       startTransition(async () => {
                         const result = await deleteProductImage(image.id);
                         if (!result.success) {
-                          toast.error(result.error ?? "Não foi possível remover a imagem.");
+                          toast.error(
+                            result.error ?? "Erro ao remover a imagem.",
+                          );
                           return;
                         }
-
                         toast.success("Imagem removida.");
                         router.refresh();
                       })
                     }
-                    className="rounded-lg border border-red-200 p-2 text-red-700 transition hover:bg-red-50"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    {isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
             ))}
             {!images.length ? (
-              <p className="text-sm text-slate-500">Ainda não há imagens carregadas.</p>
+              <p className="text-sm text-slate-500">
+                Ainda não há imagens carregadas.
+              </p>
             ) : null}
           </div>
         ) : (
@@ -540,81 +614,141 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
             </p>
           </div>
           {product ? (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="grid gap-3 md:grid-cols-2">
-                <input
-                  value={variantForm.size}
-                  onChange={(event) =>
-                    setVariantForm({ ...variantForm, size: event.target.value })
-                  }
-                  className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500"
-                  placeholder="Tamanho (opcional)"
+            <Form {...variantForm}>
+              <form
+                onSubmit={variantForm.handleSubmit(onVariantSubmit)}
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+              >
+                <div className="grid gap-3 md:grid-cols-2">
+                  <FormField
+                    control={variantForm.control}
+                    name="size"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <input
+                            {...field}
+                            disabled={isPending}
+                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
+                            placeholder="Tamanho (opcional)"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={variantForm.control}
+                    name="color"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <input
+                            {...field}
+                            disabled={isPending}
+                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
+                            placeholder="Cor (opcional)"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={variantForm.control}
+                    name="stock"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <input
+                            {...field}
+                            type="number"
+                            min="0"
+                            disabled={isPending}
+                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
+                            placeholder="Stock"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={variantForm.control}
+                    name="price_override"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <input
+                            {...field}
+                            value={field.value ?? ""}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            disabled={isPending}
+                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
+                            placeholder="Preço override"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={variantForm.control}
+                  name="is_available"
+                  render={({ field }) => (
+                    <FormItem className="mt-3 flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          disabled={isPending}
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="h-4 w-4 rounded border-slate-300 cursor-pointer"
+                        />
+                      </FormControl>
+                      <FormLabel className="cursor-pointer">
+                        Disponível
+                      </FormLabel>
+                    </FormItem>
+                  )}
                 />
-                <input
-                  value={variantForm.color}
-                  onChange={(event) =>
-                    setVariantForm({ ...variantForm, color: event.target.value })
-                  }
-                  className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500"
-                  placeholder="Cor (opcional)"
-                />
-                <input
-                  value={variantForm.stock}
-                  onChange={(event) =>
-                    setVariantForm({ ...variantForm, stock: event.target.value })
-                  }
-                  type="number"
-                  min="0"
-                  className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500"
-                  placeholder="Stock"
-                />
-                <input
-                  value={variantForm.price_override}
-                  onChange={(event) =>
-                    setVariantForm({
-                      ...variantForm,
-                      price_override: event.target.value,
-                    })
-                  }
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500"
-                  placeholder="Preço override"
-                />
-              </div>
-              <label className="mt-3 inline-flex items-center gap-3 text-sm text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={variantForm.is_available}
-                  onChange={(event) =>
-                    setVariantForm({
-                      ...variantForm,
-                      is_available: event.target.checked,
-                    })
-                  }
-                />
-                Disponível
-              </label>
-              <div className="mt-4 flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleVariantSubmit}
-                  className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
-                >
-                  {variantForm.id ? "Guardar variação" : "Adicionar variação"}
-                </button>
-                {variantForm.id ? (
+                <div className="mt-4 flex gap-3">
                   <button
-                    type="button"
-                    onClick={() => setVariantForm(initialVariantForm)}
-                    className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                    type="submit"
+                    disabled={isPending}
+                    className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
                   >
-                    Cancelar
+                    {isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : null}
+                    {variantForm.watch("id")
+                      ? "Guardar variação"
+                      : "Adicionar variação"}
                   </button>
-                ) : null}
-              </div>
-            </div>
+                  {variantForm.watch("id") ? (
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() =>
+                        variantForm.reset({
+                          size: "",
+                          color: "",
+                          stock: 0,
+                          is_available: true,
+                          price_override: null,
+                        })
+                      }
+                      className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                    >
+                      Cancelar
+                    </button>
+                  ) : null}
+                </div>
+              </form>
+            </Form>
           ) : null}
         </div>
 
@@ -634,8 +768,12 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               <tbody>
                 {variants.map((variant) => (
                   <tr key={variant.id} className="border-b border-slate-100">
-                    <td className="py-4 pr-4 text-slate-700">{variant.size || "—"}</td>
-                    <td className="py-4 pr-4 text-slate-700">{variant.color || "—"}</td>
+                    <td className="py-4 pr-4 text-slate-700">
+                      {variant.size || "—"}
+                    </td>
+                    <td className="py-4 pr-4 text-slate-700">
+                      {variant.color || "—"}
+                    </td>
                     <td className="py-4 pr-4 text-slate-700">{variant.stock}</td>
                     <td className="py-4 pr-4 text-slate-700">
                       {variant.is_available ? "Sim" : "Não"}
@@ -649,49 +787,63 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
+                          disabled={isPending}
                           onClick={() =>
-                            setVariantForm({
+                            variantForm.reset({
                               id: variant.id,
                               size: variant.size ?? "",
                               color: variant.color ?? "",
-                              stock: String(variant.stock),
+                              stock: variant.stock,
                               is_available: variant.is_available,
-                              price_override: variant.price_override
-                                ? String(variant.price_override)
-                                : "",
+                              price_override: variant.price_override,
                             })
                           }
-                          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
                         >
                           <Pencil className="h-4 w-4" />
                           Editar
                         </button>
                         <button
                           type="button"
+                          disabled={isPending}
                           onClick={() => setActiveVariantForImages(variant)}
-                          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
                         >
                           <Images className="h-4 w-4" />
                           Imagens da variação
                         </button>
                         <button
                           type="button"
-                          onClick={() =>
+                          disabled={isPending}
+                          onClick={() => {
+                            if (
+                              !confirm(
+                                "Tens a certeza que pretendes remover esta variação?",
+                              )
+                            )
+                              return;
                             startTransition(async () => {
-                              const result = await deleteVariant(variant.id, product.id);
+                              const result = await deleteVariant(
+                                variant.id,
+                                product.id,
+                              );
                               if (!result.success) {
-                                toast.error(result.error ?? "Não foi possível remover a variação.");
+                                toast.error(
+                                  result.error ?? "Erro ao remover a variação.",
+                                );
                                 return;
                               }
-
                               toast.success("Variação removida.");
                               router.refresh();
-                            })
-                          }
-                          className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50"
+                            });
+                          }}
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
                         >
-                          <Trash2 className="h-4 w-4" />
-                          Remover
+                          {isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </td>
@@ -736,21 +888,36 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               </button>
             </div>
 
-            <label className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-              <Upload className="h-4 w-4" />
+            <label
+              className={cn(
+                "mt-5 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100",
+                isPending && "opacity-50 cursor-not-allowed",
+              )}
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
               Carregar imagem
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 className="hidden"
-                onChange={(event) => handleVariantImageUpload(event.target.files)}
+                disabled={isPending}
+                onChange={(event) =>
+                  handleVariantImageUpload(event.target.files)
+                }
               />
             </label>
 
             <div className="mt-5 space-y-4">
               {(activeVariantForImages.variant_images ?? []).length ? (
                 activeVariantForImages.variant_images!.map((image) => (
-                  <div key={image.id} className="rounded-2xl border border-slate-200 p-3">
+                  <div
+                    key={image.id}
+                    className="rounded-2xl border border-slate-200 p-3"
+                  >
                     <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-slate-100">
                       <Image
                         src={image.url}
@@ -761,21 +928,30 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                     </div>
                     <button
                       type="button"
+                      disabled={isPending}
                       onClick={() =>
                         startTransition(async () => {
-                          const result = await deleteVariantImage(image.id, product?.id ?? "");
+                          const result = await deleteVariantImage(
+                            image.id,
+                            product?.id ?? "",
+                          );
                           if (!result.success) {
-                            toast.error(result.error ?? "Não foi possível remover a imagem.");
+                            toast.error(
+                              result.error ?? "Erro ao remover a imagem.",
+                            );
                             return;
                           }
-
                           toast.success("Imagem removida.");
                           router.refresh();
                         })
                       }
-                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50"
+                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                       Remover
                     </button>
                   </div>
