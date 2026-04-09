@@ -8,6 +8,7 @@ import type { AddressRecord, ClientRecord, OrderRecord } from "@/lib/types";
 type ClientFilters = {
   search?: string;
   status?: "all" | "active" | "inactive";
+  role?: "client" | "admin";
 };
 
 async function getEmailMap() {
@@ -39,6 +40,10 @@ export async function getClients(filters: ClientFilters = {}) {
 
   if (filters.status === "inactive") {
     query = query.eq("is_active", false);
+  }
+
+  if (filters.role) {
+    query = query.eq("role", filters.role);
   }
 
   if (filters.search) {
@@ -140,6 +145,24 @@ export async function toggleClientStatus(id: string, isActive: boolean) {
   }
 
   revalidatePath("/clientes");
+  revalidatePath("/administradores");
   revalidatePath(`/clientes/${id}`);
+  return { success: true };
+}
+
+export async function toggleAdminRole(userId: string, newRole: "client" | "admin") {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ role: newRole, updated_at: new Date().toISOString() })
+    .eq("id", userId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/clientes");
+  revalidatePath("/administradores");
+  revalidatePath(`/clientes/${userId}`);
   return { success: true };
 }

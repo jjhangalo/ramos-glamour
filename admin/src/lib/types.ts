@@ -129,4 +129,5 @@ export type ClientRecord = {
   created_at: string;
   updated_at: string;
   email?: string | null;
+  role: "client" | "admin";
 };

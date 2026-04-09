@@ -18,6 +18,7 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
   const clients = await getClients({
     status: params.estado,
     search: params.pesquisa,
+    role: "client",
   });
 
   return (
