@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatPrice } from "@/lib/format";
@@ -88,18 +89,18 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               <tr className="border-b border-slate-200">
                 <th className="px-5 py-3 font-medium">Imagem</th>
                 <th className="px-5 py-3 font-medium">Nome</th>
-                <th className="px-5 py-3 font-medium">Categoria</th>
-                <th className="px-5 py-3 font-medium">Preço base</th>
-                <th className="px-5 py-3 font-medium">Estado</th>
-                <th className="px-5 py-3 font-medium">Variações</th>
-                <th className="px-5 py-3 font-medium">Acções</th>
+                <th className="hidden px-5 py-3 font-medium md:table-cell">Categoria</th>
+                <th className="px-5 py-3 font-medium">Preço</th>
+                <th className="hidden px-5 py-3 font-medium lg:table-cell">Estado</th>
+                <th className="hidden px-5 py-3 font-medium xl:table-cell">Variações</th>
+                <th className="px-5 py-3 font-medium text-right">Acções</th>
               </tr>
             </thead>
             <tbody>
               {products.map((product) => (
                 <tr key={product.id} className="border-b border-slate-100">
                   <td className="px-5 py-4">
-                    <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-slate-100">
+                    <div className="relative h-8 w-8 overflow-hidden rounded-xl bg-slate-100 md:h-12 md:w-12">
                       {product.product_images?.[0]?.url ? (
                         <Image
                           src={product.product_images[0].url}
@@ -111,28 +112,33 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     </div>
                   </td>
                   <td className="px-5 py-4 font-medium text-slate-950">
-                    {product.name}
+                    <div className="max-w-[150px] truncate md:max-w-[200px]" title={product.name}>
+                      {product.name}
+                    </div>
                   </td>
-                  <td className="px-5 py-4 text-slate-700">
-                    {product.categories?.length
-                      ? product.categories.map((category) => category.name).join(", ")
-                      : "Sem categoria"}
+                  <td className="hidden px-5 py-4 text-slate-700 md:table-cell">
+                    <div className="max-w-[120px] truncate">
+                      {product.categories?.length
+                        ? product.categories.map((category) => category.name).join(", ")
+                        : "Sem categoria"}
+                    </div>
                   </td>
                   <td className="px-5 py-4 text-slate-700">
                     {formatPrice(product.price)}
                   </td>
-                  <td className="px-5 py-4 text-slate-700">
+                  <td className="hidden px-5 py-4 text-slate-700 lg:table-cell">
                     {product.is_active ? "Activo" : "Inactivo"}
                   </td>
-                  <td className="px-5 py-4 text-slate-700">
+                  <td className="hidden px-5 py-4 text-slate-700 xl:table-cell">
                     {product.product_variants?.length ?? 0}
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-4 text-right whitespace-nowrap w-[1%]">
                     <Link
                       href={`/produtos/${product.id}`}
-                      className="rounded-xl border border-slate-200 px-3 py-2 font-medium text-slate-700 transition hover:bg-slate-100"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:bg-slate-100"
+                      title="Gerir produto"
                     >
-                      Gerir
+                      <Pencil className="h-4 w-4" />
                     </Link>
                   </td>
                 </tr>

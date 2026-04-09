@@ -18,6 +18,7 @@ import {
 } from "@/lib/actions/categories";
 import { slugify } from "@/lib/format";
 import type { CategoryRecord } from "@/lib/types";
+import { DropdownMenu, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 type CategoryManagerProps = {
   categories: CategoryRecord[];
@@ -226,44 +227,41 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
                   </div>
                 </button>
 
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setForm({
-                        id: category.id,
-                        name: category.name,
-                        slug: category.slug,
-                        parent_id: category.parent_id ?? "",
-                      })
-                    }
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-                  >
-                    <Pencil className="h-4 w-4" />
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setForm({
-                        name: "",
-                        slug: "",
-                        parent_id: category.id,
-                      })
-                    }
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-                  >
-                    <FolderTree className="h-4 w-4" />
-                    Adicionar subcategoria
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(category.id)}
-                    className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Remover
-                  </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setForm({
+                          id: category.id,
+                          name: category.name,
+                          slug: category.slug,
+                          parent_id: category.parent_id ?? "",
+                        })
+                      }
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Editar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setForm({
+                          name: "",
+                          slug: "",
+                          parent_id: category.id,
+                        })
+                      }
+                    >
+                      <FolderTree className="h-4 w-4" />
+                      Adicionar subcategoria
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleDelete(category.id)}
+                      className="text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remover
+                    </DropdownMenuItem>
+                  </DropdownMenu>
                 </div>
               </div>
 
@@ -279,30 +277,29 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
                           <h4 className="font-medium text-slate-900">{child.name}</h4>
                           <p className="text-sm text-slate-500">{child.slug}</p>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setForm({
-                                id: child.id,
-                                name: child.name,
-                                slug: child.slug,
-                                parent_id: child.parent_id ?? "",
-                              })
-                            }
-                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-white"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(child.id)}
-                            className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Remover
-                          </button>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <DropdownMenu>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                setForm({
+                                  id: child.id,
+                                  name: child.name,
+                                  slug: child.slug,
+                                  parent_id: child.parent_id ?? "",
+                                })
+                              }
+                            >
+                              <Pencil className="h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(child.id)}
+                              className="text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Remover
+                            </DropdownMenuItem>
+                          </DropdownMenu>
                         </div>
                       </div>
                     ))

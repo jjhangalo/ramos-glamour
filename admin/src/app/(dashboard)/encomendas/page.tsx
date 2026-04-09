@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Eye } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -53,11 +54,11 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
               <tr className="border-b border-slate-200">
                 <th className="px-5 py-3 font-medium">ID</th>
                 <th className="px-5 py-3 font-medium">Cliente</th>
-                <th className="px-5 py-3 font-medium">Itens</th>
+                <th className="hidden px-5 py-3 font-medium md:table-cell">Itens</th>
                 <th className="px-5 py-3 font-medium">Total</th>
                 <th className="px-5 py-3 font-medium">Estado</th>
-                <th className="px-5 py-3 font-medium">Data</th>
-                <th className="px-5 py-3 font-medium">Acções</th>
+                <th className="hidden px-5 py-3 font-medium lg:table-cell">Data</th>
+                <th className="px-5 py-3 font-medium text-right">Acções</th>
               </tr>
             </thead>
             <tbody>
@@ -67,11 +68,13 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     #{shortId(order.id)}
                   </td>
                   <td className="px-5 py-4 text-slate-700">
-                    {order.profiles?.full_name ||
-                      order.profiles?.display_name ||
-                      "Cliente sem nome"}
+                    <div className="max-w-[120px] truncate md:max-w-none" title={order.profiles?.full_name || order.profiles?.display_name || "Cliente sem nome"}>
+                      {order.profiles?.full_name ||
+                        order.profiles?.display_name ||
+                        "Cliente sem nome"}
+                    </div>
                   </td>
-                  <td className="px-5 py-4 text-slate-700">
+                  <td className="hidden px-5 py-4 text-slate-700 md:table-cell">
                     {order.order_items?.length ?? 0}
                   </td>
                   <td className="px-5 py-4 text-slate-700">
@@ -80,15 +83,16 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                   <td className="px-5 py-4">
                     <StatusBadge status={order.status} />
                   </td>
-                  <td className="px-5 py-4 text-slate-700">
+                  <td className="hidden px-5 py-4 text-slate-700 lg:table-cell">
                     {formatDate(order.created_at)}
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-4 text-right whitespace-nowrap w-[1%]">
                     <Link
                       href={`/encomendas/${order.id}`}
-                      className="rounded-xl border border-slate-200 px-3 py-2 font-medium text-slate-700 transition hover:bg-slate-100"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:bg-slate-100"
+                      title="Ver detalhes"
                     >
-                      Ver detalhe
+                      <Eye className="h-4 w-4" />
                     </Link>
                   </td>
                 </tr>

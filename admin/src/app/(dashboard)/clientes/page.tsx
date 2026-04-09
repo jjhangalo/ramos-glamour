@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/format";
@@ -60,20 +61,20 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
           <table className="min-w-full text-left text-sm">
             <thead className="text-slate-500">
               <tr className="border-b border-slate-200">
-                <th className="px-5 py-3 font-medium">Avatar</th>
+                <th className="hidden px-5 py-3 font-medium md:table-cell">Avatar</th>
                 <th className="px-5 py-3 font-medium">Nome</th>
-                <th className="px-5 py-3 font-medium">Email</th>
-                <th className="px-5 py-3 font-medium">Telefone</th>
-                <th className="px-5 py-3 font-medium">WhatsApp</th>
+                <th className="hidden px-5 py-3 font-medium lg:table-cell">Email</th>
+                <th className="hidden px-5 py-3 font-medium xl:table-cell">Telefone</th>
+                <th className="hidden px-5 py-3 font-medium xl:table-cell">WhatsApp</th>
                 <th className="px-5 py-3 font-medium">Estado</th>
-                <th className="px-5 py-3 font-medium">Registo</th>
-                <th className="px-5 py-3 font-medium">Acções</th>
+                <th className="hidden px-5 py-3 font-medium lg:table-cell">Registo</th>
+                <th className="px-5 py-3 font-medium text-right">Acções</th>
               </tr>
             </thead>
             <tbody>
               {clients.map((client) => (
                 <tr key={client.id} className="border-b border-slate-100">
-                  <td className="px-5 py-4">
+                  <td className="hidden px-5 py-4 md:table-cell">
                     <div className="relative h-10 w-10 overflow-hidden rounded-full bg-slate-100">
                       {client.avatar_url ? (
                         <Image
@@ -86,29 +87,32 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
                     </div>
                   </td>
                   <td className="px-5 py-4 font-medium text-slate-950">
-                    {client.full_name || client.display_name || "Sem nome"}
+                    <div className="max-w-[150px] truncate" title={client.full_name || client.display_name || "Sem nome"}>
+                      {client.full_name || client.display_name || "Sem nome"}
+                    </div>
                   </td>
-                  <td className="px-5 py-4 text-slate-700">
+                  <td className="hidden px-5 py-4 text-slate-700 lg:table-cell">
                     {client.email || "Sem email"}
                   </td>
-                  <td className="px-5 py-4 text-slate-700">
+                  <td className="hidden px-5 py-4 text-slate-700 xl:table-cell">
                     {client.phone || "—"}
                   </td>
-                  <td className="px-5 py-4 text-slate-700">
+                  <td className="hidden px-5 py-4 text-slate-700 xl:table-cell">
                     {client.whatsapp || "—"}
                   </td>
                   <td className="px-5 py-4 text-slate-700">
                     {client.is_active ? "Activo" : "Inactivo"}
                   </td>
-                  <td className="px-5 py-4 text-slate-700">
+                  <td className="hidden px-5 py-4 text-slate-700 lg:table-cell">
                     {formatDate(client.created_at)}
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-4 text-right whitespace-nowrap w-[1%]">
                     <Link
                       href={`/clientes/${client.id}`}
-                      className="rounded-xl border border-slate-200 px-3 py-2 font-medium text-slate-700 transition hover:bg-slate-100"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:bg-slate-100"
+                      title="Ver detalhes"
                     >
-                      Ver detalhe
+                      <Eye className="h-4 w-4" />
                     </Link>
                   </td>
                 </tr>
