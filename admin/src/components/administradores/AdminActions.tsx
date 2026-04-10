@@ -31,6 +31,10 @@ export function AdminActions({ userId }: AdminActionsProps) {
     });
   }
 
+  if (userId === process.env.NEXT_PUBLIC_MASTER_ADMIN_ID) {
+    return null;
+  }
+
   return (
     <button
       onClick={handleDemote}

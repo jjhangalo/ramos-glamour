@@ -1,6 +1,7 @@
 import { getClients } from "@/lib/actions/clients";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AdminActions } from "@/components/administradores/AdminActions";
+import { AddAdminDialog } from "@/components/administradores/AddAdminDialog";
 
 type AdminsPageProps = {
   searchParams?: Promise<{
@@ -17,13 +18,16 @@ export default async function AdminsPage({ searchParams }: AdminsPageProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
-          Administradores
-        </p>
-        <h1 className="mt-1 text-3xl font-semibold text-slate-950">
-          Gestão de acesso
-        </h1>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
+            Administradores
+          </p>
+          <h1 className="mt-1 text-3xl font-semibold text-slate-950">
+            Gestão de acesso
+          </h1>
+        </div>
+        <AddAdminDialog />
       </div>
 
       <form className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4">
