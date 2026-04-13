@@ -25,6 +25,7 @@ import {
   updateProduct,
   uploadProductImage,
 } from "@/lib/actions/products";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   createVariant,
   deleteVariant,
@@ -78,9 +79,15 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   const [isPending, startTransition] = useTransition();
   const [activeVariantForImages, setActiveVariantForImages] =
     useState<ProductVariantRecord | null>(null);
+  const [isProductConfirmOpen, setIsProductConfirmOpen] = useState(false);
+  const [isVariantConfirmOpen, setIsVariantConfirmOpen] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState<{
+    id: string;
+    productId: string;
+  } | null>(null);
 
   const productForm = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productSchema) as any,
     defaultValues: {
       name: product?.name ?? "",
       description: product?.description ?? "",
@@ -91,7 +98,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   });
 
   const variantForm = useForm<VariantFormValues>({
-    resolver: zodResolver(variantSchema),
+    resolver: zodResolver(variantSchema) as any,
     defaultValues: {
       size: "",
       color: "",
@@ -173,9 +180,16 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
     if (!product) return;
 
     startTransition(async () => {
+      const input = {
+        ...values,
+        size: values.size ?? "",
+        color: values.color ?? "",
+        price_override: values.price_override ?? null,
+      };
+
       const result = values.id
-        ? await updateVariant(values.id, product.id, values)
-        : await createVariant(product.id, values);
+        ? await updateVariant(values.id, product.id, input)
+        : await createVariant(product.id, input);
 
       if (!result.success) {
         toast.error(result.error ?? "Erro ao guardar a variação.");
@@ -196,19 +210,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
 
   function handleDeleteProduct() {
     if (!product) return;
-    if (!confirm("Tens a certeza que pretendes remover este produto?")) return;
-
-    startTransition(async () => {
-      const result = await deleteProduct(product.id);
-      if (!result.success) {
-        toast.error(result.error ?? "Erro ao remover o produto.");
-        return;
-      }
-
-      toast.success("Produto removido.");
-      router.push("/produtos");
-      router.refresh();
-    });
+    setIsProductConfirmOpen(true);
   }
 
   function handleProductImageUpload(fileList: FileList | null) {
@@ -816,26 +818,11 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                           type="button"
                           disabled={isPending}
                           onClick={() => {
-                            if (
-                              !confirm(
-                                "Tens a certeza que pretendes remover esta variação?",
-                              )
-                            )
-                              return;
-                            startTransition(async () => {
-                              const result = await deleteVariant(
-                                variant.id,
-                                product.id,
-                              );
-                              if (!result.success) {
-                                toast.error(
-                                  result.error ?? "Erro ao remover a variação.",
-                                );
-                                return;
-                              }
-                              toast.success("Variação removida.");
-                              router.refresh();
+                            setSelectedVariant({
+                              id: variant.id,
+                              productId: product.id,
                             });
+                            setIsVariantConfirmOpen(true);
                           }}
                           className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
                         >
@@ -965,6 +952,53 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
           </div>
         </div>
       ) : null}
+
+      <ConfirmDialog
+        open={isProductConfirmOpen}
+        onOpenChange={setIsProductConfirmOpen}
+        title="Eliminar produto"
+        description="Esta acção é irreversível. Tens a certeza que pretendes remover este produto?"
+        confirmLabel="Sim, eliminar"
+        variant="destructive"
+        onConfirm={() => {
+          if (!product) return;
+          startTransition(async () => {
+            const result = await deleteProduct(product.id);
+            if (!result.success) {
+              toast.error(result.error ?? "Erro ao remover o produto.");
+              return;
+            }
+
+            toast.success("Produto removido.");
+            router.push("/produtos");
+            router.refresh();
+          });
+        }}
+      />
+
+      <ConfirmDialog
+        open={isVariantConfirmOpen}
+        onOpenChange={setIsVariantConfirmOpen}
+        title="Eliminar variação"
+        description="Esta acção é irreversível. Tens a certeza que pretendes remover esta variação?"
+        confirmLabel="Sim, eliminar"
+        variant="destructive"
+        onConfirm={() => {
+          if (!selectedVariant) return;
+          startTransition(async () => {
+            const result = await deleteVariant(
+              selectedVariant.id,
+              selectedVariant.productId,
+            );
+            if (!result.success) {
+              toast.error(result.error ?? "Erro ao remover a variação.");
+              return;
+            }
+            toast.success("Variação removida.");
+            router.refresh();
+          });
+        }}
+      />
     </div>
   );
 }

@@ -7,9 +7,12 @@ import { useRouter } from "next/navigation";
 
 import { getClients, toggleAdminRole } from "@/lib/actions/clients";
 import type { ClientRecord } from "@/lib/types";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export function AddAdminDialog() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<ClientRecord[]>([]);
   const [isSearching, startSearchTransition] = useTransition();
@@ -46,13 +49,11 @@ export function AddAdminDialog() {
     return () => clearTimeout(timer);
   }, [search, isOpen]);
 
-  async function handlePromote(userId: string) {
-    if (!confirm("Pretendes promover este cliente a administrador?")) {
-      return;
-    }
+  async function handlePromote() {
+    if (!selectedUserId) return;
 
     startPromoteTransition(async () => {
-      const result = await toggleAdminRole(userId, "admin");
+      const result = await toggleAdminRole(selectedUserId, "admin");
       if (!result.success) {
         toast.error(result.error ?? "Erro ao promover utilizador.");
         return;
@@ -61,6 +62,11 @@ export function AddAdminDialog() {
       setIsOpen(false);
       router.refresh();
     });
+  }
+
+  function triggerConfirm(userId: string) {
+    setSelectedUserId(userId);
+    setIsConfirmOpen(true);
   }
 
   if (!isOpen) {
@@ -129,7 +135,7 @@ export function AddAdminDialog() {
                       </p>
                     </div>
                     <button
-                      onClick={() => handlePromote(client.id)}
+                      onClick={() => triggerConfirm(client.id)}
                       disabled={isPromoting}
                       className="ml-4 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
                     >
@@ -149,6 +155,16 @@ export function AddAdminDialog() {
             )}
           </div>
         </div>
+
+        <ConfirmDialog
+          open={isConfirmOpen}
+          onOpenChange={setIsConfirmOpen}
+          title="Promover administrador"
+          description="Aviso: Ao promover este cliente a administrador, estás a conceder acesso total à gestão de produtos, categorias, encomendas e dados de outros clientes. Tens a certeza que pretendes continuar?"
+          confirmLabel="Sim, promover"
+          variant="default"
+          onConfirm={handlePromote}
+        />
       </div>
     </div>
   );
