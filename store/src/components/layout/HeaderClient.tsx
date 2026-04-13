@@ -138,8 +138,11 @@ export function HeaderClient({ user }: HeaderClientProps) {
                       )}
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel className="font-normal">
+                  <DropdownMenuContent
+                    align="end"
+                    className="z-50 w-56 rounded-lg border border-gray-200 bg-white shadow-lg"
+                  >
+                    <DropdownMenuLabel className="font-normal text-brand-charcoal">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">
                           {user.displayName || "Cliente"}
