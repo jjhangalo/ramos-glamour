@@ -6,14 +6,15 @@ import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import { ProductPrice } from "@/components/product/ProductPrice";
 import type { Product } from "@/lib/mock/products";
-import { formatPrice } from "@/lib/utils/format";
 
 type ProductCardProps = {
   product: Product;
+  promoPrice?: number | null;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, promoPrice }: ProductCardProps) {
   const router = useRouter();
 
   return (
@@ -42,6 +43,11 @@ export function ProductCard({ product }: ProductCardProps) {
         <span className="absolute left-3 top-3 rounded-full bg-brand-mauve px-3 py-1 text-xs font-medium text-brand-white shadow-sm">
           {product.category.name}
         </span>
+        {promoPrice ? (
+          <span className="absolute right-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+            Promoção
+          </span>
+        ) : null}
       </div>
 
       <div className="space-y-4 p-5">
@@ -64,9 +70,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         <div className="flex items-center justify-between gap-4">
-          <p className="text-lg font-semibold text-brand-charcoal">
-            {formatPrice(product.price)}
-          </p>
+          <ProductPrice price={product.price} promoPrice={promoPrice} size="md" />
           <AddToCartButton
             product={product}
             compact

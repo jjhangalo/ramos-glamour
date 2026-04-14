@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
   Package,
+  PercentCircle,
   Shield,
   ShoppingBag,
   Tag,
@@ -29,6 +30,11 @@ export const dashboardNavItems: NavItem[] = [
     href: "/categorias",
     label: "Categorias",
     icon: Tag,
+  },
+  {
+    href: "/promocoes",
+    label: "Promoções",
+    icon: PercentCircle,
   },
   {
     href: "/encomendas",

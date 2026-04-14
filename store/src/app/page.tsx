@@ -1,14 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Tag } from "lucide-react";
 
 import { ProductCard } from "@/components/product/ProductCard";
+import { ProductPrice } from "@/components/product/ProductPrice";
 import { mockCategories, mockProducts } from "@/lib/mock/products";
+import { getStoreActivePromotions } from "@/lib/actions/promotions";
 
-export default function Home() {
+export default async function Home() {
+  const activePromotions = await getStoreActivePromotions().catch(() => []);
+
   return (
     <main className="flex flex-1 flex-col">
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-brand-bg">
         <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top,#ffffff70,transparent_60%)] lg:block" />
         <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:px-8 lg:py-24">
@@ -57,6 +62,78 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Promoções ────────────────────────────────────────────────── */}
+      {activePromotions.length > 0 && (
+        <section className="bg-emerald-50">
+          <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+            <div className="mb-8 flex items-end justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-emerald-600" />
+                  <p className="text-sm uppercase tracking-[0.3em] text-emerald-700">
+                    Ofertas especiais
+                  </p>
+                </div>
+                <h2 className="mt-2 text-3xl font-semibold text-brand-charcoal">
+                  Produtos em promoção
+                </h2>
+              </div>
+              <Link
+                href="/catalogo"
+                className="text-sm font-medium text-emerald-700 transition hover:text-emerald-900"
+              >
+                Ver tudo
+              </Link>
+            </div>
+
+            <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+              {activePromotions.map((promo) => {
+                const p = promo.products;
+                if (!p) return null;
+                const image = [...(p.product_images ?? [])].sort(
+                  (a, b) => a.position - b.position,
+                )[0];
+
+                return (
+                  <Link
+                    key={promo.id}
+                    href={`/produto/${p.id}`}
+                    className="group flex-shrink-0 snap-start w-56 sm:w-64 overflow-hidden rounded-[1.5rem] bg-white shadow-[0_12px_30px_rgba(98,98,96,0.1)] transition hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(98,98,96,0.18)]"
+                  >
+                    <div className="relative aspect-[3/4] overflow-hidden">
+                      <Image
+                        src={
+                          image?.url ??
+                          "https://picsum.photos/seed/promo/600/800"
+                        }
+                        alt={p.name}
+                        fill
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                        sizes="256px"
+                      />
+                      <span className="absolute right-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white shadow">
+                        Promoção
+                      </span>
+                    </div>
+                    <div className="p-4 space-y-2">
+                      <p className="font-semibold text-brand-charcoal leading-tight line-clamp-2">
+                        {p.name}
+                      </p>
+                      <ProductPrice
+                        price={p.price}
+                        promoPrice={promo.promo_price}
+                        size="sm"
+                      />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Categorias ───────────────────────────────────────────────── */}
       <section className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
@@ -106,6 +183,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Produtos em destaque ─────────────────────────────────────── */}
       <section className="mx-auto w-full max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>

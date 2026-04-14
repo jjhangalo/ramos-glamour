@@ -8,14 +8,15 @@ import Link from "next/link";
 import { Minus, Plus, Star } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import { ProductPrice } from "@/components/product/ProductPrice";
 import type { Product } from "@/lib/mock/products";
-import { formatPrice } from "@/lib/utils/format";
 
 type ProductDetailViewProps = {
   product: Product;
+  promoPrice?: number | null;
 };
 
-export function ProductDetailView({ product }: ProductDetailViewProps) {
+export function ProductDetailView({ product, promoPrice }: ProductDetailViewProps) {
   const [selectedImage, setSelectedImage] = useState(product.images[0]);
   const [quantity, setQuantity] = useState(1);
 
@@ -100,9 +101,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
             </a>
           </div>
 
-          <p className="text-3xl font-semibold text-brand-charcoal">
-            {formatPrice(product.price)}
-          </p>
+          <ProductPrice price={product.price} promoPrice={promoPrice} size="lg" />
 
           <p className="max-w-xl text-base leading-8 text-brand-charcoal/80">
             {product.description}
