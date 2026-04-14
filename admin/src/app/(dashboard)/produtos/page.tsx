@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { Pencil, Star } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatPrice } from "@/lib/format";
@@ -112,8 +112,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     </div>
                   </td>
                   <td className="px-5 py-4 font-medium text-slate-950">
-                    <div className="max-w-[150px] truncate md:max-w-[200px]" title={product.name}>
-                      {product.name}
+                    <div className="flex items-center gap-1.5 max-w-[150px] md:max-w-[200px]">
+                      <span className="truncate" title={product.name}>{product.name}</span>
+                      {product.is_featured ? (
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 shrink-0" />
+                      ) : null}
                     </div>
                   </td>
                   <td className="hidden px-5 py-4 text-slate-700 md:table-cell">

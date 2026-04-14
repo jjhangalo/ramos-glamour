@@ -39,6 +39,7 @@ export const productSchema = z.object({
     .array(z.string())
     .min(1, "Selecciona pelo menos uma categoria."),
   is_active: z.boolean().default(true),
+  is_featured: z.boolean().default(false),
 });
 
 export type VariantFormValues = z.infer<typeof variantSchema>;

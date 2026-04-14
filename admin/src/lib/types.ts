@@ -59,6 +59,7 @@ export type ProductRecord = {
   price: number;
   category_id: string | null;
   is_active: boolean;
+  is_featured: boolean;
   created_at: string;
   updated_at: string;
   categories?: Array<{

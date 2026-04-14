@@ -94,6 +94,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
       price: product?.price ?? 0,
       category_ids: product?.categories?.map((category) => category.id) ?? [],
       is_active: product?.is_active ?? true,
+      is_featured: product?.is_featured ?? false,
     },
   });
 
@@ -492,6 +493,27 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                     </FormControl>
                     <FormLabel className="cursor-pointer">
                       Produto activo
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={productForm.control}
+                name="is_featured"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        disabled={isPending}
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="h-4 w-4 rounded border-slate-300 cursor-pointer"
+                      />
+                    </FormControl>
+                    <FormLabel className="cursor-pointer">
+                      Produto em destaque
                     </FormLabel>
                   </FormItem>
                 )}
