@@ -338,13 +338,14 @@ export function PromotionsClient({
             <tbody>
               {promotions.map((promo) => {
                 const originalPrice = promo.products?.price ?? 0;
-                const discount =
+                const rawDiscount =
                   originalPrice > 0
-                    ? Math.round(
-                        ((originalPrice - promo.promo_price) / originalPrice) *
-                          100,
-                      )
+                    ? ((originalPrice - promo.promo_price) / originalPrice) *
+                      100
                     : 0;
+                const discount = Number.isInteger(rawDiscount)
+                  ? rawDiscount
+                  : Number(rawDiscount.toFixed(2));
                 const isExpired =
                   promo.ends_at && new Date(promo.ends_at) < new Date();
 

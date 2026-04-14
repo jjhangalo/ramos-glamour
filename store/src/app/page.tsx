@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Tag } from "lucide-react";
 
 import { ProductCard } from "@/components/product/ProductCard";
-import { ProductPrice } from "@/components/product/ProductPrice";
+import { PromoCard } from "@/components/product/PromoCard";
 import { mockCategories, mockProducts } from "@/lib/mock/products";
 import { getStoreActivePromotions } from "@/lib/actions/promotions";
 
@@ -64,68 +64,50 @@ export default async function Home() {
 
       {/* ── Promoções ────────────────────────────────────────────────── */}
       {activePromotions.length > 0 && (
-        <section className="bg-emerald-50">
-          <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-            <div className="mb-8 flex items-end justify-between gap-4">
+        <section className="bg-gradient-to-b from-emerald-50 to-white">
+          <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            {/* Header */}
+            <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="flex items-center gap-2">
-                  <Tag className="h-4 w-4 text-emerald-600" />
-                  <p className="text-sm uppercase tracking-[0.3em] text-emerald-700">
-                    Ofertas especiais
-                  </p>
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                  <Tag className="h-3.5 w-3.5" />
+                  Tempo limitado
                 </div>
-                <h2 className="mt-2 text-3xl font-semibold text-brand-charcoal">
-                  Produtos em promoção
+                <h2 className="text-3xl font-semibold text-brand-charcoal">
+                  Ofertas Imperdíveis
                 </h2>
+                <p className="mt-1 text-sm text-brand-charcoal/65">
+                  Aproveita os melhores preços enquanto há stock.
+                </p>
               </div>
               <Link
                 href="/catalogo"
-                className="text-sm font-medium text-emerald-700 transition hover:text-emerald-900"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 transition hover:text-emerald-900 sm:mt-0"
               >
-                Ver tudo
+                Ver catálogo
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
-            <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+            {/* Grid */}
+            <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-4">
               {activePromotions.map((promo) => {
                 const p = promo.products;
                 if (!p) return null;
+
                 const image = [...(p.product_images ?? [])].sort(
                   (a, b) => a.position - b.position,
                 )[0];
 
                 return (
-                  <Link
+                  <PromoCard
                     key={promo.id}
-                    href={`/produto/${p.id}`}
-                    className="group flex-shrink-0 snap-start w-56 sm:w-64 overflow-hidden rounded-[1.5rem] bg-white shadow-[0_12px_30px_rgba(98,98,96,0.1)] transition hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(98,98,96,0.18)]"
-                  >
-                    <div className="relative aspect-[3/4] overflow-hidden">
-                      <Image
-                        src={
-                          image?.url ??
-                          "https://picsum.photos/seed/promo/600/800"
-                        }
-                        alt={p.name}
-                        fill
-                        className="object-cover transition duration-500 group-hover:scale-105"
-                        sizes="256px"
-                      />
-                      <span className="absolute right-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white shadow">
-                        Promoção
-                      </span>
-                    </div>
-                    <div className="p-4 space-y-2">
-                      <p className="font-semibold text-brand-charcoal leading-tight line-clamp-2">
-                        {p.name}
-                      </p>
-                      <ProductPrice
-                        price={p.price}
-                        promoPrice={promo.promo_price}
-                        size="sm"
-                      />
-                    </div>
-                  </Link>
+                    productId={p.id}
+                    name={p.name}
+                    price={p.price}
+                    promoPrice={promo.promo_price}
+                    imageUrl={image?.url}
+                  />
                 );
               })}
             </div>

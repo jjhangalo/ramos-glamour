@@ -19,10 +19,6 @@ export function ProductPrice({
 }: ProductPriceProps) {
   const styles = sizeMap[size];
   const hasPromo = promoPrice !== null && promoPrice !== undefined && promoPrice > 0;
-  const discount =
-    hasPromo && price > 0
-      ? Math.round(((price - promoPrice!) / price) * 100)
-      : 0;
 
   if (!hasPromo) {
     return (
@@ -40,11 +36,6 @@ export function ProductPrice({
       <p className={`${styles.original} text-brand-charcoal/50 line-through`}>
         {formatPrice(price)}
       </p>
-      {discount > 0 && (
-        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-          -{discount}%
-        </span>
-      )}
     </div>
   );
 }
