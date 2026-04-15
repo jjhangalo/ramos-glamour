@@ -8,6 +8,7 @@ import type { AddressRecord, ClientRecord, OrderRecord } from "@/lib/types";
 type ClientFilters = {
   search?: string;
   status?: "all" | "active" | "inactive";
+  role?: "client" | "admin";
 };
 
 async function getEmailMap() {
@@ -39,6 +40,10 @@ export async function getClients(filters: ClientFilters = {}) {
 
   if (filters.status === "inactive") {
     query = query.eq("is_active", false);
+  }
+
+  if (filters.role) {
+    query = query.eq("role", filters.role);
   }
 
   if (filters.search) {
@@ -106,10 +111,13 @@ export async function getClient(id: string) {
       email: userData.user.email ?? null,
     },
     addresses: (addresses ?? []) as AddressRecord[],
-    orders: (orders ?? []).map((order: any) => ({
-      ...order,
-      addresses: Array.isArray(order.addresses) ? order.addresses[0] : order.addresses,
-    })) as OrderRecord[],
+    orders: (orders ?? []).map((order: unknown) => {
+      const o = order as OrderRecord & { addresses: unknown };
+      return {
+        ...o,
+        addresses: Array.isArray(o.addresses) ? (o.addresses as unknown[])[0] : o.addresses,
+      };
+    }) as OrderRecord[],
   };
 }
 
@@ -129,6 +137,13 @@ export async function updateAdminNotes(id: string, notes: string) {
 }
 
 export async function toggleClientStatus(id: string, isActive: boolean) {
+  if (id === process.env.MASTER_ADMIN_ID) {
+    return {
+      success: false,
+      error: "Não é permitido desativar a conta do administrador mestre.",
+    };
+  }
+
   const supabase = createAdminClient();
   const { error } = await supabase
     .from("profiles")
@@ -140,6 +155,31 @@ export async function toggleClientStatus(id: string, isActive: boolean) {
   }
 
   revalidatePath("/clientes");
+  revalidatePath("/administradores");
   revalidatePath(`/clientes/${id}`);
+  return { success: true };
+}
+
+export async function toggleAdminRole(userId: string, newRole: "client" | "admin") {
+  if (userId === process.env.MASTER_ADMIN_ID) {
+    return {
+      success: false,
+      error: "Não é permitido alterar o papel do administrador mestre.",
+    };
+  }
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ role: newRole, updated_at: new Date().toISOString() })
+    .eq("id", userId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/clientes");
+  revalidatePath("/administradores");
+  revalidatePath(`/clientes/${userId}`);
   return { success: true };
 }

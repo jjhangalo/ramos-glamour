@@ -1,52 +1,61 @@
 "use client";
 
-import {
-  ChevronDown,
-  ChevronRight,
-  FolderTree,
-  Pencil,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { useMemo, useState, useTransition } from "react";
+import { ChevronDown, ChevronRight, FolderTree, Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 
-import {
-  createCategory,
-  deleteCategory,
-  updateCategory,
-} from "@/lib/actions/categories";
+import { createCategory, deleteCategory, updateCategory } from "@/lib/actions/categories";
 import { slugify } from "@/lib/format";
 import type { CategoryRecord } from "@/lib/types";
+import { categorySchema, type CategoryFormValues } from "@/lib/validations/category";
+import { DropdownMenu, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 type CategoryManagerProps = {
   categories: CategoryRecord[];
 };
 
-type FormState = {
-  id?: string;
-  name: string;
-  slug: string;
-  parent_id: string;
-};
-
-const initialState: FormState = {
+const defaultValues: CategoryFormValues = {
   name: "",
   slug: "",
   parent_id: "",
 };
 
 export function CategoryManager({ categories }: CategoryManagerProps) {
-  const [form, setForm] = useState<FormState>(initialState);
   const [isPending, startTransition] = useTransition();
   const [expandedRootIds, setExpandedRootIds] = useState<string[]>(
     categories.map((category) => category.id),
   );
 
-  const isEditing = useMemo(() => Boolean(form.id), [form.id]);
+  const form = useForm<CategoryFormValues>({
+    resolver: zodResolver(categorySchema),
+    defaultValues,
+  });
+
+  const {
+    handleSubmit,
+    reset,
+    setValue,
+    control,
+    formState: { dirtyFields },
+  } = form;
+
+  const nameValue = useWatch({ control, name: "name" });
+  const formId = useWatch({ control, name: "id" });
+  const isEditing = Boolean(formId);
+
+  useEffect(() => {
+    if (nameValue && !dirtyFields.slug) {
+      setValue("slug", slugify(nameValue), {
+        shouldValidate: true,
+      });
+    }
+  }, [nameValue, dirtyFields.slug, setValue]);
 
   function resetForm() {
-    setForm(initialState);
+    reset(defaultValues);
   }
 
   function toggleExpanded(id: string) {
@@ -57,17 +66,15 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
     );
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  const onSubmit = (data: CategoryFormValues) => {
     startTransition(async () => {
       const payload = {
-        name: form.name,
-        slug: form.slug,
-        parent_id: form.parent_id || null,
+        name: data.name,
+        slug: data.slug,
+        parent_id: data.parent_id || null,
       };
-      const result = isEditing
-        ? await updateCategory(form.id!, payload)
+      const result = data.id
+        ? await updateCategory(data.id, payload)
         : await createCategory(payload);
 
       if (!result.success) {
@@ -76,11 +83,11 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
       }
 
       toast.success(
-        isEditing ? "Categoria actualizada." : "Categoria criada com sucesso.",
+        data.id ? "Categoria actualizada." : "Categoria criada com sucesso.",
       );
       resetForm();
     });
-  }
+  };
 
   function handleDelete(id: string) {
     startTransition(async () => {
@@ -91,7 +98,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
       }
 
       toast.success("Categoria removida.");
-      if (form.id === id) {
+      if (formId === id) {
         resetForm();
       }
     });
@@ -114,76 +121,92 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
           </div>
         </div>
 
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Nome</label>
-            <input
-              value={form.name}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  name: event.target.value,
-                  slug: current.slug ? current.slug : slugify(event.target.value),
-                }))
-              }
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500"
-              placeholder="Ex.: Vestidos"
-              required
+        <Form {...form}>
+          <form
+            className="mt-6 space-y-4"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <FormField
+              control={control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome</FormLabel>
+                  <FormControl>
+                    <input
+                      {...field}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500"
+                      placeholder="Ex.: Vestidos"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Slug</label>
-            <input
-              value={form.slug}
-              onChange={(event) =>
-                setForm({ ...form, slug: slugify(event.target.value) })
-              }
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500"
-              placeholder="vestidos"
-              required
+            <FormField
+              control={control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Slug</FormLabel>
+                  <FormControl>
+                    <input
+                      {...field}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500"
+                      placeholder="vestidos"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">
-              Categoria pai
-            </label>
-            <select
-              value={form.parent_id}
-              onChange={(event) =>
-                setForm({ ...form, parent_id: event.target.value })
-              }
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-slate-500"
-            >
-              <option value="">Nenhuma (categoria raiz)</option>
-              {categories
-                .filter((category) => category.id !== form.id)
-                .map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-            </select>
-          </div>
+            <FormField
+              control={control}
+              name="parent_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoria pai</FormLabel>
+                  <FormControl>
+                    <select
+                      {...field}
+                      value={field.value ?? ""}
+                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-slate-500"
+                    >
+                      <option value="">Nenhuma (categoria raiz)</option>
+                      {categories
+                        .filter((category) => category.id !== formId)
+                        .map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div className="flex gap-3">
-            <button
-              type="submit"
-              disabled={isPending}
-              className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isEditing ? "Guardar alterações" : "Criar categoria"}
-            </button>
-            <button
-              type="button"
-              onClick={resetForm}
-              className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-            >
-              {isEditing ? "Cancelar" : "Limpar"}
-            </button>
-          </div>
-        </form>
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                disabled={isPending}
+                className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isEditing ? "Guardar alterações" : "Criar categoria"}
+              </button>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+              >
+                {isEditing ? "Cancelar" : "Limpar"}
+              </button>
+            </div>
+          </form>
+        </Form>
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white">
@@ -226,44 +249,41 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
                   </div>
                 </button>
 
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setForm({
-                        id: category.id,
-                        name: category.name,
-                        slug: category.slug,
-                        parent_id: category.parent_id ?? "",
-                      })
-                    }
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-                  >
-                    <Pencil className="h-4 w-4" />
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setForm({
-                        name: "",
-                        slug: "",
-                        parent_id: category.id,
-                      })
-                    }
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-                  >
-                    <FolderTree className="h-4 w-4" />
-                    Adicionar subcategoria
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(category.id)}
-                    className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Remover
-                  </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        reset({
+                          id: category.id,
+                          name: category.name,
+                          slug: category.slug,
+                          parent_id: category.parent_id ?? "",
+                        });
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Editar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        reset({
+                          name: "",
+                          slug: "",
+                          parent_id: category.id,
+                        });
+                      }}
+                    >
+                      <FolderTree className="h-4 w-4" />
+                      Adicionar subcategoria
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleDelete(category.id)}
+                      className="text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remover
+                    </DropdownMenuItem>
+                  </DropdownMenu>
                 </div>
               </div>
 
@@ -279,30 +299,29 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
                           <h4 className="font-medium text-slate-900">{child.name}</h4>
                           <p className="text-sm text-slate-500">{child.slug}</p>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setForm({
-                                id: child.id,
-                                name: child.name,
-                                slug: child.slug,
-                                parent_id: child.parent_id ?? "",
-                              })
-                            }
-                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-white"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(child.id)}
-                            className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Remover
-                          </button>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <DropdownMenu>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                reset({
+                                  id: child.id,
+                                  name: child.name,
+                                  slug: child.slug,
+                                  parent_id: child.parent_id ?? "",
+                                });
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(child.id)}
+                              className="text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Remover
+                            </DropdownMenuItem>
+                          </DropdownMenu>
                         </div>
                       </div>
                     ))

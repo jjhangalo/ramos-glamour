@@ -1,14 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Tag } from "lucide-react";
 
 import { ProductCard } from "@/components/product/ProductCard";
-import { mockCategories, mockProducts } from "@/lib/mock/products";
+import { getPublicCategories } from "@/lib/actions/public-categories";
+import { getPublicProducts } from "@/lib/actions/public-products";
 
-export default function Home() {
+export default async function Home() {
+  const [promoProducts, featuredProducts, latestProducts, categories] =
+    await Promise.all([
+      getPublicProducts({ hasPromo: true, limit: 4 }),
+      getPublicProducts({ isFeatured: true, limit: 4 }),
+      getPublicProducts({ limit: 8 }),
+      getPublicCategories(),
+    ]);
+
   return (
     <main className="flex flex-1 flex-col">
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-brand-bg">
         <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top,#ffffff70,transparent_60%)] lg:block" />
         <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:px-8 lg:py-24">
@@ -35,7 +45,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 sm:gap-6">
-            {mockProducts.slice(0, 4).map((product, index) => (
+            {featuredProducts.slice(0, 4).map((product, index) => (
               <div
                 key={product.id}
                 className={`relative overflow-hidden rounded-[2rem] shadow-[0_18px_40px_rgba(98,98,96,0.12)] ${
@@ -44,7 +54,7 @@ export default function Home() {
               >
                 <div className="relative aspect-[3/4]">
                   <Image
-                    src={product.images[0].url}
+                    src={product.images[0]?.url ?? "https://picsum.photos/seed/fallback/600/800"}
                     alt={product.name}
                     fill
                     className="object-cover"
@@ -57,27 +67,64 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-end justify-between gap-4">
+      {/* ── Promoções ────────────────────────────────────────────────── */}
+      {promoProducts.length > 0 && (
+        <section className="bg-gradient-to-b from-emerald-50 to-white">
+          <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:py-16 lg:px-8">
+            <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                  <Tag className="h-3.5 w-3.5" />
+                  Tempo limitado
+                </div>
+                <h2 className="text-xl font-semibold text-brand-charcoal md:text-3xl">
+                  Ofertas Imperdíveis
+                </h2>
+                <p className="mt-1 text-sm text-brand-charcoal/65">
+                  Aproveita os melhores preços enquanto há stock.
+                </p>
+              </div>
+              <Link
+                href="/catalogo"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 transition hover:text-emerald-900 sm:mt-0"
+              >
+                Ver catálogo
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6">
+              {promoProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Categorias ───────────────────────────────────────────────── */}
+      <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:py-16 lg:px-8">
+        <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-brand-charcoal/65">
               Categorias
             </p>
-            <h2 className="mt-2 text-3xl font-semibold text-brand-charcoal">
+            <h2 className="mt-2 text-xl font-semibold text-brand-charcoal md:text-3xl">
               Categorias em destaque
             </h2>
           </div>
         </div>
 
         <div className="grid gap-5 md:grid-cols-3">
-          {mockCategories.map((category, index) => {
-            const product = mockProducts.find(
-              (item) => item.category.slug === category.slug,
-            );
+          {categories.slice(0, 3).map((category) => {
+            // Find a product in this category for the image
+            const categoryMatch = (p: import("@/lib/actions/public-products").PublicProduct) =>
+              Array.isArray(p.categories)
+                ? p.categories.some((c) => c.slug === category.slug)
+                : (p.categories as unknown as { slug: string })?.slug === category.slug;
 
-            if (!product) {
-              return null;
-            }
+            const productWithImage =
+              latestProducts.find(categoryMatch) || featuredProducts.find(categoryMatch);
 
             return (
               <Link
@@ -87,7 +134,10 @@ export default function Home() {
               >
                 <div className="relative aspect-[5/6]">
                   <Image
-                    src={product.images[index % product.images.length].url}
+                    src={
+                      productWithImage?.images[0]?.url ??
+                      "https://picsum.photos/seed/cat-fallback/600/800"
+                    }
                     alt={category.name}
                     fill
                     className="object-cover transition duration-500 group-hover:scale-105"
@@ -106,13 +156,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-end justify-between gap-4">
+      {/* ── Produtos em destaque ─────────────────────────────────────── */}
+      <section className="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-6 md:pb-16 lg:px-8">
+        <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-brand-charcoal/65">
               Seleção
             </p>
-            <h2 className="mt-2 text-3xl font-semibold text-brand-charcoal">
+            <h2 className="mt-2 text-xl font-semibold text-brand-charcoal md:text-3xl">
               Produtos em destaque
             </h2>
           </div>
@@ -124,8 +175,8 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {mockProducts.slice(0, 4).map((product) => (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5">
+          {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

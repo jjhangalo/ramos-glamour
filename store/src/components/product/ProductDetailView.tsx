@@ -8,15 +8,18 @@ import Link from "next/link";
 import { Minus, Plus, Star } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
-import type { Product } from "@/lib/mock/products";
-import { formatPrice } from "@/lib/utils/format";
+import { ProductPrice } from "@/components/product/ProductPrice";
+import type { PublicProduct } from "@/lib/actions/public-products";
 
 type ProductDetailViewProps = {
-  product: Product;
+  product: PublicProduct;
+  promoPrice?: number | null;
 };
 
-export function ProductDetailView({ product }: ProductDetailViewProps) {
-  const [selectedImage, setSelectedImage] = useState(product.images[0]);
+export function ProductDetailView({ product, promoPrice }: ProductDetailViewProps) {
+  const [selectedImage, setSelectedImage] = useState(
+    product.images[0] || { url: "https://picsum.photos/seed/fallback/600/800", position: 0 },
+  );
   const [quantity, setQuantity] = useState(1);
 
   return (
@@ -34,11 +37,11 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           </div>
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
             {product.images.map((image) => {
-              const isActive = image.id === selectedImage.id;
+              const isActive = image.url === selectedImage.url;
 
               return (
                 <button
-                  key={image.id}
+                  key={image.url}
                   type="button"
                   onClick={() => {
                     setSelectedImage(image);
@@ -76,7 +79,9 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           </nav>
 
           <span className="inline-flex rounded-full bg-brand-mauve px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-brand-white">
-            {product.category.name}
+            {(Array.isArray(product.categories)
+              ? product.categories[0]?.name
+              : (product.categories as unknown as { name: string })?.name) ?? "Sem categoria"}
           </span>
 
           <div className="space-y-3">
@@ -100,9 +105,11 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
             </a>
           </div>
 
-          <p className="text-3xl font-semibold text-brand-charcoal">
-            {formatPrice(product.price)}
-          </p>
+          <ProductPrice
+            price={product.price}
+            promoPrice={promoPrice || product.promo_price}
+            size="lg"
+          />
 
           <p className="max-w-xl text-base leading-8 text-brand-charcoal/80">
             {product.description}

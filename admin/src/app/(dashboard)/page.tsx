@@ -104,11 +104,11 @@ export default async function DashboardPage() {
                   </td>
                   <td className="px-5 py-4 text-slate-700">
                     {Array.isArray(order.profiles)
-                      ? order.profiles[0]?.full_name ||
-                        order.profiles[0]?.display_name ||
+                      ? (order.profiles as unknown as { full_name: string | null; display_name: string | null }[])[0]?.full_name ||
+                        (order.profiles as unknown as { full_name: string | null; display_name: string | null }[])[0]?.display_name ||
                         "Cliente sem nome"
-                      : (order.profiles as any)?.full_name ||
-                        (order.profiles as any)?.display_name ||
+                      : (order.profiles as unknown as { full_name: string | null; display_name: string | null })?.full_name ||
+                        (order.profiles as unknown as { full_name: string | null; display_name: string | null })?.display_name ||
                         "Cliente sem nome"}
                   </td>
                   <td className="px-5 py-4 text-slate-700">

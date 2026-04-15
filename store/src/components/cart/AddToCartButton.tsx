@@ -3,11 +3,11 @@
 import { ShoppingBag } from "lucide-react";
 import toast from "react-hot-toast";
 
-import type { Product } from "@/lib/mock/products";
+import type { PublicProduct } from "@/lib/actions/public-products";
 import { useCartStore } from "@/lib/store/cart";
 
 type AddToCartButtonProps = {
-  product: Product;
+  product: PublicProduct;
   quantity?: number;
   className?: string;
   compact?: boolean;
@@ -24,6 +24,7 @@ export function AddToCartButton({
   return (
     <button
       type="button"
+      aria-label="Adicionar ao carrinho"
       onClick={(event) => {
         event.stopPropagation();
         addItem(product, quantity);
@@ -32,7 +33,7 @@ export function AddToCartButton({
       className={className}
     >
       <ShoppingBag className={compact ? "h-4 w-4" : "h-5 w-5"} />
-      <span>Adicionar ao carrinho</span>
+      <span className="hidden md:inline">Adicionar ao carrinho</span>
     </button>
   );
 }

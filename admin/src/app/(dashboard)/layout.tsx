@@ -23,7 +23,16 @@ export default async function DashboardLayout({
   }
 
   const notifications = await getUnreadNotifications();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, display_name, full_name, avatar_url, role")
+    .eq("id", user.id)
+    .single();
+
   const displayName =
+    profile?.display_name ??
+    profile?.full_name ??
     user.user_metadata.full_name ??
     user.user_metadata.name ??
     user.email ??
@@ -46,33 +55,53 @@ export default async function DashboardLayout({
           <NotificationBell initialNotifications={notifications} />
         </div>
 
-        <DesktopDashboardNav />
-        <SidebarUser name={displayName} email={user.email ?? ""} />
+        <div className="flex-1 overflow-y-auto">
+          <DesktopDashboardNav />
+        </div>
+
+        <SidebarUser
+          id={user.id}
+          name={displayName}
+          avatarUrl={profile?.avatar_url}
+          role={profile?.role}
+        />
       </aside>
 
       <div className="flex min-h-screen flex-col md:pl-72">
+        {/* Mobile Header */}
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur md:hidden">
           <div className="flex items-center justify-between gap-4">
+            {/* Menu trigger (Sheet) */}
+            <MobileDashboardNav
+              user={{
+                id: user.id,
+                name: displayName,
+                avatarUrl: profile?.avatar_url,
+                role: profile?.role,
+              }}
+            />
+
+            {/* Logo centred */}
             <Link href="/" className="flex min-w-0 items-center">
               <Image
                 src="/icon1.png"
                 alt="Ramos Glamour"
-                width={144}
-                height={36}
-                className="h-9 w-auto object-contain"
+                width={120}
+                height={30}
+                className="h-8 w-auto object-contain"
                 priority
               />
             </Link>
+
+            {/* Notification Bell */}
             <NotificationBell initialNotifications={notifications} />
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 pb-24 md:px-8 md:py-8 md:pb-8">
+        <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
           {children}
         </main>
       </div>
-
-      <MobileDashboardNav />
     </div>
   );
 }

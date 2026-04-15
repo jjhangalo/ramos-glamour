@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { ProductDetailView } from "@/components/product/ProductDetailView";
-import { getProductById, mockProducts } from "@/lib/mock/products";
+import { getPublicProductById } from "@/lib/actions/public-products";
 
 type ProductPageProps = {
   params: Promise<{
@@ -9,15 +9,9 @@ type ProductPageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return mockProducts.map((product) => ({
-    id: product.id,
-  }));
-}
-
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await getPublicProductById(id);
 
   if (!product) {
     notFound();

@@ -12,7 +12,8 @@ export function CartHeaderButton() {
   return (
     <Link
       href="/carrinho"
-      className="inline-flex items-center gap-2 rounded-full border border-brand-charcoal/10 bg-brand-bg/50 px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
+      aria-label="Carrinho de compras"
+      className="inline-flex items-center gap-2 rounded-full border border-brand-charcoal/10 bg-brand-bg/50 px-3 py-2 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg md:px-4"
     >
       <span className="relative inline-flex items-center">
         <ShoppingBag className="h-4 w-4" />
@@ -22,7 +23,7 @@ export function CartHeaderButton() {
           </span>
         ) : null}
       </span>
-      <span>Carrinho</span>
+      <span className="hidden md:inline">Carrinho</span>
     </Link>
   );
 }

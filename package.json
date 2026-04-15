@@ -1,0 +1,14 @@
+{
+  "name": "ramos-glamour-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --names \"admin,store\" --prefix-colors \"blue,magenta\" \"npm run dev --prefix admin -- -p 3001\" \"npm run dev --prefix store -- -p 3000\"",
+    "admin": "npm run dev --prefix admin -- -p 3001",
+    "store": "npm run dev --prefix store -- -p 3000",
+    "install-all": "npm install --prefix admin && npm install --prefix store"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

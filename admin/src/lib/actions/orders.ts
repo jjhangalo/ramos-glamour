@@ -25,11 +25,14 @@ export async function getOrders(status?: string) {
     throw new Error(error.message);
   }
 
-  return (data ?? []).map((order: any) => ({
-    ...order,
-    profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles,
-    addresses: Array.isArray(order.addresses) ? order.addresses[0] : order.addresses,
-  })) as OrderRecord[];
+  return (data ?? []).map((order: unknown) => {
+    const o = order as OrderRecord;
+    return {
+      ...o,
+      profiles: Array.isArray(o.profiles) ? (o.profiles as unknown as unknown[])[0] : o.profiles,
+      addresses: Array.isArray(o.addresses) ? (o.addresses as unknown as unknown[])[0] : o.addresses,
+    };
+  }) as OrderRecord[];
 }
 
 export async function getOrder(id: string) {

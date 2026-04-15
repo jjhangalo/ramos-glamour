@@ -6,14 +6,15 @@ import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
-import type { Product } from "@/lib/mock/products";
-import { formatPrice } from "@/lib/utils/format";
+import { ProductPrice } from "@/components/product/ProductPrice";
+import type { PublicProduct } from "@/lib/actions/public-products";
 
 type ProductCardProps = {
-  product: Product;
+  product: PublicProduct;
+  promoPrice?: number | null;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, promoPrice }: ProductCardProps) {
   const router = useRouter();
 
   return (
@@ -29,9 +30,9 @@ export function ProductCard({ product }: ProductCardProps) {
           router.push(`/produto/${product.id}`);
         }
       }}
-      className="group cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_16px_40px_rgba(98,98,96,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(98,98,96,0.16)]"
+      className="group cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_16px_40px_rgba(98,98,96,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
     >
-      <div className="relative aspect-[3/4] overflow-hidden">
+      <div className="relative h-48 overflow-hidden md:h-64">
         <Image
           src={product.images[0]?.url ?? "https://picsum.photos/seed/fallback/600/800"}
           alt={product.name}
@@ -40,21 +41,28 @@ export function ProductCard({ product }: ProductCardProps) {
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
         />
         <span className="absolute left-3 top-3 rounded-full bg-brand-mauve px-3 py-1 text-xs font-medium text-brand-white shadow-sm">
-          {product.category.name}
+          {(Array.isArray(product.categories)
+            ? product.categories[0]?.name
+            : (product.categories as unknown as { name: string })?.name) ?? "Sem categoria"}
         </span>
+        {promoPrice || product.promo_price ? (
+          <span className="absolute right-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+            Promoção
+          </span>
+        ) : null}
       </div>
 
-      <div className="space-y-4 p-5">
-        <div className="space-y-2">
-          <h3 className="text-xl font-semibold text-brand-charcoal">
+      <div className="space-y-3 p-3 md:p-4">
+        <div className="space-y-1.5">
+          <h3 className="text-sm font-semibold text-brand-charcoal md:text-base">
             {product.name}
           </h3>
-          <div className="flex items-center gap-2 text-sm text-brand-charcoal/75">
-            <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5 text-xs text-brand-charcoal/75">
+            <div className="flex items-center gap-0.5">
               {Array.from({ length: 5 }).map((_, index) => (
                 <Star
                   key={`${product.id}-star-${index}`}
-                  className="h-4 w-4 fill-brand-olive text-brand-olive"
+                  className="h-3 w-3 fill-brand-olive text-brand-olive"
                 />
               ))}
             </div>
@@ -63,14 +71,16 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4">
-          <p className="text-lg font-semibold text-brand-charcoal">
-            {formatPrice(product.price)}
-          </p>
+        <div className="flex items-center justify-between gap-3">
+          <ProductPrice
+            price={product.price}
+            promoPrice={promoPrice || product.promo_price}
+            size="md"
+          />
           <AddToCartButton
             product={product}
             compact
-            className="inline-flex items-center gap-2 rounded-full bg-brand-olive px-4 py-2 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"
+            className="inline-flex items-center gap-1.5 rounded-full bg-brand-olive px-3 py-1.5 text-xs font-medium text-brand-white transition hover:bg-[#8a904d] md:px-4 md:py-2 md:text-sm"
           />
         </div>
       </div>
