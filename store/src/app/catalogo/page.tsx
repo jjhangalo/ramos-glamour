@@ -112,7 +112,6 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                   ) : null}
                 </div>
               </form>
-            </div>
           </div>
         </div>
       </section>

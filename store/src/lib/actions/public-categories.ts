@@ -24,7 +24,7 @@ export async function getPublicCategories(): Promise<PublicCategory[]> {
         id,
         name,
         slug,
-        products(count)
+        products!products_category_id_fkey(count)
       `)
       .order("name", { ascending: true });
 

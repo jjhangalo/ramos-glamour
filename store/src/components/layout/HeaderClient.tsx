@@ -70,7 +70,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   alt="Ramos Glamour"
                   fill
                   className="object-contain"
-                  sizes="40px"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
               </div>
               {/* Desktop Logo (Horizontal) */}
@@ -80,7 +80,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   alt="Ramos Glamour"
                   fill
                   className="object-contain"
-                  sizes="192px"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
               </div>
             </Link>

@@ -79,7 +79,9 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
           </nav>
 
           <span className="inline-flex rounded-full bg-brand-mauve px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-brand-white">
-            {product.categories[0]?.name ?? "Sem categoria"}
+            {(Array.isArray(product.categories)
+              ? product.categories[0]?.name
+              : (product.categories as any)?.name) ?? "Sem categoria"}
           </span>
 
           <div className="space-y-3">

@@ -118,9 +118,13 @@ export default async function Home() {
         <div className="grid gap-5 md:grid-cols-3">
           {categories.slice(0, 3).map((category) => {
             // Find a product in this category for the image
+            const categoryMatch = (p: any) =>
+              Array.isArray(p.categories)
+                ? p.categories.some((c: any) => c.slug === category.slug)
+                : p.categories?.slug === category.slug;
+
             const productWithImage =
-              latestProducts.find((p) => p.categories.some((c) => c.slug === category.slug)) ||
-              featuredProducts.find((p) => p.categories.some((c) => c.slug === category.slug));
+              latestProducts.find(categoryMatch) || featuredProducts.find(categoryMatch);
 
             return (
               <Link

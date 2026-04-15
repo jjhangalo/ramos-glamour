@@ -56,7 +56,7 @@ export async function getPublicProducts(filters: {
         price,
         is_featured,
         created_at,
-        categories!inner(id, name, slug),
+        categories!products_category_id_fkey!inner(id, name, slug),
         product_images(url, position),
         promotions(promo_price, is_active, updated_at, ends_at)
       `,
@@ -145,7 +145,7 @@ export async function getPublicProductById(id: string): Promise<PublicProduct | 
         price,
         is_featured,
         created_at,
-        categories(id, name, slug),
+        categories!products_category_id_fkey(id, name, slug),
         product_images(url, position),
         promotions(promo_price, is_active, updated_at, ends_at)
       `,
