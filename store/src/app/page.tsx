@@ -70,14 +70,14 @@ export default async function Home() {
       {/* ── Promoções ────────────────────────────────────────────────── */}
       {promoProducts.length > 0 && (
         <section className="bg-gradient-to-b from-emerald-50 to-white">
-          <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-            <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:py-16 lg:px-8">
+            <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
                   <Tag className="h-3.5 w-3.5" />
                   Tempo limitado
                 </div>
-                <h2 className="text-3xl font-semibold text-brand-charcoal">
+                <h2 className="text-xl font-semibold text-brand-charcoal md:text-3xl">
                   Ofertas Imperdíveis
                 </h2>
                 <p className="mt-1 text-sm text-brand-charcoal/65">
@@ -93,7 +93,7 @@ export default async function Home() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6">
               {promoProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -103,13 +103,13 @@ export default async function Home() {
       )}
 
       {/* ── Categorias ───────────────────────────────────────────────── */}
-      <section className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-end justify-between gap-4">
+      <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:py-16 lg:px-8">
+        <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-brand-charcoal/65">
               Categorias
             </p>
-            <h2 className="mt-2 text-3xl font-semibold text-brand-charcoal">
+            <h2 className="mt-2 text-xl font-semibold text-brand-charcoal md:text-3xl">
               Categorias em destaque
             </h2>
           </div>
@@ -157,13 +157,13 @@ export default async function Home() {
       </section>
 
       {/* ── Produtos em destaque ─────────────────────────────────────── */}
-      <section className="mx-auto w-full max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-end justify-between gap-4">
+      <section className="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-6 md:pb-16 lg:px-8">
+        <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-brand-charcoal/65">
               Seleção
             </p>
-            <h2 className="mt-2 text-3xl font-semibold text-brand-charcoal">
+            <h2 className="mt-2 text-xl font-semibold text-brand-charcoal md:text-3xl">
               Produtos em destaque
             </h2>
           </div>
@@ -175,7 +175,7 @@ export default async function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5">
           {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

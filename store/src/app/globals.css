@@ -1,5 +1,6 @@
 @config "../../tailwind.config.ts";
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 :root {
   --background: #D8DFE0;

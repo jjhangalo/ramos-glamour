@@ -55,7 +55,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-4 md:h-20">
+        <div className="flex h-14 items-center justify-between gap-4 md:h-16">
           {/* Logo Section */}
           <div className="flex flex-1 items-center justify-start md:flex-none">
             <Link
@@ -199,7 +199,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
       {isMenuOpen && (
         <div
           ref={menuRef}
-          className="absolute left-0 top-full w-full border-t border-brand-charcoal/5 bg-white shadow-lg animate-in slide-in-from-top-2 md:hidden"
+          className="absolute left-0 top-full w-full border-t border-brand-charcoal/5 bg-white shadow-lg animate-in slide-in-from-top-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 md:hidden"
         >
           <div className="flex flex-col py-2">
             {navLinks.map((link) => (
