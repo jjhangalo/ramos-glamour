@@ -134,11 +134,14 @@ export async function updateAdminNotes(id: string, notes: string) {
 }
 
 export async function toggleClientStatus(id: string, isActive: boolean) {
-  const supabase = createAdminClient();
   if (id === process.env.MASTER_ADMIN_ID) {
-    return { success: false, error: "Não é possível desativar a conta do administrador mestre." };
+    return {
+      success: false,
+      error: "Não é permitido desativar a conta do administrador mestre.",
+    };
   }
 
+  const supabase = createAdminClient();
   const { error } = await supabase
     .from("profiles")
     .update({ is_active: !isActive, updated_at: new Date().toISOString() })
@@ -155,11 +158,14 @@ export async function toggleClientStatus(id: string, isActive: boolean) {
 }
 
 export async function toggleAdminRole(userId: string, newRole: "client" | "admin") {
-  const supabase = createAdminClient();
   if (userId === process.env.MASTER_ADMIN_ID) {
-    return { success: false, error: "Não é possível alterar a função do administrador mestre." };
+    return {
+      success: false,
+      error: "Não é permitido alterar o papel do administrador mestre.",
+    };
   }
 
+  const supabase = createAdminClient();
   const { error } = await supabase
     .from("profiles")
     .update({ role: newRole, updated_at: new Date().toISOString() })
