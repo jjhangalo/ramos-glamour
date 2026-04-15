@@ -104,7 +104,7 @@ export function NotificationBell({
       </button>
 
       {open ? (
-        <div className="absolute left-0 top-12 z-50 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+        <div className="absolute right-0 top-12 z-50 w-80 max-w-[calc(100vw-32px)] rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
           <div className="flex items-center justify-between border-b border-slate-100 px-2 pb-3">
             <h2 className="text-sm font-semibold text-slate-950">Notificações</h2>
             {isPending ? (
