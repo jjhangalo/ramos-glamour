@@ -4,7 +4,6 @@ import { LogOut, ShieldCheck } from "lucide-react";
 
 import { signOut } from "@/lib/actions/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
 
 type SidebarUserProps = {
   id: string;
@@ -17,10 +16,9 @@ type SidebarUserProps = {
 export function SidebarUser({
   id,
   name,
-  email,
   avatarUrl,
   role,
-}: SidebarUserProps) {
+}: Omit<SidebarUserProps, "email">) {
   const isMasterAdmin = id === process.env.NEXT_PUBLIC_MASTER_ADMIN_ID;
 
   return (

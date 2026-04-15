@@ -19,12 +19,15 @@ export function AddAdminDialog() {
   const [isPromoting, startPromoteTransition] = useTransition();
   const router = useRouter();
 
+  // Helper to close and reset
+  const closeAndReset = () => {
+    setIsOpen(false);
+    setSearch("");
+    setResults([]);
+  };
+
   useEffect(() => {
-    if (!isOpen) {
-      setSearch("");
-      setResults([]);
-      return;
-    }
+    if (!isOpen) return;
 
     const timer = setTimeout(() => {
       if (search.length >= 2) {
@@ -59,7 +62,7 @@ export function AddAdminDialog() {
         return;
       }
       toast.success("Utilizador promovido a administrador.");
-      setIsOpen(false);
+      closeAndReset();
       router.refresh();
     });
   }
@@ -94,7 +97,7 @@ export function AddAdminDialog() {
             </p>
           </div>
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={closeAndReset}
             className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
           >
             <X className="h-5 w-5" />

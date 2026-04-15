@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { ArrowRight, Tag } from "lucide-react";
 
+import Link from "next/link";
 import { ProductCard } from "@/components/product/ProductCard";
 import { getPublicCategories } from "@/lib/actions/public-categories";
 import { getPublicProducts } from "@/lib/actions/public-products";
@@ -118,10 +119,10 @@ export default async function Home() {
         <div className="grid gap-5 md:grid-cols-3">
           {categories.slice(0, 3).map((category) => {
             // Find a product in this category for the image
-            const categoryMatch = (p: any) =>
+            const categoryMatch = (p: import("@/lib/actions/public-products").PublicProduct) =>
               Array.isArray(p.categories)
-                ? p.categories.some((c: any) => c.slug === category.slug)
-                : p.categories?.slug === category.slug;
+                ? p.categories.some((c) => c.slug === category.slug)
+                : (p.categories as unknown as { slug: string })?.slug === category.slug;
 
             const productWithImage =
               latestProducts.find(categoryMatch) || featuredProducts.find(categoryMatch);

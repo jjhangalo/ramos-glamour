@@ -49,7 +49,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -87,7 +86,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   } | null>(null);
 
   const productForm = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema) as any,
+    resolver: zodResolver(productSchema) as import("react-hook-form").Resolver<ProductFormValues>,
     defaultValues: {
       name: product?.name ?? "",
       description: product?.description ?? "",
@@ -99,7 +98,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   });
 
   const variantForm = useForm<VariantFormValues>({
-    resolver: zodResolver(variantSchema) as any,
+    resolver: zodResolver(variantSchema) as import("react-hook-form").Resolver<VariantFormValues>,
     defaultValues: {
       size: "",
       color: "",
@@ -144,10 +143,10 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
     [categories],
   );
 
+  const watchedCategoryIds = productForm.watch("category_ids") ?? [];
   const selectedCategories = useMemo(() => {
-    const ids = productForm.watch("category_ids") ?? [];
-    return flatCategories.filter((category) => ids.includes(category.id));
-  }, [flatCategories, productForm.watch("category_ids")]);
+    return flatCategories.filter((category) => watchedCategoryIds.includes(category.id));
+  }, [flatCategories, watchedCategoryIds]);
 
   function toggleCategory(categoryId: string) {
     const currentIds = productForm.getValues("category_ids");
@@ -169,8 +168,8 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
       }
 
       toast.success(product ? "Produto actualizado." : "Produto criado.");
-      if (!product && (result as any).id) {
-        router.push(`/produtos/${(result as any).id}`);
+      if (!product && (result as { id?: string }).id) {
+        router.push(`/produtos/${(result as { id: string }).id}`);
       } else {
         router.refresh();
       }
@@ -426,9 +425,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                                       <input
                                         type="checkbox"
                                         disabled={isPending}
-                                        checked={productForm
-                                          .watch("category_ids")
-                                          .includes(child.id)}
+                                        checked={watchedCategoryIds.includes(child.id)}
                                         onChange={() => toggleCategory(child.id)}
                                         className="h-4 w-4 rounded border-slate-300 cursor-pointer"
                                       />
@@ -441,9 +438,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                                   <input
                                     type="checkbox"
                                     disabled={isPending}
-                                    checked={productForm
-                                      .watch("category_ids")
-                                      .includes(category.id)}
+                                    checked={watchedCategoryIds.includes(category.id)}
                                     onChange={() => toggleCategory(category.id)}
                                     className="h-4 w-4 rounded border-slate-300 cursor-pointer"
                                   />

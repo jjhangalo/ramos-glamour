@@ -23,6 +23,23 @@ export type PublicProduct = {
   created_at: string;
 };
 
+type DbProductResponse = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  is_featured: boolean;
+  created_at: string;
+  categories: { id: string; name: string; slug: string }[];
+  product_images: { url: string; position: number }[];
+  promotions: {
+    promo_price: number | null;
+    is_active: boolean;
+    updated_at: string;
+    ends_at: string | null;
+  }[];
+};
+
 export async function getPublicProducts(filters: {
   isFeatured?: boolean;
   hasPromo?: boolean;
@@ -102,10 +119,11 @@ export async function getPublicProducts(filters: {
     }
 
     const now = new Date();
+    const dataTyped = (data || []) as unknown as DbProductResponse[];
 
-    return (data || []).map((p: any) => {
+    return dataTyped.map((p) => {
       // Find valid promotion
-      const activePromo = p.promotions?.find((promo: any) => {
+      const activePromo = p.promotions?.find((promo) => {
         if (!promo.is_active) return false;
         if (promo.ends_at && new Date(promo.ends_at) < now) return false;
         return true;
@@ -162,24 +180,25 @@ export async function getPublicProductById(id: string): Promise<PublicProduct | 
     }
 
     const now = new Date();
-    const activePromo = data.promotions?.find((promo: any) => {
+    const typedData = data as unknown as DbProductResponse;
+    const activePromo = typedData.promotions?.find((promo) => {
       if (!promo.is_active) return false;
       if (promo.ends_at && new Date(promo.ends_at) < now) return false;
       return true;
     });
 
     return {
-      id: data.id,
-      name: data.name,
-      description: data.description,
-      price: data.price,
+      id: typedData.id,
+      name: typedData.name,
+      description: typedData.description,
+      price: typedData.price,
       promo_price: activePromo ? activePromo.promo_price : null,
-      is_featured: data.is_featured,
-      categories: data.categories || [],
-      images: (data.product_images || []).sort((a: any, b: any) => a.position - b.position),
+      is_featured: typedData.is_featured,
+      categories: typedData.categories || [],
+      images: (typedData.product_images || []).sort((a, b) => a.position - b.position),
       rating_avg: 5.0,
       review_count: 0,
-      created_at: data.created_at,
+      created_at: typedData.created_at,
     };
   } catch (err) {
     console.error("Unexpected error in getPublicProductById:", err);

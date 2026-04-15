@@ -81,7 +81,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
           <span className="inline-flex rounded-full bg-brand-mauve px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-brand-white">
             {(Array.isArray(product.categories)
               ? product.categories[0]?.name
-              : (product.categories as any)?.name) ?? "Sem categoria"}
+              : (product.categories as unknown as { name: string })?.name) ?? "Sem categoria"}
           </span>
 
           <div className="space-y-3">

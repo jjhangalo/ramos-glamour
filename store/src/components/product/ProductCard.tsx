@@ -43,7 +43,7 @@ export function ProductCard({ product, promoPrice }: ProductCardProps) {
         <span className="absolute left-3 top-3 rounded-full bg-brand-mauve px-3 py-1 text-xs font-medium text-brand-white shadow-sm">
           {(Array.isArray(product.categories)
             ? product.categories[0]?.name
-            : (product.categories as any)?.name) ?? "Sem categoria"}
+            : (product.categories as unknown as { name: string })?.name) ?? "Sem categoria"}
         </span>
         {promoPrice || product.promo_price ? (
           <span className="absolute right-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">

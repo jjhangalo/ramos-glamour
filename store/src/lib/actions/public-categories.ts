@@ -37,8 +37,15 @@ export async function getPublicCategories(): Promise<PublicCategory[]> {
     // but the schema I saw in admin types didn't have is_active for categories, 
     // it had products_count)
     
-    return (data || [])
-      .map((cat: any) => ({
+    type DbCategoryResponse = {
+      id: string;
+      name: string;
+      slug: string;
+      products: { count: number }[];
+    };
+
+    return ((data || []) as unknown as DbCategoryResponse[])
+      .map((cat) => ({
         id: cat.id,
         name: cat.name,
         slug: cat.slug,

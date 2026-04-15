@@ -49,7 +49,7 @@ function PromotionDialog({ products }: PromotionDialogProps) {
   const [search, setSearch] = useState("");
 
   const form = useForm<PromotionFormValues>({
-    resolver: zodResolver(promotionSchema) as any,
+    resolver: zodResolver(promotionSchema) as import("react-hook-form").Resolver<PromotionFormValues>,
     defaultValues: {
       product_id: "",
       promo_price: 0,
@@ -445,7 +445,7 @@ export function PromotionsClient({
             Nenhuma promoção criada.
           </p>
           <p className="mt-1 text-sm text-slate-500">
-            Clica em "Nova promoção" para adicionar um produto à lista de
+            Clica em &quot;Nova promoção&quot; para adicionar um produto à lista de
             promoções.
           </p>
         </div>

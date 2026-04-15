@@ -111,10 +111,13 @@ export async function getClient(id: string) {
       email: userData.user.email ?? null,
     },
     addresses: (addresses ?? []) as AddressRecord[],
-    orders: (orders ?? []).map((order: any) => ({
-      ...order,
-      addresses: Array.isArray(order.addresses) ? order.addresses[0] : order.addresses,
-    })) as OrderRecord[],
+    orders: (orders ?? []).map((order: unknown) => {
+      const o = order as OrderRecord & { addresses: unknown };
+      return {
+        ...o,
+        addresses: Array.isArray(o.addresses) ? (o.addresses as unknown[])[0] : o.addresses,
+      };
+    }) as OrderRecord[],
   };
 }
 
