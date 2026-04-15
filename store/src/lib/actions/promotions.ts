@@ -1,7 +1,6 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { Product } from "@/lib/mock/products";
 
 export type PromotionWithProduct = {
   id: string;

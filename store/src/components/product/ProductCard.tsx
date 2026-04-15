@@ -7,10 +7,10 @@ import { Star } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ProductPrice } from "@/components/product/ProductPrice";
-import type { Product } from "@/lib/mock/products";
+import type { PublicProduct } from "@/lib/actions/public-products";
 
 type ProductCardProps = {
-  product: Product;
+  product: PublicProduct;
   promoPrice?: number | null;
 };
 
@@ -41,9 +41,9 @@ export function ProductCard({ product, promoPrice }: ProductCardProps) {
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
         />
         <span className="absolute left-3 top-3 rounded-full bg-brand-mauve px-3 py-1 text-xs font-medium text-brand-white shadow-sm">
-          {product.category.name}
+          {product.categories[0]?.name ?? "Sem categoria"}
         </span>
-        {promoPrice ? (
+        {promoPrice || product.promo_price ? (
           <span className="absolute right-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
             Promoção
           </span>
@@ -70,7 +70,11 @@ export function ProductCard({ product, promoPrice }: ProductCardProps) {
         </div>
 
         <div className="flex items-center justify-between gap-4">
-          <ProductPrice price={product.price} promoPrice={promoPrice} size="md" />
+          <ProductPrice
+            price={product.price}
+            promoPrice={promoPrice || product.promo_price}
+            size="md"
+          />
           <AddToCartButton
             product={product}
             compact

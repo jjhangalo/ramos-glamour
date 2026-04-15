@@ -3,11 +3,11 @@
 import { ShoppingBag } from "lucide-react";
 import toast from "react-hot-toast";
 
-import type { Product } from "@/lib/mock/products";
+import type { PublicProduct } from "@/lib/actions/public-products";
 import { useCartStore } from "@/lib/store/cart";
 
 type AddToCartButtonProps = {
-  product: Product;
+  product: PublicProduct;
   quantity?: number;
   className?: string;
   compact?: boolean;

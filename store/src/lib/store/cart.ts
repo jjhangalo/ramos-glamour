@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import type { Product } from "@/lib/mock/products";
+import type { PublicProduct } from "@/lib/actions/public-products";
 
 export type CartItem = {
   id: string;
@@ -17,7 +17,7 @@ type CartState = {
   items: CartItem[];
   totalItems: number;
   totalPrice: number;
-  addItem: (product: Product, quantity: number) => void;
+  addItem: (product: PublicProduct, quantity: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -32,7 +32,7 @@ function getTotals(items: CartItem[]) {
   };
 }
 
-function buildCartItem(product: Product, quantity: number): CartItem {
+function buildCartItem(product: PublicProduct, quantity: number): CartItem {
   return {
     id: product.id,
     name: product.name,

@@ -4,12 +4,17 @@ import Link from "next/link";
 import { ArrowRight, Tag } from "lucide-react";
 
 import { ProductCard } from "@/components/product/ProductCard";
-import { PromoCard } from "@/components/product/PromoCard";
-import { mockCategories, mockProducts } from "@/lib/mock/products";
-import { getStoreActivePromotions } from "@/lib/actions/promotions";
+import { getPublicCategories } from "@/lib/actions/public-categories";
+import { getPublicProducts } from "@/lib/actions/public-products";
 
 export default async function Home() {
-  const activePromotions = await getStoreActivePromotions().catch(() => []);
+  const [promoProducts, featuredProducts, latestProducts, categories] =
+    await Promise.all([
+      getPublicProducts({ hasPromo: true, limit: 4 }),
+      getPublicProducts({ isFeatured: true, limit: 4 }),
+      getPublicProducts({ limit: 8 }),
+      getPublicCategories(),
+    ]);
 
   return (
     <main className="flex flex-1 flex-col">
@@ -40,7 +45,7 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 sm:gap-6">
-            {mockProducts.slice(0, 4).map((product, index) => (
+            {featuredProducts.slice(0, 4).map((product, index) => (
               <div
                 key={product.id}
                 className={`relative overflow-hidden rounded-[2rem] shadow-[0_18px_40px_rgba(98,98,96,0.12)] ${
@@ -49,7 +54,7 @@ export default async function Home() {
               >
                 <div className="relative aspect-[3/4]">
                   <Image
-                    src={product.images[0].url}
+                    src={product.images[0]?.url ?? "https://picsum.photos/seed/fallback/600/800"}
                     alt={product.name}
                     fill
                     className="object-cover"
@@ -63,10 +68,9 @@ export default async function Home() {
       </section>
 
       {/* ── Promoções ────────────────────────────────────────────────── */}
-      {activePromotions.length > 0 && (
+      {promoProducts.length > 0 && (
         <section className="bg-gradient-to-b from-emerald-50 to-white">
           <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-            {/* Header */}
             <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
@@ -89,27 +93,10 @@ export default async function Home() {
               </Link>
             </div>
 
-            {/* Grid */}
             <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-4">
-              {activePromotions.map((promo) => {
-                const p = promo.products;
-                if (!p) return null;
-
-                const image = [...(p.product_images ?? [])].sort(
-                  (a, b) => a.position - b.position,
-                )[0];
-
-                return (
-                  <PromoCard
-                    key={promo.id}
-                    productId={p.id}
-                    name={p.name}
-                    price={p.price}
-                    promoPrice={promo.promo_price}
-                    imageUrl={image?.url}
-                  />
-                );
-              })}
+              {promoProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
             </div>
           </div>
         </section>
@@ -129,14 +116,11 @@ export default async function Home() {
         </div>
 
         <div className="grid gap-5 md:grid-cols-3">
-          {mockCategories.map((category, index) => {
-            const product = mockProducts.find(
-              (item) => item.category.slug === category.slug,
-            );
-
-            if (!product) {
-              return null;
-            }
+          {categories.slice(0, 3).map((category) => {
+            // Find a product in this category for the image
+            const productWithImage =
+              latestProducts.find((p) => p.categories.some((c) => c.slug === category.slug)) ||
+              featuredProducts.find((p) => p.categories.some((c) => c.slug === category.slug));
 
             return (
               <Link
@@ -146,7 +130,10 @@ export default async function Home() {
               >
                 <div className="relative aspect-[5/6]">
                   <Image
-                    src={product.images[index % product.images.length].url}
+                    src={
+                      productWithImage?.images[0]?.url ??
+                      "https://picsum.photos/seed/cat-fallback/600/800"
+                    }
                     alt={category.name}
                     fill
                     className="object-cover transition duration-500 group-hover:scale-105"
@@ -185,7 +172,7 @@ export default async function Home() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {mockProducts.slice(0, 4).map((product) => (
+          {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
