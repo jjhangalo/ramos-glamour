@@ -168,8 +168,8 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
       }
 
       toast.success(product ? "Produto actualizado." : "Produto criado.");
-      if (!product && (result as { id?: string }).id) {
-        router.push(`/produtos/${(result as { id: string }).id}`);
+      if (!product && "id" in result && typeof result.id === "string") {
+        router.push(`/produtos/${result.id}`);
       } else {
         router.refresh();
       }

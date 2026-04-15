@@ -42,7 +42,11 @@ export async function getStoreActivePromotions(): Promise<PromotionWithProduct[]
     return [];
   }
 
-  return (data ?? []) as PromotionWithProduct[];
+  const rawData = data || [];
+  return rawData.map((promo: any) => ({
+    ...promo,
+    products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
+  })) as PromotionWithProduct[];
 }
 
 // Returns promo_price for a specific product_id if an active promotion exists.

@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 type MobileDashboardNavProps = {
   user: {
     id: string;
-    email: string;
     name: string;
     avatarUrl?: string | null;
     role?: string | null;
@@ -113,7 +112,6 @@ export function MobileDashboardNav({ user }: MobileDashboardNavProps) {
           <SidebarUser
             id={user.id}
             name={user.name}
-            email={user.email}
             avatarUrl={user.avatarUrl}
             role={user.role}
           />

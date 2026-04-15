@@ -41,7 +41,7 @@ export function SidebarUser({
               {name}
             </p>
             {isMasterAdmin && (
-              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-brand-olive" title="Administrador Mestre" />
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-brand-olive" />
             )}
           </div>
           <p className="truncate text-xs text-slate-500">

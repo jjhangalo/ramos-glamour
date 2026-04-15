@@ -37,11 +37,11 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
           </div>
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
             {product.images.map((image) => {
-              const isActive = image.id === selectedImage.id;
+              const isActive = image.url === selectedImage.url;
 
               return (
                 <button
-                  key={image.id}
+                  key={image.url}
                   type="button"
                   onClick={() => {
                     setSelectedImage(image);

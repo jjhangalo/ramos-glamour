@@ -40,7 +40,11 @@ export async function getPromotedProducts(): Promise<PromotionRecord[]> {
     throw new Error(error.message);
   }
 
-  return (data ?? []) as PromotionRecord[];
+  const rawData = data || [];
+  return rawData.map((promo: any) => ({
+    ...promo,
+    products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
+  })) as PromotionRecord[];
 }
 
 export async function getActivePromotions(): Promise<PromotionRecord[]> {
@@ -59,7 +63,11 @@ export async function getActivePromotions(): Promise<PromotionRecord[]> {
     throw new Error(error.message);
   }
 
-  return (data ?? []) as PromotionRecord[];
+  const rawData = data || [];
+  return rawData.map((promo: any) => ({
+    ...promo,
+    products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
+  })) as PromotionRecord[];
 }
 
 export async function createPromotion(input: PromotionInput) {

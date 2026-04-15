@@ -453,13 +453,15 @@ export function PromotionsClient({
 
       <ConfirmDialog
         open={confirmId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmId(null);
+        }}
         title="Remover promoção"
         description="Tens a certeza que queres remover esta promoção? Esta acção não pode ser desfeita."
         onConfirm={() => {
           if (confirmId) handleDelete(confirmId);
           setConfirmId(null);
         }}
-        onCancel={() => setConfirmId(null)}
       />
     </div>
   );

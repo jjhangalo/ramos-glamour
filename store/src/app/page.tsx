@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { ArrowRight, Tag } from "lucide-react";
 
-import Link from "next/link";
 import { ProductCard } from "@/components/product/ProductCard";
 import { getPublicCategories } from "@/lib/actions/public-categories";
 import { getPublicProducts } from "@/lib/actions/public-products";

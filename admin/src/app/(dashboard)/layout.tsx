@@ -62,7 +62,6 @@ export default async function DashboardLayout({
         <SidebarUser
           id={user.id}
           name={displayName}
-          email={user.email ?? ""}
           avatarUrl={profile?.avatar_url}
           role={profile?.role}
         />
@@ -77,7 +76,6 @@ export default async function DashboardLayout({
               user={{
                 id: user.id,
                 name: displayName,
-                email: user.email ?? "",
                 avatarUrl: profile?.avatar_url,
                 role: profile?.role,
               }}
