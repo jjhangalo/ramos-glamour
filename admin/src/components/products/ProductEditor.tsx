@@ -12,8 +12,9 @@ import {
   Trash2,
   Upload,
   GripVertical,
+  Check,
 } from "lucide-react";
-import { useMemo, useState, useTransition, useCallback } from "react";
+import { useMemo, useState, useTransition, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -172,6 +173,49 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
     productId: string;
   } | null>(null);
 
+  // Local states for image ordering
+  const [localProductImages, setLocalProductImages] = useState<{ id: string; url: string; position: number }[]>([]);
+  const [localVariantImages, setLocalVariantImages] = useState<{ id: string; url: string; position: number }[]>([]);
+
+  // Sync product images from props
+  useEffect(() => {
+    const sortedProps = [...(product?.product_images ?? [])].sort(
+      (a, b) => a.position - b.position
+    );
+    setLocalProductImages(sortedProps);
+  }, [product?.product_images]);
+
+  // Sync variant images when side panel opens or images change
+  useEffect(() => {
+    if (activeVariantForImages) {
+      const sortedProps = [...(activeVariantForImages.variant_images ?? [])].sort(
+        (a, b) => a.position - b.position
+      );
+      setLocalVariantImages(sortedProps);
+    } else {
+      setLocalVariantImages([]);
+    }
+  }, [activeVariantForImages, activeVariantForImages?.variant_images]);
+
+  const hasProductImageChanges = useMemo(() => {
+    const propIds = (product?.product_images ?? [])
+      .sort((a, b) => a.position - b.position)
+      .map((img) => img.id)
+      .join(",");
+    const localIds = localProductImages.map((img) => img.id).join(",");
+    return propIds !== localIds;
+  }, [product?.product_images, localProductImages]);
+
+  const hasVariantImageChanges = useMemo(() => {
+    if (!activeVariantForImages) return false;
+    const propIds = (activeVariantForImages.variant_images ?? [])
+      .sort((a, b) => a.position - b.position)
+      .map((img) => img.id)
+      .join(",");
+    const localIds = localVariantImages.map((img) => img.id).join(",");
+    return propIds !== localIds;
+  }, [activeVariantForImages, localVariantImages]);
+
   const productForm = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema) as import("react-hook-form").Resolver<ProductFormValues>,
     defaultValues: {
@@ -195,13 +239,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
     },
   });
 
-  const images = useMemo(
-    () =>
-      [...(product?.product_images ?? [])].sort(
-        (left, right) => left.position - right.position,
-      ),
-    [product?.product_images],
-  );
+  // Replaced memo with state + useEffect above
 
   const variants = useMemo(
     () =>
@@ -370,47 +408,59 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
 
   const handleProductDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over || active.id === over.id || !product) return;
+    if (!over || active.id === over.id) return;
 
-    const orderedIds = images.map((img) => img.id);
-    const oldIndex = orderedIds.indexOf(active.id as string);
-    const newIndex = orderedIds.indexOf(over.id as string);
+    setLocalProductImages((items) => {
+      const oldIndex = items.findIndex((img) => img.id === active.id);
+      const newIndex = items.findIndex((img) => img.id === over.id);
+      return arrayMove(items, oldIndex, newIndex);
+    });
+  }, []);
 
-    const nextIds = arrayMove(orderedIds, oldIndex, newIndex);
+  const handleSaveProductOrder = () => {
+    if (!product) return;
+    const orderedIds = localProductImages.map((img) => img.id);
 
     startTransition(async () => {
-      const result = await reorderProductImages(product.id, nextIds);
+      const result = await reorderProductImages(product.id, orderedIds);
       if (!result.success) {
-        toast.error(result.error ?? "Erro ao reordenar as imagens.");
+        toast.error(result.error ?? "Erro ao guardar a ordem das imagens.");
         return;
       }
+      toast.success("Ordem das imagens guardada.");
       router.refresh();
     });
-  }, [images, product, router]);
+  };
 
   const handleVariantDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over || active.id === over.id || !activeVariantForImages) return;
+    if (!over || active.id === over.id) return;
 
-    const orderedIds = (activeVariantForImages.variant_images ?? []).map((img) => img.id);
-    const oldIndex = orderedIds.indexOf(active.id as string);
-    const newIndex = orderedIds.indexOf(over.id as string);
+    setLocalVariantImages((items) => {
+      const oldIndex = items.findIndex((img) => img.id === active.id);
+      const newIndex = items.findIndex((img) => img.id === over.id);
+      return arrayMove(items, oldIndex, newIndex);
+    });
+  }, []);
 
-    const nextIds = arrayMove(orderedIds, oldIndex, newIndex);
+  const handleSaveVariantOrder = () => {
+    if (!activeVariantForImages) return;
+    const orderedIds = localVariantImages.map((img) => img.id);
 
     startTransition(async () => {
       const result = await reorderVariantImages(
         activeVariantForImages.id,
         product?.id ?? "",
-        nextIds
+        orderedIds
       );
       if (!result.success) {
-        toast.error(result.error ?? "Erro ao reordenar as imagens.");
+        toast.error(result.error ?? "Erro ao guardar a ordem das imagens.");
         return;
       }
+      toast.success("Ordem das imagens da variação guardada.");
       router.refresh();
     });
-  }, [activeVariantForImages, product?.id, router]);
+  };
 
   function handleImageReorder(imageId: string, direction: "up" | "down") {
     // Mantido apenas para compatibilidade se necessário, mas removido do UI
@@ -675,12 +725,24 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               Formatos aceites: JPEG, PNG, WebP. Máximo 10 MB.
             </p>
           </div>
-          <label
-            className={cn(
-              "inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100",
-              (!product || isPending) && "opacity-50 cursor-not-allowed",
-            )}
-          >
+          <div className="flex gap-3">
+            {hasProductImageChanges ? (
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={handleSaveProductOrder}
+                className="inline-flex items-center gap-2 rounded-xl bg-brand-bg px-4 py-2.5 text-sm font-medium text-slate-900 border border-slate-200 transition hover:bg-slate-50 disabled:opacity-50"
+              >
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                Guardar Ordem
+              </button>
+            ) : null}
+            <label
+              className={cn(
+                "inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100",
+                (!product || isPending) && "opacity-50 cursor-not-allowed",
+              )}
+            >
             {isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
@@ -697,6 +759,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
             />
           </label>
         </div>
+      </div>
 
         {product ? (
           <DndContext
@@ -706,10 +769,10 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
           >
             <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <SortableContext
-                items={images.map((img) => img.id)}
+                items={localProductImages.map((img) => img.id)}
                 strategy={rectSortingStrategy}
               >
-                {images.map((image) => (
+                {localProductImages.map((image) => (
                   <SortableImage
                     key={image.id}
                     id={image.id}
@@ -732,7 +795,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                   />
                 ))}
               </SortableContext>
-              {!images.length ? (
+              {!localProductImages.length ? (
                 <p className="text-sm text-slate-500">
                   Ainda não há imagens carregadas.
                 </p>
@@ -1005,13 +1068,26 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                   {activeVariantForImages.color || "Sem cor"}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => setActiveVariantForImages(null)}
-                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-              >
-                Fechar
-              </button>
+              <div className="flex gap-2">
+                {hasVariantImageChanges ? (
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={handleSaveVariantOrder}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-bg text-slate-900 border border-slate-200 transition hover:bg-slate-50 disabled:opacity-50"
+                    title="Guardar Ordem"
+                  >
+                    {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setActiveVariantForImages(null)}
+                  className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                >
+                  Fechar
+                </button>
+              </div>
             </div>
 
             <label
@@ -1045,11 +1121,11 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
             >
               <div className="mt-5 space-y-4">
                 <SortableContext
-                  items={(activeVariantForImages.variant_images ?? []).map((img) => img.id)}
+                  items={localVariantImages.map((img) => img.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  {(activeVariantForImages.variant_images ?? []).length ? (
-                    activeVariantForImages.variant_images!.map((image) => (
+                  {localVariantImages.length ? (
+                    localVariantImages.map((image) => (
                       <SortableImage
                         key={image.id}
                         id={image.id}
