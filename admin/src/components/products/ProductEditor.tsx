@@ -23,7 +23,7 @@ import {
   deleteProductImage,
   reorderProductImages,
   updateProduct,
-  uploadProductImage,
+  uploadProductImages,
 } from "@/lib/actions/products";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
@@ -31,7 +31,7 @@ import {
   deleteVariant,
   deleteVariantImage,
   updateVariant,
-  uploadVariantImage,
+  uploadVariantImages,
 } from "@/lib/actions/variants";
 import { allowedImageMimeTypes, maxImageSize } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
@@ -67,7 +67,7 @@ function validateClientFile(file: File) {
   }
 
   if (file.size > maxImageSize) {
-    return "A imagem não pode ter mais de 5 MB.";
+    return "A imagem não pode ter mais de 10 MB.";
   }
 
   return null;
@@ -216,24 +216,26 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   function handleProductImageUpload(fileList: FileList | null) {
     if (!product || !fileList?.length) return;
 
-    const file = fileList[0];
-    const clientError = validateClientFile(file);
-    if (clientError) {
-      toast.error(clientError);
-      return;
+    const files = Array.from(fileList);
+    const formData = new FormData();
+    
+    for (const file of files) {
+      const clientError = validateClientFile(file);
+      if (clientError) {
+        toast.error(`${file.name}: ${clientError}`);
+        return;
+      }
+      formData.append("files", file);
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     startTransition(async () => {
-      const result = await uploadProductImage(product.id, formData);
+      const result = await uploadProductImages(product.id, formData);
       if (!result.success) {
-        toast.error(result.error ?? "Erro ao enviar a imagem.");
+        toast.error(result.error ?? "Erro ao enviar as imagens.");
         return;
       }
 
-      toast.success("Imagem adicionada.");
+      toast.success(files.length > 1 ? "Imagens adicionadas." : "Imagem adicionada.");
       router.refresh();
     });
   }
@@ -241,27 +243,29 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   function handleVariantImageUpload(fileList: FileList | null) {
     if (!activeVariantForImages || !fileList?.length) return;
 
-    const file = fileList[0];
-    const clientError = validateClientFile(file);
-    if (clientError) {
-      toast.error(clientError);
-      return;
+    const files = Array.from(fileList);
+    const formData = new FormData();
+
+    for (const file of files) {
+      const clientError = validateClientFile(file);
+      if (clientError) {
+        toast.error(`${file.name}: ${clientError}`);
+        return;
+      }
+      formData.append("files", file);
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     startTransition(async () => {
-      const result = await uploadVariantImage(
+      const result = await uploadVariantImages(
         activeVariantForImages.id,
         formData,
       );
       if (!result.success) {
-        toast.error(result.error ?? "Erro ao enviar a imagem.");
+        toast.error(result.error ?? "Erro ao enviar as imagens.");
         return;
       }
 
-      toast.success("Imagem da variação adicionada.");
+      toast.success(files.length > 1 ? "Imagens da variação adicionadas." : "Imagem da variação adicionada.");
       router.refresh();
     });
   }
@@ -525,7 +529,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               Imagens do produto
             </h2>
             <p className="text-sm text-slate-500">
-              Formatos aceites: JPEG, PNG, WebP. Máximo 5 MB.
+              Formatos aceites: JPEG, PNG, WebP. Máximo 10 MB.
             </p>
           </div>
           <label
@@ -544,6 +548,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               type="file"
               accept="image/jpeg,image/png,image/webp"
               className="hidden"
+              multiple
               disabled={!product || isPending}
               onChange={(event) => handleProductImageUpload(event.target.files)}
             />
@@ -908,6 +913,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 className="hidden"
+                multiple
                 disabled={isPending}
                 onChange={(event) =>
                   handleVariantImageUpload(event.target.files)

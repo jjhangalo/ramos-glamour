@@ -21,7 +21,7 @@ function validateImage(file: File) {
   }
 
   if (file.size > maxImageSize) {
-    return "A imagem não pode ter mais de 5 MB.";
+    return "A imagem não pode ter mais de 10 MB.";
   }
 
   return null;
@@ -113,47 +113,13 @@ export async function deleteVariant(variantId: string, productId: string) {
   return { success: true };
 }
 
-export async function uploadVariantImage(variantId: string, formData: FormData) {
+export async function uploadVariantImages(variantId: string, formData: FormData) {
   const supabase = createAdminClient();
-  const file = formData.get("file");
+  const files = formData.getAll("files");
 
-  if (!(file instanceof File)) {
-    return { success: false, error: "Selecciona uma imagem válida." };
+  if (!files.length) {
+    return { success: false, error: "Selecciona pelo menos uma imagem válida." };
   }
-
-  const validationError = validateImage(file);
-  if (validationError) {
-    return { success: false, error: validationError };
-  }
-
-  const extension = file.name.split(".").pop() ?? "jpg";
-  const storagePath = `${variantId}/${Date.now()}-${randomUUID()}.${extension}`;
-  const fileBuffer = Buffer.from(await file.arrayBuffer());
-
-  const { error: uploadError } = await supabase.storage
-    .from("variant-images")
-    .upload(storagePath, fileBuffer, {
-      contentType: file.type,
-      upsert: false,
-    });
-
-  if (uploadError) {
-    return { success: false, error: uploadError.message };
-  }
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("variant-images").getPublicUrl(storagePath);
-
-  const {
-    data: lastImage,
-  } = await supabase
-    .from("variant_images")
-    .select("position")
-    .eq("variant_id", variantId)
-    .order("position", { ascending: false })
-    .limit(1)
-    .maybeSingle();
 
   const { data: variant, error: variantError } = await supabase
     .from("product_variants")
@@ -165,11 +131,55 @@ export async function uploadVariantImage(variantId: string, formData: FormData) 
     return { success: false, error: variantError.message };
   }
 
-  const { error: insertError } = await supabase.from("variant_images").insert({
-    variant_id: variantId,
-    url: publicUrl,
-    position: (lastImage?.position ?? -1) + 1,
-  });
+  const results = [];
+
+  for (const file of files) {
+    if (!(file instanceof File)) continue;
+
+    const validationError = validateImage(file);
+    if (validationError) {
+      return { success: false, error: `${file.name}: ${validationError}` };
+    }
+
+    const extension = file.name.split(".").pop() ?? "jpg";
+    const storagePath = `${variantId}/${Date.now()}-${randomUUID()}.${extension}`;
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+    const { error: uploadError } = await supabase.storage
+      .from("variant-images")
+      .upload(storagePath, fileBuffer, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      return { success: false, error: `Erro no upload (${file.name}): ${uploadError.message}` };
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("variant-images").getPublicUrl(storagePath);
+
+    results.push({ url: publicUrl });
+  }
+
+  const { data: lastImage } = await supabase
+    .from("variant_images")
+    .select("position")
+    .eq("variant_id", variantId)
+    .order("position", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let nextPosition = (lastImage?.position ?? -1) + 1;
+
+  const { error: insertError } = await supabase.from("variant_images").insert(
+    results.map((res) => ({
+      variant_id: variantId,
+      url: res.url,
+      position: nextPosition++,
+    })),
+  );
 
   if (insertError) {
     return { success: false, error: insertError.message };

@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
     ],
   },
   outputFileTracingRoot: path.resolve(process.cwd(), "../"),
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "20mb",
+    },
+  },
 };
 
 export default nextConfig;
