@@ -47,6 +47,9 @@ import {
 } from "@/lib/actions/products";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
+  createVariant,
+  deleteVariant,
+  deleteVariantImage,
   updateVariant,
   uploadVariantImages,
   reorderVariantImages,
@@ -71,6 +74,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 
@@ -683,9 +687,14 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                         className="h-4 w-4 rounded border-slate-300 cursor-pointer"
                       />
                     </FormControl>
-                    <FormLabel className="cursor-pointer">
-                      Produto activo
-                    </FormLabel>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="cursor-pointer">
+                        Disponível para encomenda
+                      </FormLabel>
+                      <FormDescription className="text-xs">
+                        Controla se o produto aparece na loja. Para produtos com variações, a disponibilidade é gerida em cada variação.
+                      </FormDescription>
+                    </div>
                   </FormItem>
                 )}
               />
