@@ -9,6 +9,9 @@ type CartItemPayload = {
   price: number;
   image: string;
   quantity: number;
+  variantId?: string;
+  variantSize?: string;
+  variantColor?: string;
 };
 
 type ManualAddressPayload = {
@@ -168,7 +171,10 @@ export async function createOrder(input: CreateOrderInput) {
 
   const orderItems = input.items.map((item) => ({
     order_id: order.id,
-    product_id: null,
+    product_id: item.id,
+    variant_id: item.variantId || null,
+    variant_size: item.variantSize || null,
+    variant_color: item.variantColor || null,
     product_name: item.name,
     product_price: item.price,
     quantity: item.quantity,

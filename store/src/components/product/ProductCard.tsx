@@ -7,10 +7,10 @@ import { Star } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ProductPrice } from "@/components/product/ProductPrice";
-import type { PublicProduct } from "@/lib/actions/public-products";
+import type { Product } from "@/lib/actions/products";
 
 type ProductCardProps = {
-  product: PublicProduct;
+  product: Product;
   promoPrice?: number | null;
 };
 
@@ -41,9 +41,7 @@ export function ProductCard({ product, promoPrice }: ProductCardProps) {
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
         />
         <span className="absolute left-3 top-3 rounded-full bg-brand-mauve px-3 py-1 text-xs font-medium text-brand-white shadow-sm">
-          {(Array.isArray(product.categories)
-            ? product.categories[0]?.name
-            : (product.categories as unknown as { name: string })?.name) ?? "Sem categoria"}
+          {product.categories?.[0]?.name ?? "Sem categoria"}
         </span>
         {promoPrice || product.promo_price ? (
           <span className="absolute right-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">

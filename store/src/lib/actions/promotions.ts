@@ -42,8 +42,8 @@ export async function getStoreActivePromotions(): Promise<PromotionWithProduct[]
     return [];
   }
 
-  const rawData = data || [];
-  return rawData.map((promo: any) => ({
+  const rawData = (data || []) as unknown as (PromotionWithProduct & { products: { id: string }[] | { id: string } | null })[];
+  return rawData.map((promo) => ({
     ...promo,
     products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
   })) as PromotionWithProduct[];

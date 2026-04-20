@@ -1,23 +1,31 @@
 "use client";
 
+"use client";
+
 import { ShoppingBag } from "lucide-react";
 import toast from "react-hot-toast";
 
-import type { PublicProduct } from "@/lib/actions/public-products";
+import type { Product } from "@/lib/actions/products";
 import { useCartStore } from "@/lib/store/cart";
 
 type AddToCartButtonProps = {
-  product: PublicProduct;
+  product: Product;
   quantity?: number;
+  variant?: { id: string; size?: string | null; color?: string | null; price_override?: number | null };
   className?: string;
   compact?: boolean;
+  disabled?: boolean;
+  onAdd?: () => void;
 };
 
 export function AddToCartButton({
   product,
   quantity = 1,
+  variant,
   className,
   compact = false,
+  disabled = false,
+  onAdd,
 }: AddToCartButtonProps) {
   const addItem = useCartStore((state) => state.addItem);
 
@@ -25,10 +33,13 @@ export function AddToCartButton({
     <button
       type="button"
       aria-label="Adicionar ao carrinho"
+      disabled={disabled}
       onClick={(event) => {
         event.stopPropagation();
-        addItem(product, quantity);
+        if (disabled) return;
+        addItem(product, quantity, variant);
         toast.success("Produto adicionado ao carrinho");
+        onAdd?.();
       }}
       className={className}
     >
