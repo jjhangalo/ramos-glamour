@@ -38,6 +38,11 @@ export const productSchema = z.object({
   category_ids: z
     .array(z.string())
     .min(1, "Selecciona pelo menos uma categoria."),
+  stock: z.coerce
+    .number({
+      message: "O stock deve ser um número válido.",
+    })
+    .min(0, "O stock não pode ser negativo."),
   is_active: z.boolean().default(true),
   is_featured: z.boolean().default(false),
 });

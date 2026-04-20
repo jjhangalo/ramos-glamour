@@ -227,6 +227,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
       description: product?.description ?? "",
       price: product?.price ?? 0,
       category_ids: product?.categories?.map((category) => category.id) ?? [],
+      stock: product?.stock ?? 0,
       is_active: product?.is_active ?? true,
       is_featured: product?.is_featured ?? false,
     },
@@ -470,7 +471,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
     // Mantido apenas para compatibilidade se necessário, mas removido do UI
     if (!product) return;
 
-    const orderedIds = [...images].map((image) => image.id);
+    const orderedIds = [...localProductImages].map((image) => image.id);
     const currentIndex = orderedIds.indexOf(imageId);
     const targetIndex =
       direction === "up" ? currentIndex - 1 : currentIndex + 1;
@@ -673,6 +674,28 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               />
 
 
+              {variants.length === 0 ? (
+                <FormField
+                  control={productForm.control}
+                  name="stock"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Stock disponível</FormLabel>
+                      <FormControl>
+                        <input
+                          {...field}
+                          type="number"
+                          min="0"
+                          disabled={isPending}
+                          className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : null}
+
               <FormField
                 control={productForm.control}
                 name="is_active"
@@ -692,7 +715,9 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                         Disponível para encomenda
                       </FormLabel>
                       <FormDescription className="text-xs">
-                        Controla se o produto aparece na loja. Para produtos com variações, a disponibilidade é gerida em cada variação.
+                        {variants.length > 0 
+                          ? "Para produtos com variações, a disponibilidade e o stock são geridos em cada variação."
+                          : "Controla se o produto aparece na loja."}
                       </FormDescription>
                     </div>
                   </FormItem>

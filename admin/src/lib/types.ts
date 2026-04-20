@@ -57,6 +57,7 @@ export type ProductRecord = {
   name: string;
   description: string | null;
   price: number;
+  stock: number;
   category_id: string | null;
   is_active: boolean;
   is_featured: boolean;

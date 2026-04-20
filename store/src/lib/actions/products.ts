@@ -43,6 +43,7 @@ export type Product = {
   promo_price: number | null;
   is_featured: boolean;
   is_active: boolean;
+  stock: number;
   created_at: string;
   categories: Category[];
   images: {
@@ -63,6 +64,7 @@ type DbProductBase = {
   price: number;
   is_featured: boolean;
   is_active: boolean;
+  stock: number;
   created_at: string;
   product_categories: { categories: Category }[];
   product_images: { url: string; position: number }[];
@@ -106,6 +108,7 @@ export async function getProducts(filters: {
       name,
       description,
       price,
+      stock,
       is_featured,
       is_active,
       created_at,
@@ -161,6 +164,7 @@ export async function getProducts(filters: {
       promo_price: activePromo?.promo_price || null,
       is_featured: p.is_featured,
       is_active: p.is_active,
+      stock: p.stock ?? 0,
       created_at: p.created_at,
       categories: p.product_categories.map((pc) => pc.categories),
       images: (p.product_images || []).sort((a, b) => a.position - b.position),
@@ -183,6 +187,7 @@ export async function getProduct(id: string): Promise<Product | null> {
       name,
       description,
       price,
+      stock,
       is_featured,
       is_active,
       created_at,
@@ -236,6 +241,7 @@ export async function getProduct(id: string): Promise<Product | null> {
     promo_price: activePromo?.promo_price || null,
     is_featured: typedData.is_featured,
     is_active: typedData.is_active,
+    stock: typedData.stock ?? 0,
     created_at: typedData.created_at,
     categories: typedData.product_categories.map((pc) => pc.categories),
     images: (typedData.product_images || []).sort((a, b) => a.position - b.position),
