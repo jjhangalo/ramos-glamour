@@ -215,3 +215,21 @@ export async function deleteVariantImage(imageId: string, productId: string) {
   revalidatePath(`/produtos/${productId}`);
   return { success: true };
 }
+
+export async function reorderVariantImages(variantId: string, productId: string, orderedIds: string[]) {
+  const supabase = createAdminClient();
+
+  for (const [position, id] of orderedIds.entries()) {
+    const { error } = await supabase
+      .from("variant_images")
+      .update({ position })
+      .eq("id", id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  revalidatePath(`/produtos/${productId}`);
+  return { success: true };
+}

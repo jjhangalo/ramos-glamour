@@ -11,11 +11,30 @@ import {
   Pencil,
   Trash2,
   Upload,
+  GripVertical,
 } from "lucide-react";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, useCallback } from "react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  rectSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import {
   createProduct,
@@ -27,11 +46,9 @@ import {
 } from "@/lib/actions/products";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
-  createVariant,
-  deleteVariant,
-  deleteVariantImage,
   updateVariant,
   uploadVariantImages,
+  reorderVariantImages,
 } from "@/lib/actions/variants";
 import { allowedImageMimeTypes, maxImageSize } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
@@ -55,6 +72,76 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+
+type SortableImageProps = {
+  id: string;
+  url: string;
+  onRemove: () => void;
+  isPending: boolean;
+  aspectClassName?: string;
+  overlayLabel?: string;
+};
+
+function SortableImage({
+  id,
+  url,
+  onRemove,
+  isPending,
+  aspectClassName = "aspect-[4/5]",
+  overlayLabel,
+}: SortableImageProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.5 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="group relative h-fit rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md"
+    >
+      <div className={cn("relative overflow-hidden rounded-xl bg-slate-100", aspectClassName)}>
+        <Image src={url} alt={overlayLabel || "Imagem"} fill className="object-cover" />
+        
+        {/* Drag Handle Overlay */}
+        <div 
+          {...attributes} 
+          {...listeners}
+          className="absolute inset-0 flex cursor-grab items-center justify-center bg-slate-950/0 transition-colors group-hover:bg-slate-950/20 active:cursor-grabbing"
+        >
+          <GripVertical className="h-8 w-8 text-white opacity-0 transition-opacity group-hover:opacity-100" />
+        </div>
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-slate-400">Arraste para reordenar</span>
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={onRemove}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+        >
+          {isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 type ProductEditorProps = {
   product: ProductRecord | null;
@@ -270,7 +357,63 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
     });
   }
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleProductDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !product) return;
+
+    const orderedIds = images.map((img) => img.id);
+    const oldIndex = orderedIds.indexOf(active.id as string);
+    const newIndex = orderedIds.indexOf(over.id as string);
+
+    const nextIds = arrayMove(orderedIds, oldIndex, newIndex);
+
+    startTransition(async () => {
+      const result = await reorderProductImages(product.id, nextIds);
+      if (!result.success) {
+        toast.error(result.error ?? "Erro ao reordenar as imagens.");
+        return;
+      }
+      router.refresh();
+    });
+  }, [images, product, router]);
+
+  const handleVariantDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !activeVariantForImages) return;
+
+    const orderedIds = (activeVariantForImages.variant_images ?? []).map((img) => img.id);
+    const oldIndex = orderedIds.indexOf(active.id as string);
+    const newIndex = orderedIds.indexOf(over.id as string);
+
+    const nextIds = arrayMove(orderedIds, oldIndex, newIndex);
+
+    startTransition(async () => {
+      const result = await reorderVariantImages(
+        activeVariantForImages.id,
+        product?.id ?? "",
+        nextIds
+      );
+      if (!result.success) {
+        toast.error(result.error ?? "Erro ao reordenar as imagens.");
+        return;
+      }
+      router.refresh();
+    });
+  }, [activeVariantForImages, product?.id, router]);
+
   function handleImageReorder(imageId: string, direction: "up" | "down") {
+    // Mantido apenas para compatibilidade se necessário, mas removido do UI
     if (!product) return;
 
     const orderedIds = [...images].map((image) => image.id);
@@ -556,43 +699,24 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
         </div>
 
         {product ? (
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {images.map((image, index) => (
-              <div
-                key={image.id}
-                className="rounded-2xl border border-slate-200 p-3"
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleProductDragEnd}
+          >
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <SortableContext
+                items={images.map((img) => img.id)}
+                strategy={rectSortingStrategy}
               >
-                <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-slate-100">
-                  <Image
-                    src={image.url}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleImageReorder(image.id, "up")}
-                      disabled={index === 0 || isPending}
-                      className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
-                    >
-                      <ArrowUp className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleImageReorder(image.id, "down")}
-                      disabled={index === images.length - 1 || isPending}
-                      className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
-                    >
-                      <ArrowDown className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() =>
+                {images.map((image) => (
+                  <SortableImage
+                    key={image.id}
+                    id={image.id}
+                    url={image.url}
+                    isPending={isPending}
+                    overlayLabel={product.name}
+                    onRemove={() =>
                       startTransition(async () => {
                         const result = await deleteProductImage(image.id);
                         if (!result.success) {
@@ -605,23 +729,16 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                         router.refresh();
                       })
                     }
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-                  >
-                    {isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))}
-            {!images.length ? (
-              <p className="text-sm text-slate-500">
-                Ainda não há imagens carregadas.
-              </p>
-            ) : null}
-          </div>
+                  />
+                ))}
+              </SortableContext>
+              {!images.length ? (
+                <p className="text-sm text-slate-500">
+                  Ainda não há imagens carregadas.
+                </p>
+              ) : null}
+            </div>
+          </DndContext>
         ) : (
           <p className="mt-5 text-sm text-slate-500">
             Guarda primeiro o produto para activar os uploads.
@@ -921,57 +1038,50 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               />
             </label>
 
-            <div className="mt-5 space-y-4">
-              {(activeVariantForImages.variant_images ?? []).length ? (
-                activeVariantForImages.variant_images!.map((image) => (
-                  <div
-                    key={image.id}
-                    className="rounded-2xl border border-slate-200 p-3"
-                  >
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-slate-100">
-                      <Image
-                        src={image.url}
-                        alt="Imagem da variação"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      disabled={isPending}
-                      onClick={() =>
-                        startTransition(async () => {
-                          const result = await deleteVariantImage(
-                            image.id,
-                            product?.id ?? "",
-                          );
-                          if (!result.success) {
-                            toast.error(
-                              result.error ?? "Erro ao remover a imagem.",
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleVariantDragEnd}
+            >
+              <div className="mt-5 space-y-4">
+                <SortableContext
+                  items={(activeVariantForImages.variant_images ?? []).map((img) => img.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {(activeVariantForImages.variant_images ?? []).length ? (
+                    activeVariantForImages.variant_images!.map((image) => (
+                      <SortableImage
+                        key={image.id}
+                        id={image.id}
+                        url={image.url}
+                        isPending={isPending}
+                        overlayLabel="Imagem da variação"
+                        onRemove={() =>
+                          startTransition(async () => {
+                            const result = await deleteVariantImage(
+                              image.id,
+                              product?.id ?? "",
                             );
-                            return;
-                          }
-                          toast.success("Imagem removida.");
-                          router.refresh();
-                        })
-                      }
-                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-                    >
-                      {isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                      Remover
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-slate-500">
-                  Esta variação ainda não tem imagens próprias.
-                </p>
-              )}
-            </div>
+                            if (!result.success) {
+                              toast.error(
+                                result.error ?? "Erro ao remover a imagem.",
+                              );
+                              return;
+                            }
+                            toast.success("Imagem removida.");
+                            router.refresh();
+                          })
+                        }
+                      />
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500">
+                      Esta variação ainda não tem imagens próprias.
+                    </p>
+                  )}
+                </SortableContext>
+              </div>
+            </DndContext>
           </div>
         </div>
       ) : null}
