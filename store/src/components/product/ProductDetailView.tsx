@@ -10,7 +10,6 @@ import { Minus, Plus, Star, User } from "lucide-react";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ProductPrice } from "@/components/product/ProductPrice";
 import type { Product } from "@/lib/actions/products";
-import { formatPrice } from "@/lib/utils/format";
 
 type ProductDetailViewProps = {
   product: Product;
@@ -39,20 +38,40 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
     return Array.from(c) as string[];
   }, [product.variants]);
 
+  const hasOptions = sizes.length > 0 || colors.length > 0;
+
+  const allVariantsUnavailable = useMemo(() => {
+    if (!hasVariants) return false;
+    return product.variants!.every((v) => !v.is_available);
+  }, [product.variants, hasVariants]);
+
   // Find active variant
   const activeVariant = useMemo(() => {
     if (!hasVariants) return null;
+    
+    if (!hasOptions) {
+      return product.variants?.find((v) => v.is_available) || product.variants?.[0] || null;
+    }
+
+    const needsSize = sizes.length > 0;
+    const needsColor = colors.length > 0;
+
+    if ((needsSize && !selectedSize) || (needsColor && !selectedColor)) {
+      return null;
+    }
+
     return product.variants?.find((v) => {
-      const matchSize = !selectedSize || v.size === selectedSize;
-      const matchColor = !selectedColor || v.color === selectedColor;
-      return matchSize && matchColor && v.is_available;
-    });
-  }, [product.variants, selectedSize, selectedColor, hasVariants]);
+      const matchSize = !needsSize || v.size === selectedSize;
+      const matchColor = !needsColor || v.color === selectedColor;
+      return matchSize && matchColor;
+    }) || null;
+  }, [product.variants, selectedSize, selectedColor, hasVariants, hasOptions, sizes.length, colors.length]);
 
   // Update gallery if variant has images
   useEffect(() => {
     if (activeVariant?.variant_images?.length) {
       const firstImage = activeVariant.variant_images[0];
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedImage((prev) => (prev.url === firstImage.url ? prev : firstImage));
     }
   }, [selectedSize, selectedColor, activeVariant]);
@@ -60,7 +79,14 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
   const currentPrice = activeVariant?.price_override ?? product.price;
   const currentPromoPrice = activeVariant?.price_override ? null : promoPrice || product.promo_price;
 
-  const canAddToCart = !hasVariants || (!!activeVariant && (!!selectedSize || !sizes.length) && (!!selectedColor || !colors.length));
+  const canAddToCart = !allVariantsUnavailable && (!hasVariants || !hasOptions || (!!activeVariant && activeVariant.is_available));
+
+  let addToCartLabel = "Adicionar ao carrinho";
+  if (hasVariants && allVariantsUnavailable) {
+    addToCartLabel = "Produto temporariamente indisponível";
+  } else if (hasVariants && activeVariant && !activeVariant.is_available) {
+    addToCartLabel = "Variedade esgotada";
+  }
 
   const allImages = useMemo(() => {
     const variantImages = activeVariant?.variant_images || [];
@@ -165,7 +191,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
           </p>
 
           {/* Variation Selectors */}
-          {hasVariants && (
+          {hasOptions && (
             <div className="space-y-6 border-y border-brand-charcoal/10 py-6">
               {sizes.length > 0 && (
                 <div className="space-y-3">
@@ -177,9 +203,12 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                       <button
                         key={size}
                         type="button"
+                        disabled={allVariantsUnavailable}
                         onClick={() => setSelectedSize(size === selectedSize ? null : size)}
                         className={`min-w-[3rem] rounded-xl border px-3 py-2 text-sm font-medium transition ${
-                          selectedSize === size
+                          allVariantsUnavailable
+                            ? "border-brand-charcoal/10 bg-brand-charcoal/5 text-brand-charcoal/30 cursor-not-allowed"
+                            : selectedSize === size
                             ? "border-brand-olive bg-brand-olive text-brand-white shadow-md"
                             : "border-brand-charcoal/15 bg-white text-brand-charcoal hover:border-brand-mauve"
                         }`}
@@ -201,9 +230,12 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                       <button
                         key={color}
                         type="button"
+                        disabled={allVariantsUnavailable}
                         onClick={() => setSelectedColor(color === selectedColor ? null : color)}
                         className={`rounded-xl border px-4 py-2 text-sm font-medium transition ${
-                          selectedColor === color
+                          allVariantsUnavailable
+                            ? "border-brand-charcoal/10 bg-brand-charcoal/5 text-brand-charcoal/30 cursor-not-allowed"
+                            : selectedColor === color
                             ? "border-brand-olive bg-brand-olive text-brand-white shadow-md"
                             : "border-brand-charcoal/15 bg-white text-brand-charcoal hover:border-brand-mauve"
                         }`}
@@ -269,13 +301,14 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
               price_override: activeVariant.price_override
             } : undefined}
             disabled={!canAddToCart}
+            label={addToCartLabel}
             className={`flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-base font-medium transition ${
               canAddToCart 
                 ? "bg-brand-olive text-brand-white hover:bg-[#8a904d] shadow-lg active:scale-[0.98]" 
                 : "bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed"
             }`}
           />
-          {!canAddToCart && hasVariants && (
+          {!canAddToCart && hasOptions && !allVariantsUnavailable && !activeVariant && (
             <p className="text-center text-xs text-brand-charcoal/50">
               Por favor, seleciona as opções acima para adicionar ao carrinho.
             </p>

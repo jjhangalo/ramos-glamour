@@ -15,6 +15,7 @@ type AddToCartButtonProps = {
   className?: string;
   compact?: boolean;
   disabled?: boolean;
+  label?: string;
   onAdd?: () => void;
 };
 
@@ -25,6 +26,7 @@ export function AddToCartButton({
   className,
   compact = false,
   disabled = false,
+  label,
   onAdd,
 }: AddToCartButtonProps) {
   const addItem = useCartStore((state) => state.addItem);
@@ -44,7 +46,7 @@ export function AddToCartButton({
       className={className}
     >
       <ShoppingBag className={compact ? "h-4 w-4" : "h-5 w-5"} />
-      <span className="hidden md:inline">Adicionar ao carrinho</span>
+      <span className="hidden md:inline">{label || "Adicionar ao carrinho"}</span>
     </button>
   );
 }
