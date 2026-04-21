@@ -4,17 +4,17 @@ import Link from "next/link";
 import { ArrowRight, Tag } from "lucide-react";
 
 import { ProductCard } from "@/components/product/ProductCard";
-import { getPublicCategories } from "@/lib/actions/public-categories";
-import { getPublicProducts } from "@/lib/actions/public-products";
+import { getCategories, getFeaturedProducts } from "@/lib/actions/products";
 
 export default async function Home() {
-  const [promoProducts, featuredProducts, latestProducts, categories] =
-    await Promise.all([
-      getPublicProducts({ hasPromo: true, limit: 4 }),
-      getPublicProducts({ isFeatured: true, limit: 4 }),
-      getPublicProducts({ limit: 8 }),
-      getPublicCategories(),
-    ]);
+  const [featuredProducts, categories] = await Promise.all([
+    getFeaturedProducts(),
+    getCategories(),
+  ]);
+
+  const rootCategories = categories.filter((c) => !c.parent_id);
+  const hasProducts = featuredProducts.length > 0;
+  const hasCategories = rootCategories.length > 0;
 
   return (
     <main className="flex flex-1 flex-col">
@@ -67,94 +67,59 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── Promoções ────────────────────────────────────────────────── */}
-      {promoProducts.length > 0 && (
-        <section className="bg-gradient-to-b from-emerald-50 to-white">
-          <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:py-16 lg:px-8">
-            <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                  <Tag className="h-3.5 w-3.5" />
-                  Tempo limitado
-                </div>
-                <h2 className="text-xl font-semibold text-brand-charcoal md:text-3xl">
-                  Ofertas Imperdíveis
-                </h2>
-                <p className="mt-1 text-sm text-brand-charcoal/65">
-                  Aproveita os melhores preços enquanto há stock.
-                </p>
-              </div>
-              <Link
-                href="/catalogo"
-                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 transition hover:text-emerald-900 sm:mt-0"
-              >
-                Ver catálogo
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+      {/* Promoções (Hidden if no products, but logic handled by getFeaturedProducts for now) */}
 
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6">
-              {promoProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+      {/* ── Categorias ───────────────────────────────────────────────── */}
+      {hasCategories && (
+        <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:py-16 lg:px-8">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.3em] text-brand-charcoal/65">
+                Categorias
+              </p>
+              <h2 className="mt-2 text-xl font-semibold text-brand-charcoal md:text-3xl">
+                Categorias em destaque
+              </h2>
             </div>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-3">
+            {rootCategories.slice(0, 3).map((category) => {
+              // Find a product in this category for the image
+              const productWithImage = featuredProducts.find((p) =>
+                p.categories.some((c) => c.slug === category.slug)
+              );
+
+              return (
+                <Link
+                  key={category.id}
+                  href={`/catalogo?categoria=${encodeURIComponent(category.slug)}`}
+                  className="group relative overflow-hidden rounded-[2rem] shadow-[0_18px_40px_rgba(98,98,96,0.12)]"
+                >
+                  <div className="relative aspect-[5/6]">
+                    <Image
+                      src={
+                        productWithImage?.images[0]?.url ??
+                        "https://picsum.photos/seed/cat-fallback/600/800"
+                      }
+                      alt={category.name}
+                      fill
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal via-brand-charcoal/15 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-6">
+                      <p className="text-3xl font-semibold text-brand-white">
+                        {category.name}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}
-
-      {/* ── Categorias ───────────────────────────────────────────────── */}
-      <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:py-16 lg:px-8">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-brand-charcoal/65">
-              Categorias
-            </p>
-            <h2 className="mt-2 text-xl font-semibold text-brand-charcoal md:text-3xl">
-              Categorias em destaque
-            </h2>
-          </div>
-        </div>
-
-        <div className="grid gap-5 md:grid-cols-3">
-          {categories.slice(0, 3).map((category) => {
-            // Find a product in this category for the image
-            const categoryMatch = (p: import("@/lib/actions/public-products").PublicProduct) =>
-              Array.isArray(p.categories)
-                ? p.categories.some((c) => c.slug === category.slug)
-                : (p.categories as unknown as { slug: string })?.slug === category.slug;
-
-            const productWithImage =
-              latestProducts.find(categoryMatch) || featuredProducts.find(categoryMatch);
-
-            return (
-              <Link
-                key={category.id}
-                href={`/catalogo?categoria=${encodeURIComponent(category.slug)}`}
-                className="group relative overflow-hidden rounded-[2rem] shadow-[0_18px_40px_rgba(98,98,96,0.12)]"
-              >
-                <div className="relative aspect-[5/6]">
-                  <Image
-                    src={
-                      productWithImage?.images[0]?.url ??
-                      "https://picsum.photos/seed/cat-fallback/600/800"
-                    }
-                    alt={category.name}
-                    fill
-                    className="object-cover transition duration-500 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal via-brand-charcoal/15 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-6">
-                    <p className="text-3xl font-semibold text-brand-white">
-                      {category.name}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
 
       {/* ── Produtos em destaque ─────────────────────────────────────── */}
       <section className="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-6 md:pb-16 lg:px-8">
@@ -175,11 +140,19 @@ export default async function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {hasProducts ? (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5">
+            {featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product as any} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[2rem] bg-brand-bg px-6 py-16 text-center shadow-inner">
+            <p className="text-lg font-medium text-brand-charcoal/60">
+              Em breve novidades
+            </p>
+          </div>
+        )}
       </section>
     </main>
   );

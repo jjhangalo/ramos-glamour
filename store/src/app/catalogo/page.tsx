@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/product/ProductCard";
-import { getPublicCategories } from "@/lib/actions/public-categories";
-import { getPublicProducts } from "@/lib/actions/public-products";
+import { getCategories, getProducts } from "@/lib/actions/products";
 
 type CatalogPageProps = {
   searchParams?: Promise<{
@@ -19,24 +18,26 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   const page = params.page ? parseInt(params.page) : 1;
   const limit = 16;
 
+  // Map URL sort param to action param
+  let order: "newest" | "price-asc" | "price-desc" = "newest";
+  if (params.ordem === "preco-asc") order = "price-asc";
+  if (params.ordem === "preco-desc") order = "price-desc";
+
   const [products, categories] = await Promise.all([
-    getPublicProducts({
+    getProducts({
       categorySlug: categoria,
-      search: busca,
-      page,
+      order,
       limit,
     }),
-    getPublicCategories(),
+    getCategories(),
   ]);
 
-  // Sorting is done in JS for now as the action only supports basic ordering
-  // but I can add more sorting options to the action if needed.
-  const sortedProducts = [...products];
-  if (params.ordem === "preco-asc") {
-    sortedProducts.sort((a, b) => a.price - b.price);
-  } else if (params.ordem === "preco-desc") {
-    sortedProducts.sort((a, b) => b.price - a.price);
-  }
+  // Client-side search filtering (since getProducts search is basic ilike on name)
+  const filteredProducts = busca 
+    ? products.filter(p => p.name.toLowerCase().includes(busca.toLowerCase()))
+    : products;
+
+  const sortedProducts = filteredProducts;
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8">
@@ -121,7 +122,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         <div className="space-y-10">
           <section className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
             {sortedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product as any} />
             ))}
           </section>
 

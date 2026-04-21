@@ -11,11 +11,31 @@ import {
   Pencil,
   Trash2,
   Upload,
+  GripVertical,
+  Check,
 } from "lucide-react";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  rectSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import {
   createProduct,
@@ -23,7 +43,7 @@ import {
   deleteProductImage,
   reorderProductImages,
   updateProduct,
-  uploadProductImage,
+  uploadProductImages,
 } from "@/lib/actions/products";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
@@ -31,7 +51,8 @@ import {
   deleteVariant,
   deleteVariantImage,
   updateVariant,
-  uploadVariantImage,
+  uploadVariantImages,
+  reorderVariantImages,
 } from "@/lib/actions/variants";
 import { allowedImageMimeTypes, maxImageSize } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
@@ -53,8 +74,79 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+
+type SortableImageProps = {
+  id: string;
+  url: string;
+  onRemove: () => void;
+  isPending: boolean;
+  aspectClassName?: string;
+  overlayLabel?: string;
+};
+
+function SortableImage({
+  id,
+  url,
+  onRemove,
+  isPending,
+  aspectClassName = "aspect-[4/5]",
+  overlayLabel,
+}: SortableImageProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.5 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="group relative h-fit rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md"
+    >
+      <div className={cn("relative overflow-hidden rounded-xl bg-slate-100", aspectClassName)}>
+        <Image src={url} alt={overlayLabel || "Imagem"} fill className="object-cover" />
+        
+        {/* Drag Handle Overlay */}
+        <div 
+          {...attributes} 
+          {...listeners}
+          className="absolute inset-0 flex cursor-grab items-center justify-center bg-slate-950/0 transition-colors group-hover:bg-slate-950/20 active:cursor-grabbing"
+        >
+          <GripVertical className="h-8 w-8 text-white opacity-0 transition-opacity group-hover:opacity-100" />
+        </div>
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-slate-400">Arraste para reordenar</span>
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={onRemove}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+        >
+          {isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 type ProductEditorProps = {
   product: ProductRecord | null;
@@ -67,7 +159,7 @@ function validateClientFile(file: File) {
   }
 
   if (file.size > maxImageSize) {
-    return "A imagem não pode ter mais de 5 MB.";
+    return "A imagem não pode ter mais de 10 MB.";
   }
 
   return null;
@@ -85,6 +177,49 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
     productId: string;
   } | null>(null);
 
+  // Local states for image ordering
+  const [localProductImages, setLocalProductImages] = useState<{ id: string; url: string; position: number }[]>([]);
+  const [localVariantImages, setLocalVariantImages] = useState<{ id: string; url: string; position: number }[]>([]);
+
+  // Sync product images from props
+  useEffect(() => {
+    const sortedProps = [...(product?.product_images ?? [])].sort(
+      (a, b) => a.position - b.position
+    );
+    setLocalProductImages(sortedProps);
+  }, [product?.product_images]);
+
+  // Sync variant images when side panel opens or images change
+  useEffect(() => {
+    if (activeVariantForImages) {
+      const sortedProps = [...(activeVariantForImages.variant_images ?? [])].sort(
+        (a, b) => a.position - b.position
+      );
+      setLocalVariantImages(sortedProps);
+    } else {
+      setLocalVariantImages([]);
+    }
+  }, [activeVariantForImages, activeVariantForImages?.variant_images]);
+
+  const hasProductImageChanges = useMemo(() => {
+    const propIds = (product?.product_images ?? [])
+      .sort((a, b) => a.position - b.position)
+      .map((img) => img.id)
+      .join(",");
+    const localIds = localProductImages.map((img) => img.id).join(",");
+    return propIds !== localIds;
+  }, [product?.product_images, localProductImages]);
+
+  const hasVariantImageChanges = useMemo(() => {
+    if (!activeVariantForImages) return false;
+    const propIds = (activeVariantForImages.variant_images ?? [])
+      .sort((a, b) => a.position - b.position)
+      .map((img) => img.id)
+      .join(",");
+    const localIds = localVariantImages.map((img) => img.id).join(",");
+    return propIds !== localIds;
+  }, [activeVariantForImages, localVariantImages]);
+
   const productForm = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema) as import("react-hook-form").Resolver<ProductFormValues>,
     defaultValues: {
@@ -92,6 +227,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
       description: product?.description ?? "",
       price: product?.price ?? 0,
       category_ids: product?.categories?.map((category) => category.id) ?? [],
+      stock: product?.stock ?? 0,
       is_active: product?.is_active ?? true,
       is_featured: product?.is_featured ?? false,
     },
@@ -108,13 +244,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
     },
   });
 
-  const images = useMemo(
-    () =>
-      [...(product?.product_images ?? [])].sort(
-        (left, right) => left.position - right.position,
-      ),
-    [product?.product_images],
-  );
+  // Replaced memo with state + useEffect above
 
   const variants = useMemo(
     () =>
@@ -144,9 +274,15 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   );
 
   const watchedCategoryIds = productForm.watch("category_ids") ?? [];
-  const selectedCategories = useMemo(() => {
-    return flatCategories.filter((category) => watchedCategoryIds.includes(category.id));
-  }, [flatCategories, watchedCategoryIds]);
+
+  const sortedFlatCategories = useMemo(() => {
+    return [...flatCategories].sort((a, b) => a.name.localeCompare(b.name));
+  }, [flatCategories]);
+
+  function getParentName(parentId: string | null) {
+    if (!parentId) return null;
+    return categories.find((c) => c.id === parentId)?.name ?? null;
+  }
 
   function toggleCategory(categoryId: string) {
     const currentIds = productForm.getValues("category_ids");
@@ -216,24 +352,26 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   function handleProductImageUpload(fileList: FileList | null) {
     if (!product || !fileList?.length) return;
 
-    const file = fileList[0];
-    const clientError = validateClientFile(file);
-    if (clientError) {
-      toast.error(clientError);
-      return;
+    const files = Array.from(fileList);
+    const formData = new FormData();
+    
+    for (const file of files) {
+      const clientError = validateClientFile(file);
+      if (clientError) {
+        toast.error(`${file.name}: ${clientError}`);
+        return;
+      }
+      formData.append("files", file);
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     startTransition(async () => {
-      const result = await uploadProductImage(product.id, formData);
+      const result = await uploadProductImages(product.id, formData);
       if (!result.success) {
-        toast.error(result.error ?? "Erro ao enviar a imagem.");
+        toast.error(result.error ?? "Erro ao enviar as imagens.");
         return;
       }
 
-      toast.success("Imagem adicionada.");
+      toast.success(files.length > 1 ? "Imagens adicionadas." : "Imagem adicionada.");
       router.refresh();
     });
   }
@@ -241,35 +379,105 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   function handleVariantImageUpload(fileList: FileList | null) {
     if (!activeVariantForImages || !fileList?.length) return;
 
-    const file = fileList[0];
-    const clientError = validateClientFile(file);
-    if (clientError) {
-      toast.error(clientError);
-      return;
+    const files = Array.from(fileList);
+    const formData = new FormData();
+
+    for (const file of files) {
+      const clientError = validateClientFile(file);
+      if (clientError) {
+        toast.error(`${file.name}: ${clientError}`);
+        return;
+      }
+      formData.append("files", file);
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     startTransition(async () => {
-      const result = await uploadVariantImage(
+      const result = await uploadVariantImages(
         activeVariantForImages.id,
         formData,
       );
       if (!result.success) {
-        toast.error(result.error ?? "Erro ao enviar a imagem.");
+        toast.error(result.error ?? "Erro ao enviar as imagens.");
         return;
       }
 
-      toast.success("Imagem da variação adicionada.");
+      toast.success(files.length > 1 ? "Imagens da variação adicionadas." : "Imagem da variação adicionada.");
       router.refresh();
     });
   }
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleProductDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setLocalProductImages((items) => {
+      const oldIndex = items.findIndex((img) => img.id === active.id);
+      const newIndex = items.findIndex((img) => img.id === over.id);
+      return arrayMove(items, oldIndex, newIndex);
+    });
+  }, []);
+
+  const handleSaveProductOrder = () => {
+    if (!product) return;
+    const orderedIds = localProductImages.map((img) => img.id);
+
+    startTransition(async () => {
+      const result = await reorderProductImages(product.id, orderedIds);
+      if (!result.success) {
+        toast.error(result.error ?? "Erro ao guardar a ordem das imagens.");
+        return;
+      }
+      toast.success("Ordem das imagens guardada.");
+      router.refresh();
+    });
+  };
+
+  const handleVariantDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setLocalVariantImages((items) => {
+      const oldIndex = items.findIndex((img) => img.id === active.id);
+      const newIndex = items.findIndex((img) => img.id === over.id);
+      return arrayMove(items, oldIndex, newIndex);
+    });
+  }, []);
+
+  const handleSaveVariantOrder = () => {
+    if (!activeVariantForImages) return;
+    const orderedIds = localVariantImages.map((img) => img.id);
+
+    startTransition(async () => {
+      const result = await reorderVariantImages(
+        activeVariantForImages.id,
+        product?.id ?? "",
+        orderedIds
+      );
+      if (!result.success) {
+        toast.error(result.error ?? "Erro ao guardar a ordem das imagens.");
+        return;
+      }
+      toast.success("Ordem das imagens da variação guardada.");
+      router.refresh();
+    });
+  };
+
   function handleImageReorder(imageId: string, direction: "up" | "down") {
+    // Mantido apenas para compatibilidade se necessário, mas removido do UI
     if (!product) return;
 
-    const orderedIds = [...images].map((image) => image.id);
+    const orderedIds = [...localProductImages].map((image) => image.id);
     const currentIndex = orderedIds.indexOf(imageId);
     const targetIndex =
       direction === "up" ? currentIndex - 1 : currentIndex + 1;
@@ -408,69 +616,60 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                   <FormItem className="space-y-3">
                     <FormLabel>Categorias</FormLabel>
                     <FormControl>
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <div className="space-y-4">
-                          {categories.map((category) => (
-                            <div key={category.id}>
-                              <p className="text-sm font-semibold text-slate-900">
-                                {category.name}
-                              </p>
-                              {category.children?.length ? (
-                                <div className="mt-3 space-y-2 border-l border-slate-200 pl-4">
-                                  {category.children.map((child) => (
-                                    <label
-                                      key={child.id}
-                                      className="flex cursor-pointer items-center gap-3 text-sm text-slate-700"
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        disabled={isPending}
-                                        checked={watchedCategoryIds.includes(child.id)}
-                                        onChange={() => toggleCategory(child.id)}
-                                        className="h-4 w-4 rounded border-slate-300 cursor-pointer"
-                                      />
-                                      <span>{child.name}</span>
-                                    </label>
-                                  ))}
-                                </div>
-                              ) : (
-                                <label className="mt-3 flex cursor-pointer items-center gap-3 text-sm text-slate-700">
-                                  <input
-                                    type="checkbox"
-                                    disabled={isPending}
-                                    checked={watchedCategoryIds.includes(category.id)}
-                                    onChange={() => toggleCategory(category.id)}
-                                    className="h-4 w-4 rounded border-slate-300 cursor-pointer"
-                                  />
-                                  <span>{category.name}</span>
-                                </label>
+                      <div className="flex w-full gap-2 overflow-x-auto pb-2 scrollbar-hide flex-nowrap [&::-webkit-scrollbar]:hidden">
+                        {sortedFlatCategories.map((category) => {
+                          const isSelected = watchedCategoryIds.includes(category.id);
+                          const parentName = getParentName(category.parent_id);
+                          
+                          return (
+                            <button
+                              key={category.id}
+                              type="button"
+                              onClick={() => toggleCategory(category.id)}
+                              disabled={isPending}
+                              className={cn(
+                                "rounded-full border px-3 py-1.5 text-sm font-medium transition whitespace-nowrap shrink-0",
+                                isSelected
+                                  ? "bg-slate-900 text-white border-slate-900"
+                                  : "bg-white text-slate-700 border-slate-200 hover:border-slate-400"
                               )}
-                            </div>
-                          ))}
-                        </div>
+                            >
+                              {parentName && (
+                                <span className={isSelected ? "text-slate-300" : "text-slate-400"}>
+                                  {parentName} ·{" "}
+                                </span>
+                              )}
+                              {category.name}
+                            </button>
+                          );
+                        })}
                       </div>
                     </FormControl>
-                    {selectedCategories.length ? (
-                      <div className="flex flex-wrap gap-2">
-                        {selectedCategories.map((category) => (
-                          <span
-                            key={category.id}
-                            className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
-                          >
-                            {category.name}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-slate-500">
-                        Nenhuma categoria seleccionada.
-                      </p>
-                    )}
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+
+              <FormField
+                control={productForm.control}
+                name="stock"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stock disponível</FormLabel>
+                    <FormControl>
+                      <input
+                        {...field}
+                        type="number"
+                        min="0"
+                        disabled={isPending}
+                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={productForm.control}
@@ -486,9 +685,14 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                         className="h-4 w-4 rounded border-slate-300 cursor-pointer"
                       />
                     </FormControl>
-                    <FormLabel className="cursor-pointer">
-                      Produto activo
-                    </FormLabel>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="cursor-pointer">
+                        Disponível para encomenda
+                      </FormLabel>
+                      <FormDescription className="text-xs">
+                        Controla se o produto aparece na loja.
+                      </FormDescription>
+                    </div>
                   </FormItem>
                 )}
               />
@@ -525,15 +729,27 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               Imagens do produto
             </h2>
             <p className="text-sm text-slate-500">
-              Formatos aceites: JPEG, PNG, WebP. Máximo 5 MB.
+              Formatos aceites: JPEG, PNG, WebP. Máximo 10 MB.
             </p>
           </div>
-          <label
-            className={cn(
-              "inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100",
-              (!product || isPending) && "opacity-50 cursor-not-allowed",
-            )}
-          >
+          <div className="flex gap-3">
+            {hasProductImageChanges ? (
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={handleSaveProductOrder}
+                className="inline-flex items-center gap-2 rounded-xl bg-brand-bg px-4 py-2.5 text-sm font-medium text-slate-900 border border-slate-200 transition hover:bg-slate-50 disabled:opacity-50"
+              >
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                Guardar Ordem
+              </button>
+            ) : null}
+            <label
+              className={cn(
+                "inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100",
+                (!product || isPending) && "opacity-50 cursor-not-allowed",
+              )}
+            >
             {isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
@@ -544,50 +760,33 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               type="file"
               accept="image/jpeg,image/png,image/webp"
               className="hidden"
+              multiple
               disabled={!product || isPending}
               onChange={(event) => handleProductImageUpload(event.target.files)}
             />
           </label>
         </div>
+      </div>
 
         {product ? (
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {images.map((image, index) => (
-              <div
-                key={image.id}
-                className="rounded-2xl border border-slate-200 p-3"
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleProductDragEnd}
+          >
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <SortableContext
+                items={localProductImages.map((img) => img.id)}
+                strategy={rectSortingStrategy}
               >
-                <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-slate-100">
-                  <Image
-                    src={image.url}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleImageReorder(image.id, "up")}
-                      disabled={index === 0 || isPending}
-                      className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
-                    >
-                      <ArrowUp className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleImageReorder(image.id, "down")}
-                      disabled={index === images.length - 1 || isPending}
-                      className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
-                    >
-                      <ArrowDown className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() =>
+                {localProductImages.map((image) => (
+                  <SortableImage
+                    key={image.id}
+                    id={image.id}
+                    url={image.url}
+                    isPending={isPending}
+                    overlayLabel={product.name}
+                    onRemove={() =>
                       startTransition(async () => {
                         const result = await deleteProductImage(image.id);
                         if (!result.success) {
@@ -600,23 +799,16 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                         router.refresh();
                       })
                     }
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-                  >
-                    {isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))}
-            {!images.length ? (
-              <p className="text-sm text-slate-500">
-                Ainda não há imagens carregadas.
-              </p>
-            ) : null}
-          </div>
+                  />
+                ))}
+              </SortableContext>
+              {!localProductImages.length ? (
+                <p className="text-sm text-slate-500">
+                  Ainda não há imagens carregadas.
+                </p>
+              ) : null}
+            </div>
+          </DndContext>
         ) : (
           <p className="mt-5 text-sm text-slate-500">
             Guarda primeiro o produto para activar os uploads.
@@ -883,13 +1075,26 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                   {activeVariantForImages.color || "Sem cor"}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => setActiveVariantForImages(null)}
-                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-              >
-                Fechar
-              </button>
+              <div className="flex gap-2">
+                {hasVariantImageChanges ? (
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={handleSaveVariantOrder}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-bg text-slate-900 border border-slate-200 transition hover:bg-slate-50 disabled:opacity-50"
+                    title="Guardar Ordem"
+                  >
+                    {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setActiveVariantForImages(null)}
+                  className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                >
+                  Fechar
+                </button>
+              </div>
             </div>
 
             <label
@@ -908,6 +1113,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 className="hidden"
+                multiple
                 disabled={isPending}
                 onChange={(event) =>
                   handleVariantImageUpload(event.target.files)
@@ -915,57 +1121,50 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               />
             </label>
 
-            <div className="mt-5 space-y-4">
-              {(activeVariantForImages.variant_images ?? []).length ? (
-                activeVariantForImages.variant_images!.map((image) => (
-                  <div
-                    key={image.id}
-                    className="rounded-2xl border border-slate-200 p-3"
-                  >
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-slate-100">
-                      <Image
-                        src={image.url}
-                        alt="Imagem da variação"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      disabled={isPending}
-                      onClick={() =>
-                        startTransition(async () => {
-                          const result = await deleteVariantImage(
-                            image.id,
-                            product?.id ?? "",
-                          );
-                          if (!result.success) {
-                            toast.error(
-                              result.error ?? "Erro ao remover a imagem.",
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleVariantDragEnd}
+            >
+              <div className="mt-5 space-y-4">
+                <SortableContext
+                  items={localVariantImages.map((img) => img.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {localVariantImages.length ? (
+                    localVariantImages.map((image) => (
+                      <SortableImage
+                        key={image.id}
+                        id={image.id}
+                        url={image.url}
+                        isPending={isPending}
+                        overlayLabel="Imagem da variação"
+                        onRemove={() =>
+                          startTransition(async () => {
+                            const result = await deleteVariantImage(
+                              image.id,
+                              product?.id ?? "",
                             );
-                            return;
-                          }
-                          toast.success("Imagem removida.");
-                          router.refresh();
-                        })
-                      }
-                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-                    >
-                      {isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                      Remover
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-slate-500">
-                  Esta variação ainda não tem imagens próprias.
-                </p>
-              )}
-            </div>
+                            if (!result.success) {
+                              toast.error(
+                                result.error ?? "Erro ao remover a imagem.",
+                              );
+                              return;
+                            }
+                            toast.success("Imagem removida.");
+                            router.refresh();
+                          })
+                        }
+                      />
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500">
+                      Esta variação ainda não tem imagens próprias.
+                    </p>
+                  )}
+                </SortableContext>
+              </div>
+            </DndContext>
           </div>
         </div>
       ) : null}

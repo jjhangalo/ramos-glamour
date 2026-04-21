@@ -17,6 +17,7 @@ type ProductInput = {
   name: string;
   description: string;
   price: number;
+  stock: number;
   category_ids: string[];
   is_active: boolean;
   is_featured: boolean;
@@ -38,7 +39,7 @@ function validateImage(file: File) {
   }
 
   if (file.size > maxImageSize) {
-    return "A imagem não pode ter mais de 5 MB.";
+    return "A imagem não pode ter mais de 10 MB.";
   }
 
   return null;
@@ -124,7 +125,7 @@ export async function getProducts(filters: ProductFilters = {}) {
   let query = supabase
     .from("products")
     .select(
-      "id, name, description, price, category_id, is_active, is_featured, created_at, updated_at, product_images(id, product_id, url, position), product_variants(id)",
+      "id, name, description, price, stock, category_id, is_active, is_featured, created_at, updated_at, product_images(id, product_id, url, position), product_variants(id)",
     )
     .order("created_at", { ascending: false });
 
@@ -175,7 +176,7 @@ export async function getProduct(id: string) {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, name, description, price, category_id, is_active, is_featured, created_at, updated_at, product_images(id, product_id, url, position), product_variants(id, product_id, size, color, stock, is_available, price_override, created_at, updated_at, variant_images(id, variant_id, url, position))",
+      "id, name, description, price, stock, category_id, is_active, is_featured, created_at, updated_at, product_images(id, product_id, url, position), product_variants(id, product_id, size, color, stock, is_available, price_override, created_at, updated_at, variant_images(id, variant_id, url, position))",
     )
     .eq("id", id)
     .single();
@@ -194,6 +195,7 @@ export async function createProduct(input: ProductInput) {
     name: input.name.trim(),
     description: input.description.trim() || null,
     price: input.price,
+    stock: input.stock,
     category_id: input.category_ids[0] ?? null,
     is_active: input.is_active,
     is_featured: input.is_featured,
@@ -231,6 +233,7 @@ export async function updateProduct(id: string, input: ProductInput) {
     name: input.name.trim(),
     description: input.description.trim() || null,
     price: input.price,
+    stock: input.stock,
     category_id: input.category_ids[0] ?? null,
     is_active: input.is_active,
     is_featured: input.is_featured,
@@ -271,37 +274,45 @@ export async function deleteProduct(id: string) {
   return { success: true };
 }
 
-export async function uploadProductImage(productId: string, formData: FormData) {
+export async function uploadProductImages(productId: string, formData: FormData) {
   const supabase = createAdminClient();
-  const file = formData.get("file");
+  const files = formData.getAll("files");
 
-  if (!(file instanceof File)) {
-    return { success: false, error: "Selecciona uma imagem válida." };
+  if (!files.length) {
+    return { success: false, error: "Selecciona pelo menos uma imagem válida." };
   }
 
-  const validationError = validateImage(file);
-  if (validationError) {
-    return { success: false, error: validationError };
+  const results = [];
+
+  for (const file of files) {
+    if (!(file instanceof File)) continue;
+
+    const validationError = validateImage(file);
+    if (validationError) {
+      return { success: false, error: `${file.name}: ${validationError}` };
+    }
+
+    const extension = file.name.split(".").pop() ?? "jpg";
+    const storagePath = `${productId}/${Date.now()}-${randomUUID()}.${extension}`;
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+    const { error: uploadError } = await supabase.storage
+      .from("product-images")
+      .upload(storagePath, fileBuffer, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      return { success: false, error: `Erro no upload (${file.name}): ${uploadError.message}` };
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("product-images").getPublicUrl(storagePath);
+
+    results.push({ url: publicUrl });
   }
-
-  const extension = file.name.split(".").pop() ?? "jpg";
-  const storagePath = `${productId}/${Date.now()}-${randomUUID()}.${extension}`;
-  const fileBuffer = Buffer.from(await file.arrayBuffer());
-
-  const { error: uploadError } = await supabase.storage
-    .from("product-images")
-    .upload(storagePath, fileBuffer, {
-      contentType: file.type,
-      upsert: false,
-    });
-
-  if (uploadError) {
-    return { success: false, error: uploadError.message };
-  }
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("product-images").getPublicUrl(storagePath);
 
   const { data: lastImage } = await supabase
     .from("product_images")
@@ -311,13 +322,15 @@ export async function uploadProductImage(productId: string, formData: FormData) 
     .limit(1)
     .maybeSingle();
 
-  const nextPosition = (lastImage?.position ?? -1) + 1;
+  let nextPosition = (lastImage?.position ?? -1) + 1;
 
-  const { error: insertError } = await supabase.from("product_images").insert({
-    product_id: productId,
-    url: publicUrl,
-    position: nextPosition,
-  });
+  const { error: insertError } = await supabase.from("product_images").insert(
+    results.map((res) => ({
+      product_id: productId,
+      url: res.url,
+      position: nextPosition++,
+    })),
+  );
 
   if (insertError) {
     return { success: false, error: insertError.message };

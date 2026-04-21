@@ -59,4 +59,4 @@ export const allowedImageMimeTypes = [
   "image/webp",
 ];
 
-export const maxImageSize = 5 * 1024 * 1024;
+export const maxImageSize = 10 * 1024 * 1024;

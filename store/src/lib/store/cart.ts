@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import type { PublicProduct } from "@/lib/actions/public-products";
+import type { Product } from "@/lib/actions/products";
 
 export type CartItem = {
   id: string;
@@ -11,13 +11,20 @@ export type CartItem = {
   price: number;
   image: string;
   quantity: number;
+  variantId?: string;
+  variantSize?: string;
+  variantColor?: string;
 };
 
 type CartState = {
   items: CartItem[];
   totalItems: number;
   totalPrice: number;
-  addItem: (product: PublicProduct, quantity: number) => void;
+  addItem: (
+    product: Product,
+    quantity: number,
+    variant?: { id: string; size?: string | null; color?: string | null; price_override?: number | null }
+  ) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -32,13 +39,20 @@ function getTotals(items: CartItem[]) {
   };
 }
 
-function buildCartItem(product: PublicProduct, quantity: number): CartItem {
+function buildCartItem(
+  product: Product,
+  quantity: number,
+  variant?: { id: string; size?: string | null; color?: string | null; price_override?: number | null }
+): CartItem {
   return {
     id: product.id,
     name: product.name,
-    price: product.price,
+    price: variant?.price_override ?? product.price,
     image: product.images[0]?.url ?? "",
     quantity,
+    variantId: variant?.id,
+    variantSize: variant?.size ?? undefined,
+    variantColor: variant?.color ?? undefined,
   };
 }
 
@@ -48,18 +62,24 @@ export const useCartStore = create<CartState>()(
       items: [],
       totalItems: 0,
       totalPrice: 0,
-      addItem: (product, quantity) => {
+      addItem: (product, quantity, variant) => {
         const safeQuantity = Math.max(1, quantity);
 
         set((state) => {
-          const existingItem = state.items.find((item) => item.id === product.id);
+          const itemKey = variant ? `${product.id}-${variant.id}` : product.id;
+          const existingItem = state.items.find((item) => {
+            const currentKey = item.variantId ? `${item.id}-${item.variantId}` : item.id;
+            return currentKey === itemKey;
+          });
+
           const items = existingItem
-            ? state.items.map((item) =>
-                item.id === product.id
+            ? state.items.map((item) => {
+                const currentKey = item.variantId ? `${item.id}-${item.variantId}` : item.id;
+                return currentKey === itemKey
                   ? { ...item, quantity: item.quantity + safeQuantity }
-                  : item,
-              )
-            : [...state.items, buildCartItem(product, safeQuantity)];
+                  : item;
+              })
+            : [...state.items, buildCartItem(product, safeQuantity, variant)];
 
           return {
             items,

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { ProductDetailView } from "@/components/product/ProductDetailView";
-import { getPublicProductById } from "@/lib/actions/public-products";
+import { getProduct } from "@/lib/actions/products";
 
 type ProductPageProps = {
   params: Promise<{
@@ -9,9 +9,11 @@ type ProductPageProps = {
   }>;
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;
-  const product = await getPublicProductById(id);
+  const product = await getProduct(id);
 
   if (!product) {
     notFound();
@@ -19,7 +21,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-      <ProductDetailView product={product} />
+      <ProductDetailView product={product as any} />
     </main>
   );
 }
