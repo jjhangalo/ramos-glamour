@@ -5,7 +5,7 @@ import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { ChevronLeft, ChevronRight, Minus, Plus, Star, User } from "lucide-react";
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, Minus, Plus, Star, User, X } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ProductPrice } from "@/components/product/ProductPrice";
@@ -37,11 +37,6 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
   }, [product.variants]);
 
   const hasOptions = sizes.length > 0 || colors.length > 0;
-
-  const allVariantsUnavailable = useMemo(() => {
-    if (!hasVariants) return false;
-    return product.variants!.every((v) => !v.is_available);
-  }, [product.variants, hasVariants]);
 
   // Find active variant
   const activeVariant = useMemo(() => {
@@ -118,17 +113,13 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
     setActiveIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
   };
 
+  const currentStock = activeVariant?.stock ?? product.stock;
+  const canAddToCart = currentStock > 0;
+
+  const addToCartLabel = currentStock === 0 ? "Sem stock disponível" : "Adicionar ao carrinho";
+
   const currentPrice = activeVariant?.price_override ?? product.price;
   const currentPromoPrice = activeVariant?.price_override ? null : promoPrice || product.promo_price;
-
-  const canAddToCart = !allVariantsUnavailable && (!hasVariants || !hasOptions || (!!activeVariant && activeVariant.is_available));
-
-  let addToCartLabel = "Adicionar ao carrinho";
-  if (hasVariants && allVariantsUnavailable) {
-    addToCartLabel = "Produto temporariamente indisponível";
-  } else if (hasVariants && activeVariant && !activeVariant.is_available) {
-    addToCartLabel = "Variedade esgotada";
-  }
 
   return (
     <div className="space-y-12">
@@ -270,6 +261,25 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
             size="lg"
           />
 
+          <div className="flex flex-wrap gap-2">
+            {currentStock > 10 ? (
+              <div className="bg-green-50 text-green-700 border border-green-200 rounded-full px-3 py-1 text-xs font-medium inline-flex items-center gap-1.5">
+                <Check className="h-3 w-3" />
+                Em stock
+              </div>
+            ) : currentStock > 0 ? (
+              <div className="bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-3 py-1 text-xs font-medium inline-flex items-center gap-1.5">
+                <AlertTriangle className="h-3 w-3" />
+                Apenas {currentStock} unidades
+              </div>
+            ) : (
+              <div className="bg-red-50 text-red-700 border border-red-200 rounded-full px-3 py-1 text-xs font-medium inline-flex items-center gap-1.5">
+                <X className="h-3 w-3" />
+                Sem stock
+              </div>
+            )}
+          </div>
+
           <p className="max-w-xl text-base leading-8 text-brand-charcoal/80">
             {product.description}
           </p>
@@ -287,12 +297,9 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                       <button
                         key={size}
                         type="button"
-                        disabled={allVariantsUnavailable}
                         onClick={() => setSelectedSize(size === selectedSize ? null : size)}
                         className={`min-w-[3rem] rounded-xl border px-3 py-2 text-sm font-medium transition ${
-                          allVariantsUnavailable
-                            ? "border-brand-charcoal/10 bg-brand-charcoal/5 text-brand-charcoal/30 cursor-not-allowed"
-                            : selectedSize === size
+                          selectedSize === size
                             ? "border-brand-olive bg-brand-olive text-brand-white shadow-md"
                             : "border-brand-charcoal/15 bg-white text-brand-charcoal hover:border-brand-mauve"
                         }`}
@@ -314,12 +321,9 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                       <button
                         key={color}
                         type="button"
-                        disabled={allVariantsUnavailable}
                         onClick={() => setSelectedColor(color === selectedColor ? null : color)}
                         className={`rounded-xl border px-4 py-2 text-sm font-medium transition ${
-                          allVariantsUnavailable
-                            ? "border-brand-charcoal/10 bg-brand-charcoal/5 text-brand-charcoal/30 cursor-not-allowed"
-                            : selectedColor === color
+                          selectedColor === color
                             ? "border-brand-olive bg-brand-olive text-brand-white shadow-md"
                             : "border-brand-charcoal/15 bg-white text-brand-charcoal hover:border-brand-mauve"
                         }`}
@@ -392,11 +396,6 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                 : "bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed"
             }`}
           />
-          {!canAddToCart && hasOptions && !allVariantsUnavailable && !activeVariant && (
-            <p className="text-center text-xs text-brand-charcoal/50">
-              Por favor, seleciona as opções acima para adicionar ao carrinho.
-            </p>
-          )}
         </div>
       </section>
 
