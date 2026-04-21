@@ -5,7 +5,7 @@ import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Minus, Plus, Star, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, Minus, Plus, Star, User } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ProductPrice } from "@/components/product/ProductPrice";
@@ -17,9 +17,7 @@ type ProductDetailViewProps = {
 };
 
 export function ProductDetailView({ product, promoPrice }: ProductDetailViewProps) {
-  const [selectedImage, setSelectedImage] = useState(
-    product.images[0] || { url: "https://picsum.photos/seed/fallback/600/800", position: 0 },
-  );
+  const [activeIndex, setActiveIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
   // Variation states
@@ -69,17 +67,56 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
 
   const hasExplicitSelection = selectedSize !== null || selectedColor !== null;
 
+  const allImages = useMemo(() => {
+    if (hasExplicitSelection && activeVariant?.variant_images?.length) {
+      return activeVariant.variant_images;
+    }
+    return product.images.length > 0 
+      ? product.images 
+      : [{ url: "https://picsum.photos/seed/fallback/600/800", position: 0 }];
+  }, [product.images, activeVariant, hasExplicitSelection]);
+
   // Update gallery if variant has images
   useEffect(() => {
-    if (hasExplicitSelection && activeVariant?.variant_images?.length) {
-      const firstImage = activeVariant.variant_images[0];
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedImage((prev) => (prev.url === firstImage.url ? prev : firstImage));
-    } else if (!hasExplicitSelection && product.images.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedImage((prev) => (prev.url === product.images[0].url ? prev : product.images[0]));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setActiveIndex(0);
+  }, [allImages]);
+
+  // Touch handlers
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEndHandler = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      setActiveIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
+    } else if (isRightSwipe) {
+      setActiveIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
     }
-  }, [selectedSize, selectedColor, activeVariant, hasExplicitSelection, product.images]);
+  };
+
+  const nextImage = () => {
+    setActiveIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
+  };
+
+  const prevImage = () => {
+    setActiveIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
+  };
 
   const currentPrice = activeVariant?.price_override ?? product.price;
   const currentPromoPrice = activeVariant?.price_override ? null : promoPrice || product.promo_price;
@@ -93,54 +130,96 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
     addToCartLabel = "Variedade esgotada";
   }
 
-  const allImages = useMemo(() => {
-    if (hasExplicitSelection && activeVariant?.variant_images?.length) {
-      return activeVariant.variant_images;
-    }
-    return product.images;
-  }, [product.images, activeVariant, hasExplicitSelection]);
-
   return (
     <div className="space-y-12">
       <section className="grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-        <div className="space-y-4">
-          <div className="relative aspect-[3/4] overflow-hidden rounded-[2rem] bg-white shadow-[0_18px_40px_rgba(98,98,96,0.08)]">
-            <Image
-              src={selectedImage.url}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 55vw"
-            />
-          </div>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-            {allImages.map((image, idx) => {
-              const isActive = image.url === selectedImage.url;
-
-              return (
+        <div className="space-y-4 overflow-hidden">
+          <div 
+            className="relative aspect-[3/4] overflow-hidden rounded-[2rem] bg-white shadow-[0_18px_40px_rgba(98,98,96,0.08)]"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEndHandler}
+          >
+            {allImages.map((image, index) => (
+              <Image
+                key={`main-${image.url}-${index}`}
+                src={image.url}
+                alt={`${product.name} - Imagem ${index + 1}`}
+                fill
+                className={`object-cover transition-opacity duration-300 ${index === activeIndex ? "opacity-100" : "opacity-0"}`}
+                sizes="(max-width: 1024px) 100vw, 55vw"
+                priority={index === 0}
+              />
+            ))}
+            
+            {allImages.length > 1 && (
+              <>
                 <button
-                  key={`${image.url}-${idx}`}
                   type="button"
-                  onClick={() => {
-                    setSelectedImage(image);
-                  }}
-                  className={`relative aspect-[3/4] overflow-hidden rounded-2xl border transition ${
-                    isActive
-                      ? "border-brand-olive ring-2 ring-brand-olive/25"
-                      : "border-brand-white/20 hover:border-brand-mauve"
-                  }`}
+                  onClick={prevImage}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-brand-charcoal shadow-sm backdrop-blur-sm transition hover:bg-white md:p-3"
+                  aria-label="Imagem anterior"
                 >
-                  <Image
-                    src={image.url}
-                    alt={`${product.name} miniatura ${idx + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="25vw"
-                  />
+                  <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
                 </button>
-              );
-            })}
+                <button
+                  type="button"
+                  onClick={nextImage}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-brand-charcoal shadow-sm backdrop-blur-sm transition hover:bg-white md:p-3"
+                  aria-label="Imagem seguinte"
+                >
+                  <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
+                </button>
+                
+                {/* Dots Mobile */}
+                <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5 md:hidden">
+                  {allImages.map((_, index) => (
+                    <button
+                      key={`dot-${index}`}
+                      type="button"
+                      aria-label={`Ir para a imagem ${index + 1}`}
+                      onClick={() => setActiveIndex(index)}
+                      className={`rounded-full transition-all ${
+                        index === activeIndex 
+                          ? "h-2 w-2 bg-brand-olive" 
+                          : "h-1.5 w-1.5 bg-brand-charcoal/20"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
+          
+          {/* Thumbnails Desktop */}
+          {allImages.length > 1 && (
+            <div className="hidden overflow-x-auto scrollbar-hide md:flex md:gap-3 [&::-webkit-scrollbar]:hidden">
+              {allImages.map((image, idx) => {
+                const isActive = idx === activeIndex;
+
+                return (
+                  <button
+                    key={`thumb-${image.url}-${idx}`}
+                    type="button"
+                    onClick={() => setActiveIndex(idx)}
+                    className={`relative aspect-[3/4] w-16 shrink-0 overflow-hidden rounded-xl border transition ${
+                      isActive
+                        ? "border-brand-olive ring-2 ring-brand-olive/25"
+                        : "border-transparent hover:border-brand-mauve"
+                    }`}
+                  >
+                    <Image
+                      src={image.url}
+                      alt={`${product.name} miniatura ${idx + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className="space-y-6">
