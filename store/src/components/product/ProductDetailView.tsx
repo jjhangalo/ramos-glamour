@@ -67,14 +67,19 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
     }) || null;
   }, [product.variants, selectedSize, selectedColor, hasVariants, hasOptions, sizes.length, colors.length]);
 
+  const hasExplicitSelection = selectedSize !== null || selectedColor !== null;
+
   // Update gallery if variant has images
   useEffect(() => {
-    if (activeVariant?.variant_images?.length) {
+    if (hasExplicitSelection && activeVariant?.variant_images?.length) {
       const firstImage = activeVariant.variant_images[0];
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedImage((prev) => (prev.url === firstImage.url ? prev : firstImage));
+    } else if (!hasExplicitSelection && product.images.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedImage((prev) => (prev.url === product.images[0].url ? prev : product.images[0]));
     }
-  }, [selectedSize, selectedColor, activeVariant]);
+  }, [selectedSize, selectedColor, activeVariant, hasExplicitSelection, product.images]);
 
   const currentPrice = activeVariant?.price_override ?? product.price;
   const currentPromoPrice = activeVariant?.price_override ? null : promoPrice || product.promo_price;
@@ -89,11 +94,11 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
   }
 
   const allImages = useMemo(() => {
-    const variantImages = activeVariant?.variant_images || [];
-    // Combine but avoid duplicates if possible, or just show variant images first
-    if (variantImages.length > 0) return variantImages;
+    if (hasExplicitSelection && activeVariant?.variant_images?.length) {
+      return activeVariant.variant_images;
+    }
     return product.images;
-  }, [product.images, activeVariant]);
+  }, [product.images, activeVariant, hasExplicitSelection]);
 
   return (
     <div className="space-y-12">
