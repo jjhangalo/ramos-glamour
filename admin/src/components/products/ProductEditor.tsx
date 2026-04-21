@@ -274,9 +274,15 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   );
 
   const watchedCategoryIds = productForm.watch("category_ids") ?? [];
-  const selectedCategories = useMemo(() => {
-    return flatCategories.filter((category) => watchedCategoryIds.includes(category.id));
-  }, [flatCategories, watchedCategoryIds]);
+
+  const sortedFlatCategories = useMemo(() => {
+    return [...flatCategories].sort((a, b) => a.name.localeCompare(b.name));
+  }, [flatCategories]);
+
+  function getParentName(parentId: string | null) {
+    if (!parentId) return null;
+    return categories.find((c) => c.id === parentId)?.name ?? null;
+  }
 
   function toggleCategory(categoryId: string) {
     const currentIds = productForm.getValues("category_ids");
@@ -610,91 +616,60 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                   <FormItem className="space-y-3">
                     <FormLabel>Categorias</FormLabel>
                     <FormControl>
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <div className="space-y-4">
-                          {categories.map((category) => (
-                            <div key={category.id}>
-                              <p className="text-sm font-semibold text-slate-900">
-                                {category.name}
-                              </p>
-                              {category.children?.length ? (
-                                <div className="mt-3 space-y-2 border-l border-slate-200 pl-4">
-                                  {category.children.map((child) => (
-                                    <label
-                                      key={child.id}
-                                      className="flex cursor-pointer items-center gap-3 text-sm text-slate-700"
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        disabled={isPending}
-                                        checked={watchedCategoryIds.includes(child.id)}
-                                        onChange={() => toggleCategory(child.id)}
-                                        className="h-4 w-4 rounded border-slate-300 cursor-pointer"
-                                      />
-                                      <span>{child.name}</span>
-                                    </label>
-                                  ))}
-                                </div>
-                              ) : (
-                                <label className="mt-3 flex cursor-pointer items-center gap-3 text-sm text-slate-700">
-                                  <input
-                                    type="checkbox"
-                                    disabled={isPending}
-                                    checked={watchedCategoryIds.includes(category.id)}
-                                    onChange={() => toggleCategory(category.id)}
-                                    className="h-4 w-4 rounded border-slate-300 cursor-pointer"
-                                  />
-                                  <span>{category.name}</span>
-                                </label>
+                      <div className="flex w-full gap-2 overflow-x-auto pb-2 scrollbar-hide flex-nowrap [&::-webkit-scrollbar]:hidden">
+                        {sortedFlatCategories.map((category) => {
+                          const isSelected = watchedCategoryIds.includes(category.id);
+                          const parentName = getParentName(category.parent_id);
+                          
+                          return (
+                            <button
+                              key={category.id}
+                              type="button"
+                              onClick={() => toggleCategory(category.id)}
+                              disabled={isPending}
+                              className={cn(
+                                "rounded-full border px-3 py-1.5 text-sm font-medium transition whitespace-nowrap shrink-0",
+                                isSelected
+                                  ? "bg-slate-900 text-white border-slate-900"
+                                  : "bg-white text-slate-700 border-slate-200 hover:border-slate-400"
                               )}
-                            </div>
-                          ))}
-                        </div>
+                            >
+                              {parentName && (
+                                <span className={isSelected ? "text-slate-300" : "text-slate-400"}>
+                                  {parentName} ·{" "}
+                                </span>
+                              )}
+                              {category.name}
+                            </button>
+                          );
+                        })}
                       </div>
                     </FormControl>
-                    {selectedCategories.length ? (
-                      <div className="flex flex-wrap gap-2">
-                        {selectedCategories.map((category) => (
-                          <span
-                            key={category.id}
-                            className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
-                          >
-                            {category.name}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-slate-500">
-                        Nenhuma categoria seleccionada.
-                      </p>
-                    )}
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
 
-              {variants.length === 0 ? (
-                <FormField
-                  control={productForm.control}
-                  name="stock"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Stock disponível</FormLabel>
-                      <FormControl>
-                        <input
-                          {...field}
-                          type="number"
-                          min="0"
-                          disabled={isPending}
-                          className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ) : null}
+              <FormField
+                control={productForm.control}
+                name="stock"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stock disponível</FormLabel>
+                    <FormControl>
+                      <input
+                        {...field}
+                        type="number"
+                        min="0"
+                        disabled={isPending}
+                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={productForm.control}
@@ -715,9 +690,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                         Disponível para encomenda
                       </FormLabel>
                       <FormDescription className="text-xs">
-                        {variants.length > 0 
-                          ? "Para produtos com variações, a disponibilidade e o stock são geridos em cada variação."
-                          : "Controla se o produto aparece na loja."}
+                        Controla se o produto aparece na loja.
                       </FormDescription>
                     </div>
                   </FormItem>
