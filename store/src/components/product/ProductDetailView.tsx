@@ -41,24 +41,25 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
   // Find active variant
   const activeVariant = useMemo(() => {
     if (!hasVariants) return null;
-    
-    if (!hasOptions) {
-      return product.variants?.find((v) => v.is_available) || product.variants?.[0] || null;
-    }
+    if (!hasOptions) return null; // sem opções → produto base puro
 
-    const needsSize = sizes.length > 0;
-    const needsColor = colors.length > 0;
-
-    if ((needsSize && !selectedSize) || (needsColor && !selectedColor)) {
-      return null;
-    }
+    // Sem nenhuma selecção → null
+    if (!selectedSize && !selectedColor) return null;
 
     return product.variants?.find((v) => {
-      const matchSize = !needsSize || v.size === selectedSize;
-      const matchColor = !needsColor || v.color === selectedColor;
-      return matchSize && matchColor;
+      // Se o utilizador seleccionou tamanho, a variação deve ter esse tamanho
+      // Se a variação não tem tamanho, ignora este critério
+      const matchSize = !selectedSize || !v.size || v.size === selectedSize;
+      // Se o utilizador seleccionou cor, a variação deve ter essa cor
+      // Se a variação não tem cor, ignora este critério
+      const matchColor = !selectedColor || !v.color || v.color === selectedColor;
+      // Mas pelo menos um critério deve fazer match positivo
+      const hasPositiveMatch =
+        (selectedSize && v.size === selectedSize) ||
+        (selectedColor && v.color === selectedColor);
+      return matchSize && matchColor && hasPositiveMatch;
     }) || null;
-  }, [product.variants, selectedSize, selectedColor, hasVariants, hasOptions, sizes.length, colors.length]);
+  }, [product.variants, selectedSize, selectedColor, hasVariants, hasOptions]);
 
   const hasExplicitSelection = selectedSize !== null || selectedColor !== null;
 
@@ -115,7 +116,10 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
     setActiveIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
   };
 
-  const currentStock = activeVariant?.stock ?? product.stock;
+  const hasSelection = selectedSize !== null || selectedColor !== null;
+  const invalidCombination = hasOptions && hasSelection && activeVariant === null;
+
+  const currentStock = activeVariant?.stock ?? (invalidCombination ? 0 : product.stock);
 
   // Adjust quantity based on stock (Sync state during render)
   if (currentStock === 0 && quantity !== 1) {
@@ -124,7 +128,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
     setQuantity(currentStock);
   }
 
-  const canAddToCart = currentStock > 0;
+  const canAddToCart = !invalidCombination && currentStock > 0;
 
   const addToCartLabel = currentStock === 0 ? "Sem stock disponível" : "Adicionar ao carrinho";
 
