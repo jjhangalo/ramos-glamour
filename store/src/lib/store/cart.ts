@@ -6,8 +6,10 @@ import { persist } from "zustand/middleware";
 import type { Product } from "@/lib/actions/products";
 
 export type CartItem = {
-  id: string;
-  name: string;
+  id: string; // Product database ID
+  itemKey: string; // Unique identifier for product + variant combination
+  name: string; // Base product name
+  displayName: string; // Product name + variant details (e.g. "Name — Color, Size")
   price: number;
   image: string;
   quantity: number;
@@ -23,10 +25,11 @@ type CartState = {
   addItem: (
     product: Product,
     quantity: number,
-    variant?: { id: string; size?: string | null; color?: string | null; price_override?: number | null }
+    variant?: { id: string; size?: string | null; color?: string | null; price_override?: number | null },
+    variantImage?: string
   ) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeItem: (itemKey: string) => void;
+  updateQuantity: (itemKey: string, quantity: number) => void;
   clearCart: () => void;
 };
 
@@ -42,13 +45,24 @@ function getTotals(items: CartItem[]) {
 function buildCartItem(
   product: Product,
   quantity: number,
-  variant?: { id: string; size?: string | null; color?: string | null; price_override?: number | null }
+  variant?: { id: string; size?: string | null; color?: string | null; price_override?: number | null },
+  variantImage?: string
 ): CartItem {
+  const itemKey = variant ? `${product.id}__${variant.id}` : product.id;
+  
+  // Build dynamic display name
+  const attributes = [variant?.color, variant?.size].filter(Boolean);
+  const displayName = attributes.length > 0 
+    ? `${product.name} — ${attributes.join(", ")}`
+    : product.name;
+
   return {
     id: product.id,
+    itemKey,
     name: product.name,
+    displayName,
     price: variant?.price_override ?? product.price,
-    image: product.images[0]?.url ?? "",
+    image: variantImage || product.images[0]?.url || "",
     quantity,
     variantId: variant?.id,
     variantSize: variant?.size ?? undefined,
@@ -62,34 +76,33 @@ export const useCartStore = create<CartState>()(
       items: [],
       totalItems: 0,
       totalPrice: 0,
-      addItem: (product, quantity, variant) => {
+      addItem: (product, quantity, variant, variantImage) => {
         const safeQuantity = Math.max(1, quantity);
 
         set((state) => {
-          const itemKey = variant ? `${product.id}-${variant.id}` : product.id;
-          const existingItem = state.items.find((item) => {
-            const currentKey = item.variantId ? `${item.id}-${item.variantId}` : item.id;
-            return currentKey === itemKey;
-          });
+          const itemKey = variant ? `${product.id}__${variant.id}` : product.id;
+          const existingItem = state.items.find((item) => item.itemKey === itemKey);
 
-          const items = existingItem
-            ? state.items.map((item) => {
-                const currentKey = item.variantId ? `${item.id}-${item.variantId}` : item.id;
-                return currentKey === itemKey
-                  ? { ...item, quantity: item.quantity + safeQuantity }
-                  : item;
-              })
-            : [...state.items, buildCartItem(product, safeQuantity, variant)];
+          let newItems: CartItem[];
+          if (existingItem) {
+            newItems = state.items.map((item) => 
+              item.itemKey === itemKey 
+                ? { ...item, quantity: item.quantity + safeQuantity }
+                : item
+            );
+          } else {
+            newItems = [...state.items, buildCartItem(product, safeQuantity, variant, variantImage)];
+          }
 
           return {
-            items,
-            ...getTotals(items),
+            items: newItems,
+            ...getTotals(newItems),
           };
         });
       },
-      removeItem: (productId) => {
+      removeItem: (itemKey) => {
         set((state) => {
-          const items = state.items.filter((item) => item.id !== productId);
+          const items = state.items.filter((item) => item.itemKey !== itemKey);
 
           return {
             items,
@@ -97,12 +110,12 @@ export const useCartStore = create<CartState>()(
           };
         });
       },
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (itemKey, quantity) => {
         const safeQuantity = Math.max(1, quantity);
 
         set((state) => {
           const items = state.items.map((item) =>
-            item.id === productId ? { ...item, quantity: safeQuantity } : item,
+            item.itemKey === itemKey ? { ...item, quantity: safeQuantity } : item,
           );
 
           return {

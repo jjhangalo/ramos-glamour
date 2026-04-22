@@ -51,9 +51,10 @@ export function SheetTrigger({ asChild = false, children }: SheetTriggerProps) {
   const { onOpenChange } = useSheetContext();
 
   if (asChild && isValidElement(children)) {
-    return cloneElement(children as React.ReactElement<any>, {
+    return cloneElement(children as React.ReactElement<{ onClick?: React.MouseEventHandler }>, {
       onClick: (e: React.MouseEvent) => {
-        (children.props as any).onClick?.(e);
+        const originalProps = children.props as { onClick?: React.MouseEventHandler };
+        originalProps.onClick?.(e);
         onOpenChange(true);
       },
     });

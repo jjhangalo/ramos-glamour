@@ -77,6 +77,8 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
     setActiveIndex(0);
   }, [allImages]);
 
+
+
   // Touch handlers
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -114,6 +116,14 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
   };
 
   const currentStock = activeVariant?.stock ?? product.stock;
+
+  // Adjust quantity based on stock (Sync state during render)
+  if (currentStock === 0 && quantity !== 1) {
+    setQuantity(1);
+  } else if (currentStock > 0 && quantity > currentStock) {
+    setQuantity(currentStock);
+  }
+
   const canAddToCart = currentStock > 0;
 
   const addToCartLabel = currentStock === 0 ? "Sem stock disponível" : "Adicionar ao carrinho";
@@ -350,29 +360,33 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
             <div className="inline-flex items-center rounded-full border border-brand-charcoal/15 bg-white p-1 shadow-sm">
               <button
                 type="button"
+                disabled={quantity <= 1}
                 onClick={() => {
                   setQuantity((current) => Math.max(1, current - 1));
                 }}
-                className="rounded-full p-3 text-brand-charcoal transition hover:bg-brand-bg"
+                className="rounded-full p-3 text-brand-charcoal transition hover:bg-brand-bg disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Minus className="h-4 w-4" />
               </button>
               <input
                 type="number"
                 min={1}
+                max={currentStock}
                 value={quantity}
                 onChange={(event) => {
                   const nextValue = Number(event.target.value);
-                  setQuantity(Number.isNaN(nextValue) ? 1 : Math.max(1, nextValue));
+                  const safeValue = Number.isNaN(nextValue) ? 1 : Math.max(1, nextValue);
+                  setQuantity(Math.min(safeValue, currentStock));
                 }}
                 className="w-16 bg-transparent text-center text-base font-medium text-brand-charcoal outline-none"
               />
               <button
                 type="button"
+                disabled={quantity >= currentStock}
                 onClick={() => {
-                  setQuantity((current) => current + 1);
+                  setQuantity((current) => Math.min(current + 1, currentStock));
                 }}
-                className="rounded-full p-3 text-brand-charcoal transition hover:bg-brand-bg"
+                className="rounded-full p-3 text-brand-charcoal transition hover:bg-brand-bg disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -388,6 +402,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
               color: activeVariant.color,
               price_override: activeVariant.price_override
             } : undefined}
+            variantImage={activeVariant?.variant_images?.[0]?.url}
             disabled={!canAddToCart}
             label={addToCartLabel}
             className={`flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-base font-medium transition ${

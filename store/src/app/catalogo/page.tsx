@@ -122,7 +122,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         <div className="space-y-10">
           <section className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
             {sortedProducts.map((product) => (
-              <ProductCard key={product.id} product={product as any} />
+              <ProductCard key={product.id} product={product} />
             ))}
           </section>
 
