@@ -125,6 +125,7 @@ export const useCartStore = create<CartState>()(
         });
       },
       clearCart: () => {
+        console.log("DEBUG: clearCart called");
         set({
           items: [],
           totalItems: 0,

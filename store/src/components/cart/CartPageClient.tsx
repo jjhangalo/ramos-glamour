@@ -153,7 +153,7 @@ export function CartPageClient() {
             Finalizar encomenda
           </button>
         ) : (
-          <form action={signInWithGoogle} className="mt-8">
+          <form action={() => signInWithGoogle("/carrinho")} className="mt-8">
             <button
               type="submit"
               className="w-full rounded-full bg-brand-olive px-5 py-4 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"

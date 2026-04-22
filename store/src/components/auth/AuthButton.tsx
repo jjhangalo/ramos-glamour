@@ -32,7 +32,7 @@ export function AuthButton() {
 
   if (!user) {
     return (
-      <form action={signInWithGoogle}>
+      <form action={() => signInWithGoogle()}>
         <button
           type="submit"
           className="rounded-full bg-brand-charcoal px-5 py-2 text-sm font-medium text-brand-white transition hover:bg-brand-olive"
