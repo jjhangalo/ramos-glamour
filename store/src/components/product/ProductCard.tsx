@@ -29,7 +29,7 @@ export function ProductCard({ product, promoPrice }: ProductCardProps) {
           </span>
           {promoPrice || product.promo_price ? (
             <span className="absolute right-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
-              PromoÃ§Ã£o
+              Promoção
             </span>
           ) : null}
         </div>

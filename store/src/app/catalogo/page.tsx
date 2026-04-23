@@ -37,12 +37,12 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8">
       <section className="space-y-4">
         <p className="text-sm uppercase tracking-[0.3em] text-brand-charcoal/70">
-          CatÃ¡logo
+          Catálogo
         </p>
         <div className="flex flex-col gap-4 rounded-[2rem] bg-white/75 p-6 shadow-[0_16px_35px_rgba(98,98,96,0.08)] md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-4xl font-semibold text-brand-charcoal">
-              Explora todas as peÃ§as
+              Explora todas as peças
             </h1>
             <p className="mt-2 text-base text-brand-charcoal/75">
               Filtra por categoria e organiza os produtos como preferires.
@@ -79,15 +79,15 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
               </label>
 
               <label className="space-y-2 text-sm text-brand-charcoal">
-                <span>OrdenaÃ§Ã£o</span>
+                <span>Ordenação</span>
                 <select
                   name="ordem"
                   defaultValue={params.ordem ?? "recentes"}
                   className="w-full rounded-full border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
                 >
                   <option value="recentes">Mais recentes</option>
-                  <option value="preco-asc">Menor preÃ§o</option>
-                  <option value="preco-desc">Maior preÃ§o</option>
+                  <option value="preco-asc">Menor preço</option>
+                  <option value="preco-desc">Maior preço</option>
                 </select>
               </label>
 
@@ -130,14 +130,14 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
               </Link>
             )}
             <span className="text-sm font-medium text-brand-charcoal">
-              PÃ¡gina {page}
+              Página {page}
             </span>
             {products.length === limit && (
               <Link
                 href={`/catalogo?page=${page + 1}${categoria ? `&categoria=${categoria}` : ""}${busca ? `&busca=${busca}` : ""}${params.ordem ? `&ordem=${params.ordem}` : ""}`}
                 className="rounded-full border border-brand-charcoal/15 px-6 py-2 text-sm font-medium text-brand-charcoal hover:bg-brand-charcoal/5"
               >
-                PrÃ³xima
+                Próxima
               </Link>
             )}
           </section>
