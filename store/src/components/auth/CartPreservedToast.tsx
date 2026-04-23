@@ -9,10 +9,8 @@ function CartPreservedToastContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { hasHydrated, items } = useCartStore((state) => ({
-    hasHydrated: state.hasHydrated,
-    items: state.items,
-  }));
+  const hasHydrated = useCartStore((state) => state.hasHydrated);
+  const items = useCartStore((state) => state.items);
 
   useEffect(() => {
     const cartPreserved = searchParams.get("cart_preserved");
