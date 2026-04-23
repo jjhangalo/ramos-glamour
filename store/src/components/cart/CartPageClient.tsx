@@ -162,14 +162,15 @@ export function CartPageClient() {
             Finalizar encomenda
           </button>
         ) : (
-          <form action={signInWithGoogle} className="mt-8">
+          <div className="mt-8">
             <button
-              type="submit"
+              type="button"
+              onClick={() => signInWithGoogle("/checkout")}
               className="w-full rounded-full bg-brand-olive px-5 py-4 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"
             >
               Finalizar encomenda
             </button>
-          </form>
+          </div>
         )}
       </aside>
     </section>

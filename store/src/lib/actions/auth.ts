@@ -5,22 +5,28 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(returnTo?: string) {
   const supabase = await createClient();
-  const headersList = await headers();
-  const host = headersList.get("host");
-  const protocol = host?.startsWith("localhost") ? "http" : "https";
-  const redirectTo = `${protocol}://${host}/auth/callback`;
+  const headerStore = await headers();
+  const origin = headerStore.get("origin") ?? "http://localhost:3000";
+  const callbackUrl = new URL(`${origin}/auth/callback`);
+
+  if (returnTo) {
+    callbackUrl.searchParams.set("next", returnTo);
+  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo,
+      redirectTo: callbackUrl.toString(),
     },
   });
 
-  if (error) throw error;
-  if (data.url) redirect(data.url);
+  if (error) {
+    redirect(`/?error=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(data.url);
 }
 
 export async function signOut() {

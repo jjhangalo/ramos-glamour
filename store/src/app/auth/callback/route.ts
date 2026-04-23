@@ -3,16 +3,21 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+  const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const next = searchParams.get("next");
+  const returnTo =
+    next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
 
   if (!code) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(`${origin}${returnTo}`);
   }
 
   const supabase = await createClient();
   await supabase.auth.exchangeCodeForSession(code);
 
-  const origin = new URL(request.url).origin;
-  return NextResponse.redirect(`${origin}/?cart_preserved=1`);
+  const redirectUrl = new URL(returnTo, origin);
+  redirectUrl.searchParams.set("cart_preserved", "1");
+
+  return NextResponse.redirect(redirectUrl.toString());
 }
