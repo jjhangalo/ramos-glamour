@@ -31,6 +31,8 @@ type CartState = {
   removeItem: (itemKey: string) => void;
   updateQuantity: (itemKey: string, quantity: number) => void;
   clearCart: () => void;
+  hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
 };
 
 type PersistedCartState = Pick<CartState, "items" | "totalItems" | "totalPrice">;
@@ -132,15 +134,21 @@ export const useCartStore = create<CartState>()(
           totalPrice: 0,
         });
       },
+      hasHydrated: false,
+      setHasHydrated: (state) => set({ hasHydrated: state }),
     }),
     {
       name: "ramos-glamour-cart",
-      version: 1,
       partialize: (state): PersistedCartState => ({
         items: state.items,
         totalItems: state.totalItems,
         totalPrice: state.totalPrice,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+      version: 1,
+      migrate: () => ({ items: [], totalItems: 0, totalPrice: 0, hasHydrated: true }),
     },
   ),
 );
