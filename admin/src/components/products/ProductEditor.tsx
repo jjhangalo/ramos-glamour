@@ -14,7 +14,7 @@ import {
   GripVertical,
   Check,
 } from "lucide-react";
-import { useMemo, useState, useTransition, useCallback, useEffect } from "react";
+import { useMemo, useState, useTransition, useCallback, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -118,7 +118,13 @@ function SortableImage({
       className="group relative h-fit rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md"
     >
       <div className={cn("relative overflow-hidden rounded-xl bg-slate-100", aspectClassName)}>
-        <Image src={url} alt={overlayLabel || "Imagem"} fill className="object-cover" />
+        <Image 
+          src={url} 
+          alt={overlayLabel || "Imagem"} 
+          fill 
+          className="object-cover" 
+          sizes="(max-width: 768px) 100vw, 300px"
+        />
         
         {/* Drag Handle Overlay */}
         <div 
@@ -278,6 +284,37 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   const sortedFlatCategories = useMemo(() => {
     return [...flatCategories].sort((a, b) => a.name.localeCompare(b.name));
   }, [flatCategories]);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isDown = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    isDown.current = true;
+    scrollRef.current.classList.add("cursor-grabbing");
+    startX.current = e.pageX - scrollRef.current.offsetLeft;
+    scrollLeft.current = scrollRef.current.scrollLeft;
+  };
+
+  const handleMouseLeave = () => {
+    isDown.current = false;
+    if (scrollRef.current) scrollRef.current.classList.remove("cursor-grabbing");
+  };
+
+  const handleMouseUp = () => {
+    isDown.current = false;
+    if (scrollRef.current) scrollRef.current.classList.remove("cursor-grabbing");
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDown.current || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX.current) * 2;
+    scrollRef.current.scrollLeft = scrollLeft.current - walk;
+  };
 
   function getParentName(parentId: string | null) {
     if (!parentId) return null;
@@ -616,7 +653,14 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                   <FormItem className="space-y-3">
                     <FormLabel>Categorias</FormLabel>
                     <FormControl>
-                      <div className="flex w-full gap-2 overflow-x-auto pb-2 scrollbar-hide flex-nowrap [&::-webkit-scrollbar]:hidden">
+                      <div 
+                        ref={scrollRef}
+                        onMouseDown={handleMouseDown}
+                        onMouseLeave={handleMouseLeave}
+                        onMouseUp={handleMouseUp}
+                        onMouseMove={handleMouseMove}
+                        className="flex w-full cursor-grab select-none gap-2 overflow-x-auto pb-2 scrollbar-hide flex-nowrap [&::-webkit-scrollbar]:hidden"
+                      >
                         {sortedFlatCategories.map((category) => {
                           const isSelected = watchedCategoryIds.includes(category.id);
                           const parentName = getParentName(category.parent_id);

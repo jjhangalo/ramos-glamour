@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowRight, Tag } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { ProductCard } from "@/components/product/ProductCard";
 import { getCategories, getFeaturedProducts } from "@/lib/actions/products";
@@ -143,7 +143,7 @@ export default async function Home() {
         {hasProducts ? (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5">
             {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product as any} />
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (

@@ -41,24 +41,25 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
   // Find active variant
   const activeVariant = useMemo(() => {
     if (!hasVariants) return null;
-    
-    if (!hasOptions) {
-      return product.variants?.find((v) => v.is_available) || product.variants?.[0] || null;
-    }
+    if (!hasOptions) return null;
 
-    const needsSize = sizes.length > 0;
-    const needsColor = colors.length > 0;
-
-    if ((needsSize && !selectedSize) || (needsColor && !selectedColor)) {
-      return null;
-    }
+    // Sem nenhuma selecção → null
+    if (!selectedSize && !selectedColor) return null;
 
     return product.variants?.find((v) => {
-      const matchSize = !needsSize || v.size === selectedSize;
-      const matchColor = !needsColor || v.color === selectedColor;
-      return matchSize && matchColor;
+      // Se o utilizador seleccionou tamanho, a variação deve ter esse tamanho
+      // Se a variação não tem tamanho, ignora este critério
+      const matchSize = !selectedSize || !v.size || v.size === selectedSize;
+      // Se o utilizador seleccionou cor, a variação deve ter essa cor
+      // Se a variação não tem cor, ignora este critério
+      const matchColor = !selectedColor || !v.color || v.color === selectedColor;
+      // Mas pelo menos um critério deve fazer match positivo
+      const hasPositiveMatch =
+        (selectedSize && v.size === selectedSize) ||
+        (selectedColor && v.color === selectedColor);
+      return matchSize && matchColor && hasPositiveMatch;
     }) || null;
-  }, [product.variants, selectedSize, selectedColor, hasVariants, hasOptions, sizes.length, colors.length]);
+  }, [product.variants, selectedSize, selectedColor, hasVariants, hasOptions]);
 
   const hasExplicitSelection = selectedSize !== null || selectedColor !== null;
 
@@ -76,6 +77,8 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveIndex(0);
   }, [allImages]);
+
+
 
   // Touch handlers
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -113,8 +116,19 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
     setActiveIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
   };
 
-  const currentStock = activeVariant?.stock ?? product.stock;
-  const canAddToCart = currentStock > 0;
+  const hasSelection = selectedSize !== null || selectedColor !== null;
+  const invalidCombination = hasOptions && hasSelection && activeVariant === null;
+
+  const currentStock = activeVariant?.stock ?? (invalidCombination ? 0 : product.stock);
+
+  // Adjust quantity based on stock (Sync state during render)
+  if (currentStock === 0 && quantity !== 1) {
+    setQuantity(1);
+  } else if (currentStock > 0 && quantity > currentStock) {
+    setQuantity(currentStock);
+  }
+
+  const canAddToCart = !invalidCombination && currentStock > 0;
 
   const addToCartLabel = currentStock === 0 ? "Sem stock disponível" : "Adicionar ao carrinho";
 
@@ -350,29 +364,33 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
             <div className="inline-flex items-center rounded-full border border-brand-charcoal/15 bg-white p-1 shadow-sm">
               <button
                 type="button"
+                disabled={quantity <= 1}
                 onClick={() => {
                   setQuantity((current) => Math.max(1, current - 1));
                 }}
-                className="rounded-full p-3 text-brand-charcoal transition hover:bg-brand-bg"
+                className="rounded-full p-3 text-brand-charcoal transition hover:bg-brand-bg disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Minus className="h-4 w-4" />
               </button>
               <input
                 type="number"
                 min={1}
+                max={currentStock}
                 value={quantity}
                 onChange={(event) => {
                   const nextValue = Number(event.target.value);
-                  setQuantity(Number.isNaN(nextValue) ? 1 : Math.max(1, nextValue));
+                  const safeValue = Number.isNaN(nextValue) ? 1 : Math.max(1, nextValue);
+                  setQuantity(Math.min(safeValue, currentStock));
                 }}
                 className="w-16 bg-transparent text-center text-base font-medium text-brand-charcoal outline-none"
               />
               <button
                 type="button"
+                disabled={quantity >= currentStock}
                 onClick={() => {
-                  setQuantity((current) => current + 1);
+                  setQuantity((current) => Math.min(current + 1, currentStock));
                 }}
-                className="rounded-full p-3 text-brand-charcoal transition hover:bg-brand-bg"
+                className="rounded-full p-3 text-brand-charcoal transition hover:bg-brand-bg disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -388,6 +406,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
               color: activeVariant.color,
               price_override: activeVariant.price_override
             } : undefined}
+            variantImage={activeVariant?.variant_images?.[0]?.url}
             disabled={!canAddToCart}
             label={addToCartLabel}
             className={`flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-base font-medium transition ${

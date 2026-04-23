@@ -83,6 +83,7 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
                           alt={client.full_name || client.display_name || "Avatar"}
                           fill
                           className="object-cover"
+                          sizes="40px"
                         />
                       ) : null}
                     </div>

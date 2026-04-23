@@ -22,7 +22,10 @@ export function ProductPrice({
 
   if (!hasPromo) {
     return (
-      <p className={`${styles.current} text-brand-charcoal`}>
+      <p 
+        className={`${styles.current} text-brand-charcoal`}
+        suppressHydrationWarning
+      >
         {formatPrice(price)}
       </p>
     );
@@ -30,10 +33,16 @@ export function ProductPrice({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <p className={`${styles.current} text-emerald-700`}>
+      <p 
+        className={`${styles.current} text-emerald-700`}
+        suppressHydrationWarning
+      >
         {formatPrice(promoPrice!)}
       </p>
-      <p className={`${styles.original} text-brand-charcoal/50 line-through`}>
+      <p 
+        className={`${styles.original} text-brand-charcoal/50 line-through`}
+        suppressHydrationWarning
+      >
         {formatPrice(price)}
       </p>
     </div>

@@ -12,6 +12,7 @@ type AddToCartButtonProps = {
   product: Product;
   quantity?: number;
   variant?: { id: string; size?: string | null; color?: string | null; price_override?: number | null };
+  variantImage?: string;
   className?: string;
   compact?: boolean;
   disabled?: boolean;
@@ -23,6 +24,7 @@ export function AddToCartButton({
   product,
   quantity = 1,
   variant,
+  variantImage,
   className,
   compact = false,
   disabled = false,
@@ -39,7 +41,7 @@ export function AddToCartButton({
       onClick={(event) => {
         event.stopPropagation();
         if (disabled) return;
-        addItem(product, quantity, variant);
+        addItem(product, quantity, variant, variantImage);
         toast.success("Produto adicionado ao carrinho");
         onAdd?.();
       }}

@@ -131,11 +131,11 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
         <div className="space-y-3">
           {items.map((item) => (
             <div
-              key={item.id}
+              key={item.itemKey}
               className="flex items-center justify-between gap-4 rounded-2xl border border-brand-charcoal/10 bg-brand-white/70 px-4 py-3"
             >
               <div>
-                <p className="font-medium text-brand-charcoal">{item.name}</p>
+                <p className="font-medium text-brand-charcoal">{item.displayName}</p>
                 <p className="text-sm text-brand-charcoal/70">
                   {item.quantity} × {formatPrice(item.price)}
                 </p>
@@ -344,11 +344,11 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
               <div className="mt-3 space-y-3">
                 {items.map((item) => (
                   <div
-                    key={item.id}
+                    key={item.itemKey}
                     className="flex items-center justify-between gap-4 rounded-2xl border border-brand-charcoal/10 bg-brand-white/70 px-4 py-3"
                   >
                     <div>
-                      <p className="font-medium text-brand-charcoal">{item.name}</p>
+                      <p className="font-medium text-brand-charcoal">{item.displayName}</p>
                       <p className="text-sm text-brand-charcoal/70">
                         {item.quantity} × {formatPrice(item.price)}
                       </p>

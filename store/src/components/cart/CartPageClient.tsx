@@ -64,13 +64,13 @@ export function CartPageClient() {
       <div className="space-y-4">
         {items.map((item) => (
           <article
-            key={item.id}
+            key={item.itemKey}
             className="flex gap-4 rounded-[1.5rem] bg-white/85 p-4 shadow-[0_16px_35px_rgba(98,98,96,0.08)]"
           >
             <div className="relative h-20 w-[60px] shrink-0 overflow-hidden rounded-xl">
               <Image
                 src={item.image}
-                alt={item.name}
+                alt={item.displayName}
                 fill
                 className="object-cover"
                 sizes="60px"
@@ -80,7 +80,7 @@ export function CartPageClient() {
             <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <h2 className="truncate text-xl font-semibold text-brand-charcoal">
-                  {item.name}
+                  {item.displayName}
                 </h2>
                 <p className="mt-1 text-sm text-brand-charcoal/70">
                   {formatPrice(item.price)}
@@ -92,7 +92,7 @@ export function CartPageClient() {
                   <button
                     type="button"
                     onClick={() => {
-                      updateQuantity(item.id, item.quantity - 1);
+                      updateQuantity(item.itemKey, item.quantity - 1);
                     }}
                     className="rounded-full p-2 text-brand-charcoal transition hover:bg-brand-bg"
                   >
@@ -104,7 +104,7 @@ export function CartPageClient() {
                   <button
                     type="button"
                     onClick={() => {
-                      updateQuantity(item.id, item.quantity + 1);
+                      updateQuantity(item.itemKey, item.quantity + 1);
                     }}
                     className="rounded-full p-2 text-brand-charcoal transition hover:bg-brand-bg"
                   >
@@ -115,7 +115,7 @@ export function CartPageClient() {
                 <button
                   type="button"
                   onClick={() => {
-                    removeItem(item.id);
+                    removeItem(item.itemKey);
                   }}
                   className="rounded-full border border-brand-charcoal/10 p-3 text-brand-charcoal transition hover:bg-brand-bg"
                 >
