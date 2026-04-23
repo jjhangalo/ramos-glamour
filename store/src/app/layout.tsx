@@ -28,6 +28,7 @@ export default function RootLayout({
       className={`${playfairDisplay.variable} h-full overflow-x-hidden antialiased`}
     >
       <head>
+        <meta charSet="utf-8" />
         <meta name="apple-mobile-web-app-title" content="Ramos Glamour" />
       </head>
       <body className="flex min-h-screen w-full flex-col overflow-x-hidden bg-brand-bg font-sans text-brand-charcoal">

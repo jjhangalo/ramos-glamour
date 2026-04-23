@@ -171,7 +171,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                 </DropdownMenu>
               ) : (
                 <button
-                  onClick={() => signInWithGoogle()}
+                  onClick={() => signInWithGoogle(pathname)}
                   className="rounded-full border border-brand-charcoal px-5 py-2 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg md:px-6"
                 >
                   Entrar
@@ -262,7 +262,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                 </div>
               ) : (
                 <button
-                  onClick={() => signInWithGoogle()}
+                  onClick={() => signInWithGoogle(pathname)}
                   className="w-full rounded-full border border-brand-charcoal py-3 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
                 >
                   Entrar com Google

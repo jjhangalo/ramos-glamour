@@ -97,9 +97,10 @@ export async function getProducts(filters: {
   categorySlug?: string;
   order?: "newest" | "price-asc" | "price-desc";
   limit?: number;
+  search?: string;
 } = {}): Promise<Product[]> {
   const supabase = await createClient();
-  const { categorySlug, order = "newest", limit } = filters;
+  const { categorySlug, order = "newest", limit, search } = filters;
 
   let query = supabase
     .from("products")
@@ -123,6 +124,10 @@ export async function getProducts(filters: {
 
   if (categorySlug && categorySlug !== "todas") {
     query = query.eq("product_categories.categories.slug", categorySlug);
+  }
+
+  if (search?.trim()) {
+    query = query.ilike("name", `%${search.trim()}%`);
   }
 
   // Sorting
