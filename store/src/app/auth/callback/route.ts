@@ -13,5 +13,6 @@ export async function GET(request: Request) {
   const supabase = await createClient();
   await supabase.auth.exchangeCodeForSession(code);
 
-  return NextResponse.redirect(new URL("/", request.url));
+  const origin = new URL(request.url).origin;
+  return NextResponse.redirect(`${origin}/?cart_preserved=1`);
 }

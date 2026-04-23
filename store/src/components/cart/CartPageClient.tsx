@@ -20,6 +20,7 @@ export function CartPageClient() {
   const totalPrice = useCartStore((state) => state.totalPrice);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
+  const hasHydrated = useCartStore((state) => state.hasHydrated);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -40,6 +41,14 @@ export function CartPageClient() {
     };
   }, []);
 
+  if (!hasHydrated) {
+    return (
+      <section className="rounded-[2rem] bg-white/80 px-6 py-16 text-center shadow-[0_16px_35px_rgba(98,98,96,0.08)]">
+        <p className="text-brand-charcoal/50 text-sm">A carregar...</p>
+      </section>
+    );
+  }
+  
   if (items.length === 0) {
     return (
       <section className="rounded-[2rem] bg-white/80 px-6 py-16 text-center shadow-[0_16px_35px_rgba(98,98,96,0.08)]">
