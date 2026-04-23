@@ -135,6 +135,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "ramos-glamour-cart",
+      version: 1,
       partialize: (state): PersistedCartState => ({
         items: state.items,
         totalItems: state.totalItems,

@@ -41,7 +41,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
   // Find active variant
   const activeVariant = useMemo(() => {
     if (!hasVariants) return null;
-    if (!hasOptions) return null; // sem opções → produto base puro
+    if (!hasOptions) return null;
 
     // Sem nenhuma selecção → null
     if (!selectedSize && !selectedColor) return null;
