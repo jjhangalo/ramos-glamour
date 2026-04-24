@@ -62,7 +62,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
 
   const leftLinks = [
     { href: "/catalogo", label: "COLEÇÕES" },
-    { href: "/catalogo?novidades=true", label: "NOVIDADES" },
+    { href: "/novidades", label: "NOVIDADES" },
   ];
 
   const rightLinks = [

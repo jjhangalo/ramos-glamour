@@ -6,7 +6,7 @@ export function Footer() {
 
   const shopLinks = [
     { href: "/catalogo", label: "Coleções" },
-    { href: "/catalogo?novidades=true", label: "Novidades" },
+    { href: "/novidades", label: "Novidades" },
     { href: "/catalogo?promo=true", label: "Ofertas" },
   ];
 
