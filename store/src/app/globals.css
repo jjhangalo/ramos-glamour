@@ -55,3 +55,22 @@ body {
   font-family: var(--font-cormorant-garamond), serif;
   letter-spacing: -0.01em;
 }
+
+/* Luxury Grain Overlay */
+.grain-overlay {
+  position: relative;
+}
+
+.grain-overlay::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  mix-blend-mode: overlay;
+  z-index: 10;
+}

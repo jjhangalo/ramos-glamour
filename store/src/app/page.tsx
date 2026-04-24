@@ -19,16 +19,18 @@ export default async function Home() {
   return (
     <main className="flex flex-1 flex-col">
       {/* ── Full-Bleed Cinematic Hero ───────────────────────────────── */}
-      <section className="relative h-[90vh] w-full overflow-hidden">
+      <section className="relative h-[90vh] w-full overflow-hidden grain-overlay">
         <Image
           src="/hero.png"
           alt="Ramos Glamour - Coleção de Luxo"
           fill
           className="object-cover"
           priority
+          quality={100}
+          sizes="100vw"
         />
-        <div className="absolute inset-0 bg-brand-midnight/20" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-brand-white">
+        <div className="absolute inset-0 bg-brand-midnight/20 z-20" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-brand-white z-30">
           <p className="mb-6 animate-fade-in text-[10px] font-bold uppercase tracking-[0.4em] md:text-xs">
             Ramos Glamour
           </p>

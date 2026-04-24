@@ -29,6 +29,7 @@ export function Footer() {
                   alt="Ramos Glamour"
                   fill
                   className="object-contain"
+                  sizes="128px"
                 />
               </div>
             </Link>

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, User as UserIcon, LogOut, ShoppingBag } from "lucide-react";
+import { Menu, X, User as UserIcon, LogOut } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { signOut, signInWithGoogle } from "@/lib/actions/auth";
@@ -32,10 +32,13 @@ export function HeaderClient({ user }: HeaderClientProps) {
   const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const isHomePage = pathname === "/";
+  const useWhiteText = isHomePage && !scrolled && !isMenuOpen;
+
   // Handle scroll for glassmorphism
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -71,7 +74,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
     <header 
       className={cn(
         "fixed top-0 z-50 w-full transition-all duration-500",
-        scrolled ? "glass py-2" : "bg-transparent py-6"
+        scrolled ? "glass py-2" : isHomePage ? "bg-transparent py-6" : "bg-brand-bg py-4 border-b border-brand-midnight/5"
       )}
     >
       <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
@@ -80,7 +83,10 @@ export function HeaderClient({ user }: HeaderClientProps) {
           {/* Mobile Menu Toggle (Left on Mobile) */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-brand-midnight transition hover:bg-black/5 md:hidden"
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-black/5 md:hidden",
+              useWhiteText ? "text-brand-white" : "text-brand-midnight"
+            )}
             aria-label="Abrir menu"
           >
             {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -96,14 +102,16 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   href={link.href}
                   className={cn(
                     "group relative py-2 text-[11px] font-semibold tracking-[0.2em] transition-colors",
-                    isActive ? "text-brand-midnight" : "text-brand-midnight/60 hover:text-brand-midnight"
+                    useWhiteText 
+                      ? "text-brand-white/80 hover:text-brand-white" 
+                      : isActive ? "text-brand-midnight" : "text-brand-midnight/60 hover:text-brand-midnight"
                   )}
                 >
                   {link.label}
                   <span
                     className={cn(
                       "absolute bottom-0 left-1/2 h-[1px] w-0 bg-brand-gold transition-all duration-300 group-hover:left-0 group-hover:w-full",
-                      isActive ? "left-0 w-full" : ""
+                      isActive && !isHomePage ? "left-0 w-full" : ""
                     )}
                   />
                 </Link>
@@ -114,13 +122,17 @@ export function HeaderClient({ user }: HeaderClientProps) {
           {/* Logo (Centered) */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
             <Link href="/" className="block" onClick={() => setIsMenuOpen(false)}>
-              <div className="relative h-10 w-32 md:h-12 md:w-48">
+              <div className={cn(
+                "relative h-10 w-32 md:h-12 md:w-48 transition-all duration-500",
+                useWhiteText ? "brightness-0 invert" : ""
+              )}>
                 <Image
                   src="/logo-horizontal.png"
                   alt="Ramos Glamour"
                   fill
                   className="object-contain"
                   priority
+                  sizes="(max-width: 768px) 128px, 192px"
                 />
               </div>
             </Link>
@@ -134,7 +146,12 @@ export function HeaderClient({ user }: HeaderClientProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="group relative py-2 text-[11px] font-semibold tracking-[0.2em] text-brand-midnight/60 transition-colors hover:text-brand-midnight"
+                  className={cn(
+                    "group relative py-2 text-[11px] font-semibold tracking-[0.2em] transition-colors",
+                    useWhiteText 
+                      ? "text-brand-white/80 hover:text-brand-white" 
+                      : "text-brand-midnight/60 hover:text-brand-midnight"
+                  )}
                 >
                   {link.label}
                   <span className="absolute bottom-0 left-1/2 h-[1px] w-0 bg-brand-gold transition-all duration-300 group-hover:left-0 group-hover:w-full" />
@@ -148,7 +165,10 @@ export function HeaderClient({ user }: HeaderClientProps) {
                 {user ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-brand-midnight/10 transition hover:border-brand-gold focus:outline-none">
+                      <button className={cn(
+                        "flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border transition hover:border-brand-gold focus:outline-none",
+                        useWhiteText ? "border-brand-white/20" : "border-brand-midnight/10"
+                      )}>
                         {user.avatarUrl ? (
                           <Image
                             src={user.avatarUrl}
@@ -158,7 +178,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <UserIcon className="h-4 w-4 text-brand-midnight" />
+                          <UserIcon className={cn("h-4 w-4", useWhiteText ? "text-brand-white" : "text-brand-midnight")} />
                         )}
                       </button>
                     </DropdownMenuTrigger>
@@ -189,14 +209,17 @@ export function HeaderClient({ user }: HeaderClientProps) {
                 ) : (
                   <button
                     onClick={() => signInWithGoogle(pathname)}
-                    className="text-[11px] font-semibold tracking-[0.2em] text-brand-midnight/70 transition hover:text-brand-midnight"
+                    className={cn(
+                      "text-[11px] font-semibold tracking-[0.2em] transition",
+                      useWhiteText ? "text-brand-white/80 hover:text-brand-white" : "text-brand-midnight/70 hover:text-brand-midnight"
+                    )}
                   >
                     ENTRAR
                   </button>
                 )}
               </div>
 
-              <CartHeaderButton />
+              <CartHeaderButton useWhite={useWhiteText} />
             </div>
           </div>
         </div>
