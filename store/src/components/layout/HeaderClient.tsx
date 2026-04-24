@@ -33,7 +33,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isHomePage = pathname === "/";
-  const useWhiteText = isHomePage && !scrolled && !isMenuOpen;
+  const useWhite = isHomePage && !scrolled && !isMenuOpen;
 
   // Handle scroll for glassmorphism
   useEffect(() => {
@@ -85,7 +85,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={cn(
               "flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 md:hidden",
-              useWhiteText ? "text-brand-white hover:bg-white/10" : "text-brand-midnight hover:bg-brand-midnight/5"
+              useWhite ? "text-brand-white hover:bg-white/10" : "text-brand-midnight hover:bg-brand-midnight/5"
             )}
             aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
           >
@@ -102,7 +102,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   href={link.href}
                   className={cn(
                     "group relative py-2 text-[11px] font-semibold tracking-[0.2em] transition-colors",
-                    useWhiteText 
+                    useWhite 
                       ? "text-brand-white/80 hover:text-brand-white" 
                       : isActive ? "text-brand-midnight" : "text-brand-midnight/60 hover:text-brand-midnight"
                   )}
@@ -124,7 +124,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
             <Link href="/" className="block" onClick={() => setIsMenuOpen(false)}>
               <div className={cn(
                 "relative h-10 w-32 md:h-12 md:w-48 transition-all duration-500",
-                useWhiteText ? "brightness-0 invert" : ""
+                useWhite ? "brightness-0 invert" : ""
               )}>
                 <Image
                   src="/logo-horizontal.png"
@@ -148,7 +148,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   href={link.href}
                   className={cn(
                     "group relative py-2 text-[11px] font-semibold tracking-[0.2em] transition-colors",
-                    useWhiteText 
+                    useWhite 
                       ? "text-brand-white/80 hover:text-brand-white" 
                       : "text-brand-midnight/60 hover:text-brand-midnight"
                   )}
@@ -213,7 +213,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                     onClick={() => signInWithGoogle(pathname)}
                     className={cn(
                       "text-[11px] font-semibold tracking-[0.2em] transition",
-                      useWhiteText ? "text-brand-white/80 hover:text-brand-white" : "text-brand-midnight/70 hover:text-brand-midnight"
+                      useWhite ? "text-brand-white/80 hover:text-brand-white" : "text-brand-midnight/70 hover:text-brand-midnight"
                     )}
                   >
                     ENTRAR
@@ -221,7 +221,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                 )}
               </div>
 
-              <CartHeaderButton useWhite={useWhiteText} />
+              <CartHeaderButton useWhite={useWhite} />
             </div>
           </div>
         </div>

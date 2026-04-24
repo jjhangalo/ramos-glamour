@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { User, Mail, Phone, MessageSquare } from "lucide-react";
+import { User, Mail, Phone, MessageSquare, ArrowRight } from "lucide-react";
 
 import { updateProfile } from "@/lib/actions/profile";
 import { cn } from "@/lib/utils";

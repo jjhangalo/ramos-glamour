@@ -269,7 +269,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                 price_override: activeVariant.price_override
               } : undefined}
               variantImage={activeVariant?.variant_images?.[0]?.url}
-              disabled={!canAddToCart || (hasOptions && !activeVariant && (selectedSize || selectedColor))}
+              disabled={!canAddToCart || Boolean(hasOptions && !activeVariant && (selectedSize || selectedColor))}
               label={currentStock > 0 ? "ADICIONAR AO CARRINHO" : "INDISPONÍVEL"}
               className={cn(
                 "w-full py-5 text-[11px] font-bold tracking-[0.3em] transition-all duration-500",
