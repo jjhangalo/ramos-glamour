@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AlertTriangle, Check, Minus, Plus, Star, User, X, ChevronRight } from "lucide-react";
+import { Minus, Plus, Star, User, ChevronRight, ChevronLeft } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ProductPrice } from "@/components/product/ProductPrice";
@@ -19,6 +19,8 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const hasVariants = (product.variants?.length ?? 0) > 0;
   const sizes = useMemo(() => {
@@ -56,6 +58,25 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
   const currentPrice = activeVariant?.price_override ?? product.price;
   const currentPromoPrice = activeVariant?.price_override ? null : promoPrice || product.promo_price;
 
+  // Sync scroll position with active index (Mobile)
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, offsetWidth } = scrollRef.current;
+      const index = Math.round(scrollLeft / offsetWidth);
+      if (index !== activeImageIndex) {
+        setActiveImageIndex(index);
+      }
+    }
+  };
+
+  const scrollToImage = (index: number) => {
+    setActiveImageIndex(index);
+    if (scrollRef.current) {
+      const scrollAmount = scrollRef.current.offsetWidth * index;
+      scrollRef.current.scrollTo({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="mx-auto max-w-[1400px] px-6 lg:px-12 py-12 lg:py-24">
       {/* Breadcrumbs */}
@@ -69,20 +90,62 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
 
       <div className="grid gap-16 lg:grid-cols-[1.2fr_1fr] lg:items-start">
         
-        {/* Left: Vertical Image Gallery (Desktop) / Scroll List (Mobile) */}
-        <div className="flex flex-col gap-6">
-          {allImages.map((image, index) => (
-            <div key={image.url} className="relative aspect-[2/3] w-full overflow-hidden bg-brand-midnight/5">
-              <Image
-                src={image.url}
-                alt={`${product.name} - View ${index + 1}`}
-                fill
-                className="object-cover"
-                priority={index === 0}
-                sizes="(max-width: 1024px) 100vw, 60vw"
-              />
+        {/* Left: Enhanced Gallery */}
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+          {/* Desktop Thumbnail Sidebar */}
+          <div className="hidden lg:flex flex-col gap-4 w-20 shrink-0">
+             {allImages.map((image, index) => (
+               <button 
+                 key={`${image.url}-${index}`}
+                 onClick={() => scrollToImage(index)}
+                 className={cn(
+                   "relative aspect-[2/3] overflow-hidden border transition-all duration-300",
+                   activeImageIndex === index ? "border-brand-gold" : "border-brand-midnight/5 opacity-50 hover:opacity-100"
+                 )}
+               >
+                 <Image src={image.url} alt="Thumbnail" fill className="object-cover" sizes="80px" />
+               </button>
+             ))}
+          </div>
+
+          <div className="relative flex-1">
+            {/* Main Carousel / Display */}
+            <div 
+              ref={scrollRef}
+              onScroll={handleScroll}
+              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide lg:overflow-hidden lg:snap-none"
+            >
+              {allImages.map((image, index) => (
+                <div 
+                  key={`${image.url}-${index}`} 
+                  className="relative aspect-[2/3] w-full flex-shrink-0 snap-center overflow-hidden bg-brand-midnight/5"
+                >
+                  <Image
+                    src={image.url}
+                    alt={`${product.name} - View ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                    sizes="(max-width: 1024px) 100vw, 800px"
+                  />
+                </div>
+              ))}
             </div>
-          ))}
+
+            {/* Mobile Navigation Dots (Hidden on Desktop) */}
+            <div className="mt-4 flex justify-center gap-2 lg:hidden">
+              {allImages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToImage(index)}
+                  className={cn(
+                    "h-1 transition-all duration-300",
+                    activeImageIndex === index ? "w-8 bg-brand-gold" : "w-2 bg-brand-midnight/10"
+                  )}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Right: Sticky Info Section */}
@@ -217,7 +280,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
             />
           </div>
 
-          {/* Details Accordions (Simplified for this version) */}
+          {/* Details Accordions */}
           <div className="pt-10 space-y-4 border-t border-brand-midnight/5">
             <details className="group">
               <summary className="flex cursor-pointer items-center justify-between list-none py-4 text-[10px] font-bold tracking-[0.2em] text-brand-midnight/60 hover:text-brand-midnight transition-colors">

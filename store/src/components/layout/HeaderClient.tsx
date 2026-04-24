@@ -84,12 +84,12 @@ export function HeaderClient({ user }: HeaderClientProps) {
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-black/5 md:hidden",
-              useWhiteText ? "text-brand-white" : "text-brand-midnight"
+              "flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 md:hidden",
+              useWhiteText ? "text-brand-white hover:bg-white/10" : "text-brand-midnight hover:bg-brand-midnight/5"
             )}
-            aria-label="Abrir menu"
+            aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
           >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMenuOpen ? <X className="h-6 w-6" strokeWidth={1.5} /> : <Menu className="h-6 w-6" strokeWidth={1.5} />}
           </button>
 
           {/* Left Navigation (Desktop) */}
@@ -166,19 +166,21 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className={cn(
-                        "flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border transition hover:border-brand-gold focus:outline-none",
-                        useWhiteText ? "border-brand-white/20" : "border-brand-midnight/10"
+                        "flex h-12 w-12 items-center justify-center overflow-hidden rounded-full transition-all duration-300 focus:outline-none",
+                        useWhite ? "hover:bg-white/10" : "hover:bg-brand-midnight/5"
                       )}>
                         {user.avatarUrl ? (
-                          <Image
-                            src={user.avatarUrl}
-                            alt={user.displayName || "Utilizador"}
-                            width={36}
-                            height={36}
-                            className="h-full w-full object-cover"
-                          />
+                          <div className="h-9 w-9 overflow-hidden rounded-full border border-brand-midnight/5">
+                            <Image
+                              src={user.avatarUrl}
+                              alt={user.displayName || "Utilizador"}
+                              width={36}
+                              height={36}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
                         ) : (
-                          <UserIcon className={cn("h-4 w-4", useWhiteText ? "text-brand-white" : "text-brand-midnight")} />
+                          <UserIcon className={cn("h-6 w-6", useWhite ? "text-brand-white" : "text-brand-midnight")} strokeWidth={1.5} />
                         )}
                       </button>
                     </DropdownMenuTrigger>
