@@ -3,29 +3,30 @@
 @plugin "tailwindcss-animate";
 
 :root {
-  --background: #D8DFE0;
-  --foreground: #626260;
-  --brand-bg: #D8DFE0;
-  --brand-mauve: #CAA4A9;
-  --brand-olive: #A0A65E;
-  --brand-charcoal: #626260;
+  --background: #FCF9F6;
+  --foreground: #121212;
+  --brand-bg: #FCF9F6;
+  --brand-midnight: #121212;
+  --brand-gold: #C5A059;
+  --brand-blush: #E8D5D0;
   --brand-white: #FFFFFF;
   --popover: #FFFFFF;
-  --popover-foreground: #626260;
-  --muted: #E5E7EB;
-  --muted-foreground: #9CA3AF;
-  --accent: #F3F4F6;
-  --accent-foreground: #626260;
+  --popover-foreground: #121212;
+  --muted: #F3F4F6;
+  --muted-foreground: #6B7280;
+  --accent: #FCF9F6;
+  --accent-foreground: #C5A059;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-playfair-display);
+  --font-serif: var(--font-cormorant-garamond);
+  --font-sans: var(--font-outfit);
   --color-brand-bg: var(--brand-bg);
-  --color-brand-mauve: var(--brand-mauve);
-  --color-brand-olive: var(--brand-olive);
-  --color-brand-charcoal: var(--brand-charcoal);
+  --color-brand-midnight: var(--brand-midnight);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-blush: var(--brand-blush);
   --color-brand-white: var(--brand-white);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
@@ -38,5 +39,19 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-outfit), sans-serif;
+  scroll-behavior: smooth;
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.heading-luxury {
+  font-family: var(--font-cormorant-garamond), serif;
+  letter-spacing: -0.01em;
 }

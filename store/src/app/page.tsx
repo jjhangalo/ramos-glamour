@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-
 import { ArrowRight } from "lucide-react";
 
 import { ProductCard } from "@/components/product/ProductCard";
 import { getCategories, getFeaturedProducts } from "@/lib/actions/products";
+import { cn } from "@/lib/utils";
 
 export default async function Home() {
   const [featuredProducts, categories] = await Promise.all([
@@ -18,74 +18,55 @@ export default async function Home() {
 
   return (
     <main className="flex flex-1 flex-col">
-      {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-brand-bg">
-        <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top,#ffffff70,transparent_60%)] lg:block" />
-        <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:px-8 lg:py-24">
-          <div className="space-y-6">
-            <p className="text-sm uppercase tracking-[0.35em] text-brand-charcoal/65">
-              Ramos Glamour
-            </p>
-            <div className="space-y-4">
-              <h1 className="max-w-2xl text-5xl font-semibold leading-[1.05] text-brand-charcoal md:text-6xl">
-                Descobre o teu estilo
-              </h1>
-              <p className="max-w-xl text-lg leading-8 text-brand-charcoal/80">
-                Moda feminina por encomenda, escolhida para quem procura elegância,
-                leveza e presença em cada detalhe.
-              </p>
-            </div>
-            <Link
-              href="/catalogo"
-              className="inline-flex items-center gap-2 rounded-full bg-brand-olive px-6 py-3 text-base font-medium text-brand-white transition hover:bg-[#8a904d]"
-            >
-              Ver catálogo
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 sm:gap-6">
-            {featuredProducts.slice(0, 4).map((product, index) => (
-              <div
-                key={product.id}
-                className={`relative overflow-hidden rounded-[2rem] shadow-[0_18px_40px_rgba(98,98,96,0.12)] ${
-                  index % 2 === 0 ? "translate-y-0 sm:translate-y-8" : ""
-                }`}
-              >
-                <div className="relative aspect-[3/4]">
-                  <Image
-                    src={product.images[0]?.url ?? "https://picsum.photos/seed/fallback/600/800"}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 50vw, 25vw"
-                  />
-                </div>
-              </div>
-            ))}
+      {/* ── Full-Bleed Cinematic Hero ───────────────────────────────── */}
+      <section className="relative h-[90vh] w-full overflow-hidden">
+        <Image
+          src="/hero.png"
+          alt="Ramos Glamour - Coleção de Luxo"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-brand-midnight/20" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-brand-white">
+          <p className="mb-6 animate-fade-in text-[10px] font-bold uppercase tracking-[0.4em] md:text-xs">
+            Ramos Glamour
+          </p>
+          <h1 className="heading-luxury mb-8 max-w-4xl animate-slide-up text-5xl font-light leading-[1.1] md:text-8xl">
+            A Essência da <br /> <span className="italic font-serif">Elegância Feminina</span>
+          </h1>
+          <Link
+            href="/catalogo"
+            className="group flex items-center gap-4 border border-brand-white/30 bg-brand-white/10 px-8 py-4 text-xs font-semibold tracking-[0.2em] transition-all hover:bg-brand-white hover:text-brand-midnight"
+          >
+            DESCOBRE A COLEÇÃO
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </div>
+        
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
+          <div className="flex flex-col items-center gap-4">
+            <span className="text-[9px] font-bold tracking-[0.3em] text-brand-white/60">SCROLL</span>
+            <div className="h-12 w-[1px] bg-gradient-to-b from-brand-white/60 to-transparent" />
           </div>
         </div>
       </section>
 
-      {/* Promoções (Hidden if no products, but logic handled by getFeaturedProducts for now) */}
-
-      {/* ── Categorias ───────────────────────────────────────────────── */}
+      {/* ── Featured Categories (Editorial Layout) ───────────────────── */}
       {hasCategories && (
-        <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:py-16 lg:px-8">
-          <div className="mb-6 flex items-end justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-brand-charcoal/65">
-                Categorias
-              </p>
-              <h2 className="mt-2 text-xl font-semibold text-brand-charcoal md:text-3xl">
-                Categorias em destaque
-              </h2>
-            </div>
+        <section className="mx-auto w-full max-w-[1400px] px-6 py-24 md:px-12">
+          <div className="mb-16 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-midnight/40">
+              Coleções
+            </p>
+            <h2 className="heading-luxury mt-4 text-3xl font-light md:text-5xl">
+              Categorias em <span className="italic">Destaque</span>
+            </h2>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
-            {rootCategories.slice(0, 3).map((category) => {
-              // Find a product in this category for the image
+          <div className="grid gap-12 md:grid-cols-3">
+            {rootCategories.slice(0, 3).map((category, index) => {
               const productWithImage = featuredProducts.find((p) =>
                 p.categories.some((c) => c.slug === category.slug)
               );
@@ -94,25 +75,29 @@ export default async function Home() {
                 <Link
                   key={category.id}
                   href={`/catalogo?categoria=${encodeURIComponent(category.slug)}`}
-                  className="group relative overflow-hidden rounded-[2rem] shadow-[0_18px_40px_rgba(98,98,96,0.12)]"
+                  className={cn(
+                    "group relative overflow-hidden transition-all duration-700",
+                    index === 1 ? "md:translate-y-12" : ""
+                  )}
                 >
-                  <div className="relative aspect-[5/6]">
+                  <div className="relative aspect-[2/3] overflow-hidden">
                     <Image
                       src={
                         productWithImage?.images[0]?.url ??
-                        "https://picsum.photos/seed/cat-fallback/600/800"
+                        "https://picsum.photos/seed/cat-fallback/600/900"
                       }
                       alt={category.name}
                       fill
-                      className="object-cover transition duration-500 group-hover:scale-105"
+                      className="object-cover transition duration-1000 group-hover:scale-110"
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal via-brand-charcoal/15 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-6">
-                      <p className="text-3xl font-semibold text-brand-white">
-                        {category.name}
-                      </p>
-                    </div>
+                    <div className="absolute inset-0 bg-brand-midnight/10 transition-opacity group-hover:opacity-30" />
+                  </div>
+                  <div className="mt-6 text-center">
+                    <h3 className="heading-luxury text-2xl font-light">{category.name}</h3>
+                    <p className="mt-2 text-[10px] font-semibold tracking-[0.2em] text-brand-midnight/40 transition-colors group-hover:text-brand-gold">
+                      VER TUDO
+                    </p>
                   </div>
                 </Link>
               );
@@ -121,39 +106,56 @@ export default async function Home() {
         </section>
       )}
 
-      {/* ── Produtos em destaque ─────────────────────────────────────── */}
-      <section className="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-6 md:pb-16 lg:px-8">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-brand-charcoal/65">
-              Seleção
-            </p>
-            <h2 className="mt-2 text-xl font-semibold text-brand-charcoal md:text-3xl">
-              Produtos em destaque
-            </h2>
+      {/* ── Featured Products ────────────────────────────────────────── */}
+      <section className="bg-[#1A1A1A] py-24 text-brand-white">
+        <div className="mx-auto w-full max-w-[1400px] px-6 md:px-12">
+          <div className="mb-16 flex flex-col items-center justify-between gap-6 md:flex-row md:items-end">
+            <div className="text-center md:text-left">
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-white/40">
+                A Nossa Seleção
+              </p>
+              <h2 className="heading-luxury mt-4 text-3xl font-light md:text-5xl">
+                O Novo <span className="italic">Luxo</span>
+              </h2>
+            </div>
+            <Link
+              href="/catalogo"
+              className="group flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] text-brand-white/60 transition-colors hover:text-brand-white"
+            >
+              EXPLORAR TUDO
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
           </div>
-          <Link
-            href="/catalogo"
-            className="text-sm font-medium text-brand-charcoal transition hover:text-brand-olive"
-          >
-            Ver tudo
-          </Link>
-        </div>
 
-        {hasProducts ? (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-[2rem] bg-brand-bg px-6 py-16 text-center shadow-inner">
-            <p className="text-lg font-medium text-brand-charcoal/60">
-              Em breve novidades
-            </p>
-          </div>
-        )}
+          {hasProducts ? (
+            <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-4 lg:grid-cols-4">
+              {featuredProducts.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} inverseColors />
+              ))}
+            </div>
+          ) : (
+            <div className="border border-brand-white/10 bg-white/5 py-24 text-center">
+              <p className="heading-luxury text-xl font-light italic opacity-40">
+                Brevemente...
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── Brand Statement ──────────────────────────────────────────── */}
+      <section className="py-24 text-center">
+        <div className="mx-auto max-w-3xl px-6">
+          <p className="heading-luxury text-3xl font-light leading-relaxed md:text-5xl">
+            "A verdadeira elegância está no <span className="italic text-brand-gold">detalhe</span>, no toque de seda e na confiança de ser única."
+          </p>
+          <div className="mt-12 h-12 w-[1px] bg-brand-gold mx-auto" />
+          <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.4em] text-brand-midnight/60">
+            Ramos Glamour — Desde 2024
+          </p>
+        </div>
       </section>
     </main>
   );
 }
+

@@ -1,50 +1,52 @@
 import { formatPrice } from "@/lib/utils/format";
+import { cn } from "@/lib/utils";
 
 type ProductPriceProps = {
   price: number;
   promoPrice?: number | null;
   size?: "sm" | "md" | "lg";
+  inverse?: boolean;
 };
 
 const sizeMap = {
-  sm: { current: "text-base font-semibold", original: "text-sm" },
-  md: { current: "text-lg font-semibold", original: "text-sm" },
-  lg: { current: "text-3xl font-semibold", original: "text-lg" },
+  sm: { current: "text-sm tracking-widest", original: "text-[10px]" },
+  md: { current: "text-lg tracking-widest", original: "text-sm" },
+  lg: { current: "text-2xl tracking-widest md:text-3xl", original: "text-base" },
 };
 
 export function ProductPrice({
   price,
   promoPrice,
   size = "md",
+  inverse = false,
 }: ProductPriceProps) {
   const styles = sizeMap[size];
   const hasPromo = promoPrice !== null && promoPrice !== undefined && promoPrice > 0;
 
-  if (!hasPromo) {
-    return (
-      <p 
-        className={`${styles.current} text-brand-charcoal`}
-        suppressHydrationWarning
-      >
-        {formatPrice(price)}
-      </p>
-    );
-  }
-
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex items-baseline gap-3">
       <p 
-        className={`${styles.current} text-emerald-700`}
+        className={cn(
+          "font-sans font-medium",
+          styles.current,
+          hasPromo ? "text-brand-gold" : inverse ? "text-brand-white" : "text-brand-midnight"
+        )}
         suppressHydrationWarning
       >
-        {formatPrice(promoPrice!)}
+        {formatPrice(hasPromo ? promoPrice! : price)}
       </p>
-      <p 
-        className={`${styles.original} text-brand-charcoal/50 line-through`}
-        suppressHydrationWarning
-      >
-        {formatPrice(price)}
-      </p>
+      {hasPromo && (
+        <p 
+          className={cn(
+            "font-sans line-through opacity-40",
+            styles.original,
+            inverse ? "text-brand-white" : "text-brand-midnight"
+          )}
+          suppressHydrationWarning
+        >
+          {formatPrice(price)}
+        </p>
+      )}
     </div>
   );
 }
