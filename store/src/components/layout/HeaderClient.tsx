@@ -66,7 +66,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
   ];
 
   const rightLinks = [
-    { href: "/#sobre", label: "A MARCA" },
+    { href: "/empresa", label: "A MARCA" },
     { href: "/#contacto", label: "CONTACTO" },
   ];
 
