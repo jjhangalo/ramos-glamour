@@ -1,16 +1,22 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 export default function EmpresaPage() {
+  const sectionBackgrounds = {
+    manifesto: "/hero copy.png",
+    vision: "/hero.png",
+    texture: "/hero copy.png",
+    precision: "/hero.png",
+    curation: "/hero copy.png",
+  } as const;
+
   return (
     <main className="flex flex-1 flex-col bg-brand-bg">
       {/* ── 1. Brand Manifesto (Primary Layer) ────────────────────── */}
       <section className="relative flex h-screen w-full items-center justify-center overflow-hidden">
-        {/* Atmospheric Abstraction Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/hero.png" // Using hero as an atmospheric base for now
+            src={sectionBackgrounds.manifesto}
             alt="Atmosfera Ramos Glamour"
             fill
             className="object-cover opacity-20 grayscale brightness-125 transition-transform duration-[10000ms] hover:scale-110"
@@ -31,12 +37,20 @@ export default function EmpresaPage() {
       </section>
 
       {/* ── 2. Founder / Vision (Secondary Layer) ─────────────────── */}
-      <section className="mx-auto w-full max-w-[1400px] px-6 py-32 md:px-12 lg:py-64">
+      <section className="relative mx-auto w-full max-w-[1400px] overflow-hidden px-6 py-32 md:px-12 lg:py-64">
+        <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.06]">
+          <Image
+            src={sectionBackgrounds.vision}
+            alt=""
+            fill
+            className="object-cover grayscale"
+          />
+        </div>
         <div className="grid gap-24 lg:grid-cols-2 lg:items-center">
           {/* Asymmetric Visual */}
           <div className="relative aspect-[4/5] overflow-hidden bg-brand-midnight/5 lg:aspect-square lg:w-4/5">
              <Image 
-               src="/ramos_glamour_moodboard_1777041120310.png"
+               src={sectionBackgrounds.vision}
                alt="Visão Ramos Glamour"
                fill
                className="object-cover grayscale brightness-110 contrast-125"
@@ -79,22 +93,22 @@ export default function EmpresaPage() {
           <div className="grid gap-6 md:grid-cols-3">
             {/* Documentation Elevated to Luxury */}
             {[
-              { 
+              {
                 title: "TEXTURA", 
                 desc: "Fibras naturais selecionadas pela sua integridade estrutural e toque orgânico.",
-                img: "/hero.png" // Placeholder for macro texture
+                img: sectionBackgrounds.texture
               },
               { 
                 title: "PRECISÃO", 
                 desc: "Construção rigorosa que prioriza a longevidade e a queda impecável da peça.",
-                img: "/ramos_glamour_hero_image_1777041456184.png" // Placeholder for detail
+                img: sectionBackgrounds.precision
               },
               { 
                 title: "CURADORIA", 
                 desc: "Uma seleção limitada de acabamentos que resistem à efemeridade das tendências.",
-                img: "/hero.png" // Placeholder
+                img: sectionBackgrounds.curation
               }
-            ].map((item, i) => (
+            ].map((item) => (
               <div key={item.title} className="group space-y-8">
                 <div className="relative aspect-square overflow-hidden bg-brand-midnight/5 grayscale contrast-125 brightness-105">
                   <Image 
