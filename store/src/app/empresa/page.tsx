@@ -3,11 +3,11 @@ import Link from "next/link";
 
 export default function EmpresaPage() {
   const sectionBackgrounds = {
-    manifesto: "/hero copy.png",
+    manifesto: "/empresa-hero-luxury.svg",
     vision: "/hero.png",
-    texture: "/hero copy.png",
-    precision: "/hero.png",
-    curation: "/hero copy.png",
+    texture: "/empresa-textura-bg.svg",
+    precision: "/empresa-precisao-bg.svg",
+    curation: "/empresa-curadoria-bg.svg",
   } as const;
 
   return (
@@ -26,6 +26,9 @@ export default function EmpresaPage() {
         </div>
 
         <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
+          <p className="mb-6 text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-midnight/70">
+            HIGH-END LUXURY
+          </p>
           <p className="mb-8 animate-fade-in text-[10px] font-bold uppercase tracking-[0.5em] text-brand-gold opacity-0 [animation-delay:500ms] [animation-fill-mode:forwards]">
             MANIFESTO
           </p>
