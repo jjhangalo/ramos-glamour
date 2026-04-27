@@ -3,11 +3,11 @@ import Link from "next/link";
 
 export default function EmpresaPage() {
   const sectionBackgrounds = {
-    manifesto: "/empresa-hero-luxury.svg",
-    vision: "/hero.png",
-    texture: "/empresa-textura-bg.svg",
-    precision: "/empresa-precisao-bg.svg",
-    curation: "/empresa-curadoria-bg.svg",
+    manifesto: "/empresa-manifesto.png",
+    vision: "/empresa-vision.png",
+    texture: "/empresa-texture.png",
+    precision: "/empresa-texture.png",
+    curation: "/empresa-texture.png",
   } as const;
 
   return (
