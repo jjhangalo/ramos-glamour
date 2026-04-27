@@ -78,52 +78,55 @@ export function HeaderClient({ user }: HeaderClientProps) {
       )}
     >
       <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
-        <div className="relative flex h-12 items-center justify-between">
+        <div className="flex h-12 items-center">
           
-          {/* Mobile Menu Toggle (Left on Mobile) */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 md:hidden",
-              useWhite ? "text-brand-white hover:bg-white/10" : "text-brand-midnight hover:bg-brand-midnight/5"
-            )}
-            aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
-          >
-            {isMenuOpen ? <X className="h-6 w-6" strokeWidth={1.5} /> : <Menu className="h-6 w-6" strokeWidth={1.5} />}
-          </button>
+          {/* Left Section: Mobile Toggle & Desktop Left Nav */}
+          <div className="flex flex-1 items-center">
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={cn(
+                "flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 lg:hidden",
+                useWhite ? "text-brand-white hover:bg-white/10" : "text-brand-midnight hover:bg-brand-midnight/5"
+              )}
+              aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+            >
+              {isMenuOpen ? <X className="h-6 w-6" strokeWidth={1.5} /> : <Menu className="h-6 w-6" strokeWidth={1.5} />}
+            </button>
 
-          {/* Left Navigation (Desktop) */}
-          <nav className="hidden flex-1 items-center gap-10 md:flex">
-            {leftLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "group relative py-2 text-[11px] font-semibold tracking-[0.2em] transition-colors",
-                    useWhite 
-                      ? "text-brand-white/80 hover:text-brand-white" 
-                      : isActive ? "text-brand-midnight" : "text-brand-midnight/60 hover:text-brand-midnight"
-                  )}
-                >
-                  {link.label}
-                  <span
+            {/* Left Navigation (Desktop) */}
+            <nav className="hidden items-center gap-10 lg:flex">
+              {leftLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
                     className={cn(
-                      "absolute bottom-0 left-1/2 h-[1px] w-0 bg-brand-gold transition-all duration-300 group-hover:left-0 group-hover:w-full",
-                      isActive && !isHomePage ? "left-0 w-full" : ""
+                      "group relative py-2 text-[11px] font-semibold tracking-[0.2em] transition-colors",
+                      useWhite 
+                        ? "text-brand-white/80 hover:text-brand-white" 
+                        : isActive ? "text-brand-midnight" : "text-brand-midnight/60 hover:text-brand-midnight"
                     )}
-                  />
-                </Link>
-              );
-            })}
-          </nav>
+                  >
+                    {link.label}
+                    <span
+                      className={cn(
+                        "absolute bottom-0 left-1/2 h-[1px] w-0 bg-brand-gold transition-all duration-300 group-hover:left-0 group-hover:w-full",
+                        isActive && !isHomePage ? "left-0 w-full" : ""
+                      )}
+                    />
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
-          {/* Logo (Centered) */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+          {/* Center Section: Logo */}
+          <div className="flex shrink-0 items-center justify-center">
             <Link href="/" className="block" onClick={() => setIsMenuOpen(false)}>
               <div className={cn(
-                "relative h-10 w-32 md:h-12 md:w-48 transition-all duration-500",
+                "relative h-10 w-32 lg:h-12 lg:w-48 transition-all duration-500",
                 useWhite ? "brightness-0 invert" : ""
               )}>
                 <Image
@@ -132,13 +135,13 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   fill
                   className="object-contain"
                   priority
-                  sizes="(max-width: 768px) 128px, 192px"
+                  sizes="(max-width: 1024px) 128px, 192px"
                 />
               </div>
             </Link>
           </div>
 
-          {/* Right Navigation + Actions */}
+          {/* Right Section: Desktop Right Links & Actions */}
           <div className="flex flex-1 items-center justify-end gap-6">
             {/* Desktop Right Links */}
             <nav className="hidden items-center gap-10 lg:flex">
@@ -161,7 +164,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
 
             <div className="flex items-center gap-4">
               {/* User Profile */}
-              <div className="hidden md:block">
+              <div className="hidden lg:block">
                 {user ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -231,7 +234,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
       {isMenuOpen && (
         <div
           ref={menuRef}
-          className="absolute left-0 top-full w-full bg-brand-bg/95 backdrop-blur-xl border-t border-brand-midnight/5 shadow-2xl animate-in slide-in-from-top-2 md:hidden"
+          className="absolute left-0 top-full w-full bg-brand-bg/95 backdrop-blur-xl border-t border-brand-midnight/5 shadow-2xl animate-in slide-in-from-top-2 lg:hidden"
         >
           <div className="flex flex-col p-8 space-y-8">
             <div className="space-y-4">
