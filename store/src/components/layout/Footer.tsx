@@ -12,7 +12,7 @@ export function Footer() {
 
   const brandLinks = [
     { href: "/empresa", label: "A Marca" },
-    { href: "/#contacto", label: "Contacto" },
+    { href: "/contacto", label: "Contacto" },
     { href: "/termos", label: "Termos & Condições" },
   ];
 
