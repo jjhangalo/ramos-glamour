@@ -126,11 +126,10 @@ export function HeaderClient({ user }: HeaderClientProps) {
           <div className="flex shrink-0 items-center justify-center">
             <Link href="/" className="block" onClick={() => setIsMenuOpen(false)}>
               <div className={cn(
-                "relative h-10 w-32 lg:h-12 lg:w-48 transition-all duration-500",
-                useWhite ? "brightness-0 invert" : ""
+                "relative h-10 w-32 lg:h-12 lg:w-48 transition-all duration-500"
               )}>
                 <Image
-                  src="/logo-horizontal.png"
+                  src="/logo-gold.png"
                   alt="Ramos Glamour"
                   fill
                   className="object-contain"

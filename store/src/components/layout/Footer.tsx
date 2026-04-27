@@ -23,9 +23,9 @@ export function Footer() {
           {/* Column 1: Brand Info */}
           <div className="md:col-span-1 space-y-8">
             <Link href="/" className="inline-block">
-              <div className="relative h-10 w-32 brightness-0 invert">
+              <div className="relative h-10 w-32">
                 <Image
-                  src="/logo-horizontal.png"
+                  src="/logo-gold.png"
                   alt="Ramos Glamour"
                   fill
                   className="object-contain"
