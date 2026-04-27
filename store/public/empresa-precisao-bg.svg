@@ -1,0 +1,28 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1200" fill="#F5F3F0"/>
+  <g opacity="0.9">
+    <rect x="137" y="115" width="926" height="926" stroke="#8E7554" stroke-width="2"/>
+    <rect x="218" y="196" width="764" height="764" stroke="#BCA27E" stroke-width="2"/>
+    <rect x="300" y="278" width="600" height="600" stroke="#D2C1A8" stroke-width="2"/>
+  </g>
+  <g opacity="0.32">
+    <path d="M0 933L1200 267" stroke="url(#paint0_linear_precision)" stroke-width="3"/>
+    <path d="M0 1013L1200 347" stroke="url(#paint1_linear_precision)" stroke-width="2"/>
+    <path d="M0 853L1200 187" stroke="url(#paint2_linear_precision)" stroke-width="2"/>
+  </g>
+  <circle cx="599.5" cy="600.5" r="236.5" stroke="#A88A63" stroke-width="3" opacity="0.4"/>
+  <defs>
+    <linearGradient id="paint0_linear_precision" x1="157" y1="880" x2="1048" y2="336" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B08A5D"/>
+      <stop offset="1" stop-color="#EEE5D8"/>
+    </linearGradient>
+    <linearGradient id="paint1_linear_precision" x1="126" y1="980" x2="1080" y2="402" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E8D9C4"/>
+      <stop offset="1" stop-color="#9D805A"/>
+    </linearGradient>
+    <linearGradient id="paint2_linear_precision" x1="86" y1="804" x2="1114" y2="242" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D7C0A1"/>
+      <stop offset="1" stop-color="#8B6D48"/>
+    </linearGradient>
+  </defs>
+</svg>
