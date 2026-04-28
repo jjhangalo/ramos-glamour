@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { User, Mail, Phone, MessageSquare, ArrowRight } from "lucide-react";
 
-import { ProfileSectionHeader } from "@/components/profile/ProfileSectionHeader";
 import { updateProfile } from "@/lib/actions/profile";
+import { cn } from "@/lib/utils";
 
 type ProfileFormProps = {
   profile: {
@@ -31,35 +31,42 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   });
 
   return (
-    <section className="space-y-6 rounded-[2rem] bg-white/90 p-4 shadow-[0_16px_35px_rgba(98,98,96,0.08)] sm:p-6">
-      <ProfileSectionHeader
-        title="Os meus dados"
-        description="Atualiza os dados principais da tua conta e mantém o contacto sempre correto."
-      />
-
-      <div className="grid gap-8 lg:grid-cols-[200px_minmax(0,1fr)]">
-        <aside className="space-y-4">
-          <div className="relative aspect-square w-28 overflow-hidden rounded-full border border-brand-charcoal/10 bg-brand-bg">
+    <div className="space-y-16 animate-fade-in">
+      {/* Profile Header section within form if needed, but we have the layout header */}
+      
+      <div className="grid gap-16 lg:grid-cols-[1fr_2fr]">
+        {/* Identity Card */}
+        <div className="space-y-8">
+           <div className="relative aspect-square w-32 overflow-hidden bg-brand-midnight/5 border border-brand-midnight/5">
             {profile.avatar_url ? (
               <Image
                 src={profile.avatar_url}
                 alt={profile.full_name ?? profile.display_name ?? "Avatar"}
                 fill
                 className="object-cover"
-                sizes="112px"
+                sizes="128px"
               />
-            ) : null}
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                 <User className="h-12 w-12 text-brand-midnight/10" strokeWidth={1} />
+              </div>
+            )}
           </div>
-          <div className="space-y-1">
-            <p className="text-sm uppercase tracking-[0.24em] text-brand-charcoal/60">
-              Conta Google
+          <div className="space-y-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-gold">AUTENTICAÇÃO</p>
+            <div className="flex items-center gap-3 text-[11px] font-medium tracking-widest text-brand-midnight/60">
+              <Mail className="h-3 w-3" />
+              {profile.email}
+            </div>
+            <p className="text-[9px] text-brand-midnight/30 tracking-widest mt-4 leading-relaxed uppercase">
+              A sua conta está protegida pelo Google. Os dados de login não podem ser alterados aqui.
             </p>
-            <p className="break-all text-sm text-brand-charcoal">{profile.email}</p>
           </div>
-        </aside>
+        </div>
 
+        {/* Edit Form */}
         <form
-          className="space-y-5"
+          className="space-y-12"
           onSubmit={(event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
@@ -79,92 +86,74 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             });
           }}
         >
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="space-y-2">
-              <span className="text-sm font-medium text-brand-charcoal">
-                Nome completo
-              </span>
+          <div className="grid gap-x-8 gap-y-10 md:grid-cols-2">
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
+                NOME COMPLETO
+              </label>
               <input
                 name="full_name"
                 value={formValues.full_name}
-                onChange={(event) => {
-                  setFormValues((current) => ({
-                    ...current,
-                    full_name: event.target.value,
-                  }));
-                }}
-                className="w-full rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
+                onChange={(event) => setFormValues(v => ({ ...v, full_name: event.target.value }))}
+                className="w-full border-b border-brand-midnight/10 bg-transparent py-3 text-[11px] font-semibold tracking-widest outline-none transition focus:border-brand-gold"
               />
-            </label>
+            </div>
 
-            <label className="space-y-2">
-              <span className="text-sm font-medium text-brand-charcoal">
-                Nome de apresentação
-              </span>
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
+                NOME DE APRESENTAÇÃO
+              </label>
               <input
                 name="display_name"
                 value={formValues.display_name}
-                onChange={(event) => {
-                  setFormValues((current) => ({
-                    ...current,
-                    display_name: event.target.value,
-                  }));
-                }}
-                className="w-full rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
+                onChange={(event) => setFormValues(v => ({ ...v, display_name: event.target.value }))}
+                className="w-full border-b border-brand-midnight/10 bg-transparent py-3 text-[11px] font-semibold tracking-widest outline-none transition focus:border-brand-gold"
               />
-            </label>
+            </div>
 
-            <label className="space-y-2">
-              <span className="text-sm font-medium text-brand-charcoal">
-                Telefone
-              </span>
-              <input
-                name="phone"
-                value={formValues.phone}
-                onChange={(event) => {
-                  setFormValues((current) => ({
-                    ...current,
-                    phone: event.target.value,
-                  }));
-                }}
-                className="w-full rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
-              />
-            </label>
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
+                TELEFONE
+              </label>
+              <div className="flex items-center gap-3 border-b border-brand-midnight/10 focus-within:border-brand-gold transition">
+                <Phone className="h-3 w-3 text-brand-midnight/20" />
+                <input
+                  name="phone"
+                  value={formValues.phone}
+                  onChange={(event) => setFormValues(v => ({ ...v, phone: event.target.value }))}
+                  className="flex-1 bg-transparent py-3 text-[11px] font-semibold tracking-widest outline-none"
+                />
+              </div>
+            </div>
 
-            <label className="space-y-2">
-              <span className="text-sm font-medium text-brand-charcoal">
-                WhatsApp
-              </span>
-              <input
-                name="whatsapp"
-                value={formValues.whatsapp}
-                onChange={(event) => {
-                  setFormValues((current) => ({
-                    ...current,
-                    whatsapp: event.target.value,
-                  }));
-                }}
-                className="w-full rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
-              />
-            </label>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-brand-charcoal">Email</p>
-            <div className="rounded-2xl border border-brand-charcoal/10 bg-brand-bg/50 px-4 py-3 text-sm text-brand-charcoal/70">
-              {profile.email}
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
+                WHATSAPP
+              </label>
+              <div className="flex items-center gap-3 border-b border-brand-midnight/10 focus-within:border-brand-gold transition">
+                <MessageSquare className="h-3 w-3 text-brand-midnight/20" />
+                <input
+                  name="whatsapp"
+                  value={formValues.whatsapp}
+                  onChange={(event) => setFormValues(v => ({ ...v, whatsapp: event.target.value }))}
+                  className="flex-1 bg-transparent py-3 text-[11px] font-semibold tracking-widest outline-none"
+                />
+              </div>
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={isPending}
-            className="rounded-full bg-brand-olive px-6 py-3 text-sm font-medium text-brand-white transition hover:bg-[#8a904d] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isPending ? "A guardar..." : "Guardar alterações"}
-          </button>
+          <div className="pt-8">
+            <button
+              type="submit"
+              disabled={isPending}
+              className="group flex items-center gap-4 bg-brand-midnight px-10 py-5 text-[10px] font-bold tracking-[0.3em] text-brand-white transition-all hover:bg-brand-gold disabled:opacity-50"
+            >
+              {isPending ? "GUARDANDO..." : "GUARDAR ALTERAÇÕES"}
+              {!isPending && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
+            </button>
+          </div>
         </form>
       </div>
-    </section>
+    </div>
   );
 }

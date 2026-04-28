@@ -28,8 +28,21 @@ interface HeaderClientProps {
 
 export function HeaderClient({ user }: HeaderClientProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const isHomePage = pathname === "/";
+  const useWhite = isHomePage && !scrolled && !isMenuOpen;
+
+  // Handle scroll for glassmorphism
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Close menu on click outside
   useEffect(() => {
@@ -47,150 +60,171 @@ export function HeaderClient({ user }: HeaderClientProps) {
     };
   }, [isMenuOpen]);
 
-  const navLinks = [
-    { href: "/", label: "Início" },
-    { href: "/catalogo", label: "Catálogo" },
+  const leftLinks = [
+    { href: "/catalogo", label: "COLEÇÕES" },
+    { href: "/novidades", label: "NOVIDADES" },
+  ];
+
+  const rightLinks = [
+    { href: "/empresa", label: "A MARCA" },
+    { href: "/contacto", label: "CONTACTO" },
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-14 items-center justify-between gap-4 md:h-16">
-          {/* Logo Section */}
-          <div className="flex flex-1 items-center justify-start md:flex-none">
-            <Link
-              href="/"
-              className="flex items-center gap-3"
-              onClick={() => setIsMenuOpen(false)}
+    <header 
+      className={cn(
+        "fixed top-0 z-50 w-full transition-all duration-500",
+        scrolled ? "glass py-2" : isHomePage ? "bg-transparent py-6" : "bg-brand-bg py-4 border-b border-brand-midnight/5"
+      )}
+    >
+      <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
+        <div className="flex h-12 items-center">
+          
+          {/* Left Section: Mobile Toggle & Desktop Left Nav */}
+          <div className="flex flex-1 items-center">
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={cn(
+                "flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 lg:hidden",
+                useWhite ? "text-brand-white hover:bg-white/10" : "text-brand-midnight hover:bg-brand-midnight/5"
+              )}
+              aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
             >
-              {/* Mobile Logo (Symbol) */}
-              <div className="relative h-10 w-10 md:hidden">
+              {isMenuOpen ? <X className="h-6 w-6" strokeWidth={1.5} /> : <Menu className="h-6 w-6" strokeWidth={1.5} />}
+            </button>
+
+            {/* Left Navigation (Desktop) */}
+            <nav className="hidden items-center gap-10 lg:flex">
+              {leftLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "group relative py-2 text-[11px] font-semibold tracking-[0.2em] transition-colors",
+                      useWhite 
+                        ? "text-brand-white/80 hover:text-brand-white" 
+                        : isActive ? "text-brand-midnight" : "text-brand-midnight/60 hover:text-brand-midnight"
+                    )}
+                  >
+                    {link.label}
+                    <span
+                      className={cn(
+                        "absolute bottom-0 left-1/2 h-[1px] w-0 bg-brand-gold transition-all duration-300 group-hover:left-0 group-hover:w-full",
+                        isActive && !isHomePage ? "left-0 w-full" : ""
+                      )}
+                    />
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Center Section: Logo */}
+          <div className="flex shrink-0 items-center justify-center">
+            <Link href="/" className="block" onClick={() => setIsMenuOpen(false)}>
+              <div className={cn(
+                "relative h-10 w-32 lg:h-12 lg:w-48 transition-all duration-500"
+              )}>
                 <Image
-                  src="/icon1.png"
+                  src="/logo-gold.png"
                   alt="Ramos Glamour"
                   fill
                   className="object-contain"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-              </div>
-              {/* Desktop Logo (Horizontal) */}
-              <div className="relative hidden h-12 w-48 md:block">
-                <Image
-                  src="/logo-horizontal.png"
-                  alt="Ramos Glamour"
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  priority
+                  sizes="(max-width: 1024px) 128px, 192px"
                 />
               </div>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden items-center gap-8 md:flex">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
+          {/* Right Section: Desktop Right Links & Actions */}
+          <div className="flex flex-1 items-center justify-end gap-6">
+            {/* Desktop Right Links */}
+            <nav className="hidden items-center gap-10 lg:flex">
+              {rightLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "group relative py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "text-brand-charcoal"
-                      : "text-brand-charcoal/70 hover:text-brand-charcoal"
+                    "group relative py-2 text-[11px] font-semibold tracking-[0.2em] transition-colors",
+                    useWhite 
+                      ? "text-brand-white/80 hover:text-brand-white" 
+                      : "text-brand-midnight/60 hover:text-brand-midnight"
                   )}
                 >
                   {link.label}
-                  <span
-                    className={cn(
-                      "absolute bottom-0 left-0 h-0.5 w-full bg-brand-olive transition-transform duration-300",
-                      isActive
-                        ? "scale-x-100"
-                        : "scale-x-0 group-hover:scale-x-100"
-                    )}
-                  />
+                  <span className="absolute bottom-0 left-1/2 h-[1px] w-0 bg-brand-gold transition-all duration-300 group-hover:left-0 group-hover:w-full" />
                 </Link>
-              );
-            })}
-          </nav>
+              ))}
+            </nav>
 
-          {/* Right Section (Cart + Auth) */}
-          <div className="flex flex-1 items-center justify-end gap-3 md:flex-none">
-            <CartHeaderButton />
-
-            {/* User Auth Section (Desktop) */}
-            <div className="hidden md:block">
-              {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-brand-charcoal/10 transition hover:border-brand-olive focus:outline-none">
-                      {user.avatarUrl ? (
-                        <Image
-                          src={user.avatarUrl}
-                          alt={user.displayName || "Utilizador"}
-                          width={40}
-                          height={40}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <UserIcon className="h-5 w-5 text-brand-charcoal" />
-                      )}
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="z-50 w-56 rounded-lg border border-gray-200 bg-white shadow-lg"
+            <div className="flex items-center gap-4">
+              {/* User Profile */}
+              <div className="hidden lg:block">
+                {user ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className={cn(
+                        "flex h-12 w-12 items-center justify-center overflow-hidden rounded-full transition-all duration-300 focus:outline-none",
+                        useWhite ? "hover:bg-white/10" : "hover:bg-brand-midnight/5"
+                      )}>
+                        {user.avatarUrl ? (
+                          <div className="h-9 w-9 overflow-hidden rounded-full border border-brand-midnight/5">
+                            <Image
+                              src={user.avatarUrl}
+                              alt={user.displayName || "Utilizador"}
+                              width={36}
+                              height={36}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <UserIcon className={cn("h-6 w-6", useWhite ? "text-brand-white" : "text-brand-midnight")} strokeWidth={1.5} />
+                        )}
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56 glass border-none shadow-xl">
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium">{user.displayName || "Cliente"}</p>
+                          <p className="text-xs text-brand-midnight/50">{user.email}</p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator className="bg-brand-midnight/5" />
+                      <DropdownMenuItem asChild>
+                        <Link href="/perfil" className="cursor-pointer">
+                          <UserIcon className="mr-2 h-4 w-4" />
+                          <span>O meu perfil</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-brand-midnight/5" />
+                      <DropdownMenuItem
+                        onClick={() => signOut()}
+                        className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50"
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Sair</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <button
+                    onClick={() => signInWithGoogle(pathname)}
+                    className={cn(
+                      "text-[11px] font-semibold tracking-[0.2em] transition",
+                      useWhite ? "text-brand-white/80 hover:text-brand-white" : "text-brand-midnight/70 hover:text-brand-midnight"
+                    )}
                   >
-                    <DropdownMenuLabel className="font-normal text-brand-charcoal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {user.displayName || "Cliente"}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {user.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/perfil" className="cursor-pointer">
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        <span>O meu perfil</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => signOut()}
-                      className="cursor-pointer text-red-600 focus:text-red-700"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Sair</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <button
-                  onClick={() => signInWithGoogle(pathname)}
-                  className="rounded-full border border-brand-charcoal px-5 py-2 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg md:px-6"
-                >
-                  Entrar
-                </button>
-              )}
-            </div>
+                    ENTRAR
+                  </button>
+                )}
+              </div>
 
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-brand-charcoal transition hover:bg-brand-bg md:hidden"
-              aria-label="Abrir menu"
-            >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
+              <CartHeaderButton useWhite={useWhite} />
+            </div>
           </div>
         </div>
       </div>
@@ -199,62 +233,70 @@ export function HeaderClient({ user }: HeaderClientProps) {
       {isMenuOpen && (
         <div
           ref={menuRef}
-          className="absolute left-0 top-full w-full border-t border-brand-charcoal/5 bg-white shadow-lg animate-in slide-in-from-top-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 md:hidden"
+          className="absolute left-0 top-full w-full bg-brand-bg/95 backdrop-blur-xl border-t border-brand-midnight/5 shadow-2xl animate-in slide-in-from-top-2 lg:hidden"
         >
-          <div className="flex flex-col py-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsMenuOpen(false)}
-                className={cn(
-                  "px-6 py-4 text-sm font-medium transition-colors hover:bg-brand-bg",
-                  pathname === link.href
-                    ? "text-brand-charcoal"
-                    : "text-brand-charcoal/70"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <div className="my-2 h-px bg-brand-charcoal/5" />
-            <div className="px-6 py-4">
+          <div className="flex flex-col p-8 space-y-8">
+            <div className="space-y-4">
+              <p className="text-[10px] font-bold tracking-[0.3em] text-brand-midnight/40">LOJA</p>
+              {leftLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block text-2xl font-light tracking-tight text-brand-midnight"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-[10px] font-bold tracking-[0.3em] text-brand-midnight/40">INFO</p>
+              {rightLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block text-xl font-light tracking-tight text-brand-midnight"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="pt-8 border-t border-brand-midnight/5">
               {user ? (
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 overflow-hidden rounded-full border border-brand-charcoal/10">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 overflow-hidden rounded-full border border-brand-midnight/10">
                       {user.avatarUrl ? (
                         <Image
                           src={user.avatarUrl}
                           alt={user.displayName || "Utilizador"}
-                          width={40}
-                          height={40}
+                          width={48}
+                          height={48}
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <UserIcon className="h-5 w-5 m-auto mt-2 text-brand-charcoal" />
+                        <UserIcon className="h-6 w-6 m-auto mt-3 text-brand-midnight" />
                       )}
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-brand-charcoal">
-                        {user.displayName || "Cliente"}
-                      </span>
-                      <span className="text-xs text-brand-charcoal/60">
-                        {user.email}
-                      </span>
+                      <span className="text-sm font-semibold">{user.displayName || "Cliente"}</span>
+                      <span className="text-xs text-brand-midnight/50">{user.email}</span>
                     </div>
                   </div>
                   <Link
                     href="/perfil"
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-2 text-sm font-medium text-brand-charcoal hover:text-brand-olive"
+                    className="flex items-center gap-3 text-sm"
                   >
                     <UserIcon className="h-4 w-4" />
                     O meu perfil
                   </Link>
                   <button
                     onClick={() => signOut()}
-                    className="flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700"
+                    className="flex items-center gap-3 text-sm text-red-600"
                   >
                     <LogOut className="h-4 w-4" />
                     Sair
@@ -263,9 +305,9 @@ export function HeaderClient({ user }: HeaderClientProps) {
               ) : (
                 <button
                   onClick={() => signInWithGoogle(pathname)}
-                  className="w-full rounded-full border border-brand-charcoal py-3 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
+                  className="w-full rounded-full bg-brand-midnight py-4 text-sm font-semibold tracking-[0.2em] text-brand-white"
                 >
-                  Entrar com Google
+                  ENTRAR COM GOOGLE
                 </button>
               )}
             </div>
