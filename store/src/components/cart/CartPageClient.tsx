@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from "lucide-react";
 
 import { signInWithGoogle } from "@/lib/actions/auth";
 import { createClient } from "@/lib/supabase/client";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils/format";
+import { cn } from "@/lib/utils";
 
 export function CartPageClient() {
   const router = useRouter();
+  const pathname = usePathname();
   const items = useCartStore((state) => state.items);
   const totalItems = useCartStore((state) => state.totalItems);
   const totalPrice = useCartStore((state) => state.totalPrice);
@@ -25,154 +25,157 @@ export function CartPageClient() {
 
   useEffect(() => {
     const supabase = createClient();
-
     void supabase.auth.getUser().then(({ data }) => {
       setIsAuthenticated(Boolean(data.user));
     });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(Boolean(session?.user));
     });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   if (!hasHydrated) {
     return (
-      <section className="rounded-[2rem] bg-white/80 px-6 py-16 text-center shadow-[0_16px_35px_rgba(98,98,96,0.08)]">
-        <p className="text-brand-charcoal/50 text-sm">A carregar...</p>
-      </section>
+      <div className="flex flex-col items-center justify-center py-32 text-center">
+        <p className="text-[10px] font-bold tracking-[0.3em] animate-pulse">CARREGANDO...</p>
+      </div>
     );
   }
   
   if (items.length === 0) {
     return (
-      <section className="rounded-[2rem] bg-white/80 px-6 py-16 text-center shadow-[0_16px_35px_rgba(98,98,96,0.08)]">
-        <h1 className="text-3xl font-semibold text-brand-charcoal">
-          O teu carrinho está vazio
-        </h1>
-        <p className="mt-3 text-brand-charcoal/75">
-          Escolhe os teus favoritos e adiciona-os antes de finalizar a encomenda.
+      <div className="flex flex-col items-center justify-center py-32 text-center">
+        <div className="mb-8 h-20 w-20 rounded-full bg-brand-gold/5 flex items-center justify-center">
+          <ShoppingBag className="h-8 w-8 text-brand-gold/40" strokeWidth={1} />
+        </div>
+        <h2 className="heading-luxury text-3xl font-light mb-4">O seu carrinho está vazio</h2>
+        <p className="text-[11px] font-medium tracking-widest text-brand-midnight/40 uppercase mb-8">
+          DESCUBRA AS NOSSAS ÚLTIMAS COLECÇÕES E ENCONTRE A PEÇA PERFEITA.
         </p>
         <Link
           href="/catalogo"
-          className="mt-6 inline-flex rounded-full bg-brand-olive px-6 py-3 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"
+          className="group flex items-center gap-4 bg-brand-midnight px-8 py-4 text-[10px] font-bold tracking-[0.3em] text-brand-white transition-all hover:bg-brand-gold"
         >
-          Ir para o catálogo
+          EXPLORAR CATÁLOGO
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Link>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section className="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
-      <div className="space-y-4">
+    <div className="grid gap-20 lg:grid-cols-[1.2fr_0.8fr]">
+      {/* Items List */}
+      <div className="space-y-12">
         {items.map((item) => (
           <article
             key={item.itemKey}
-            className="flex gap-4 rounded-[1.5rem] bg-white/85 p-4 shadow-[0_16px_35px_rgba(98,98,96,0.08)]"
+            className="group flex gap-8 border-b border-brand-midnight/5 pb-12 last:border-0"
           >
-            <div className="relative h-20 w-[60px] shrink-0 overflow-hidden rounded-xl">
+            {/* Portrait Thumbnail */}
+            <div className="relative aspect-[2/3] w-24 shrink-0 overflow-hidden bg-brand-midnight/5 md:w-32">
               <Image
                 src={item.image}
                 alt={item.displayName}
                 fill
                 className="object-cover"
-                sizes="60px"
+                sizes="(max-width: 768px) 96px, 128px"
               />
             </div>
 
-            <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <h2 className="truncate text-xl font-semibold text-brand-charcoal">
-                  {item.displayName}
-                </h2>
-                <p className="mt-1 text-sm text-brand-charcoal/70">
-                  {formatPrice(item.price)}
-                </p>
+            <div className="flex flex-1 flex-col justify-between">
+              <div className="flex justify-between items-start gap-4">
+                <div>
+                  <p className="text-[9px] font-bold tracking-[0.2em] text-brand-gold mb-2 uppercase">
+                    RAMOS GLAMOUR
+                  </p>
+                  <h2 className="heading-luxury text-xl font-light md:text-2xl">
+                    {item.displayName}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeItem(item.itemKey)}
+                  className="p-2 text-brand-midnight/20 hover:text-red-600 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="inline-flex items-center rounded-full border border-brand-charcoal/15 bg-brand-white p-1">
+              <div className="mt-8 flex items-end justify-between">
+                {/* Quantity Controller */}
+                <div className="flex items-center border border-brand-midnight/10">
                   <button
                     type="button"
-                    onClick={() => {
-                      updateQuantity(item.itemKey, item.quantity - 1);
-                    }}
-                    className="rounded-full p-2 text-brand-charcoal transition hover:bg-brand-bg"
+                    onClick={() => updateQuantity(item.itemKey, item.quantity - 1)}
+                    className="p-3 transition-colors hover:bg-brand-midnight/5"
                   >
-                    <Minus className="h-4 w-4" />
+                    <Minus className="h-3 w-3" />
                   </button>
-                  <span className="w-12 text-center text-sm font-medium">
+                  <span className="w-10 text-center text-[11px] font-semibold">
                     {item.quantity}
                   </span>
                   <button
                     type="button"
-                    onClick={() => {
-                      updateQuantity(item.itemKey, item.quantity + 1);
-                    }}
-                    className="rounded-full p-2 text-brand-charcoal transition hover:bg-brand-bg"
+                    onClick={() => updateQuantity(item.itemKey, item.quantity + 1)}
+                    className="p-3 transition-colors hover:bg-brand-midnight/5"
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3 w-3" />
                   </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    removeItem(item.itemKey);
-                  }}
-                  className="rounded-full border border-brand-charcoal/10 p-3 text-brand-charcoal transition hover:bg-brand-bg"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <p className="font-sans text-sm font-medium tracking-widest">
+                  {formatPrice(item.price * item.quantity)}
+                </p>
               </div>
             </div>
           </article>
         ))}
       </div>
 
-      <aside className="rounded-[2rem] bg-white/90 p-6 shadow-[0_16px_35px_rgba(98,98,96,0.08)] lg:sticky lg:top-28 lg:h-fit">
-        <p className="text-sm uppercase tracking-[0.3em] text-brand-charcoal/65">
-          Resumo
-        </p>
-        <div className="mt-6 space-y-4 text-brand-charcoal">
-          <div className="flex items-center justify-between">
-            <span>Total de itens</span>
-            <span className="font-medium">{totalItems}</span>
+      {/* Summary Sidebar */}
+      <aside className="lg:sticky lg:top-32 h-fit space-y-10">
+        <div className="space-y-6">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em]">RESUMO DA ENCOMENDA</h3>
+          
+          <div className="space-y-4 border-y border-brand-midnight/5 py-8">
+            <div className="flex items-center justify-between text-[11px] font-medium tracking-widest text-brand-midnight/60">
+              <span>SUBTOTAL ({totalItems} ITENS)</span>
+              <span>{formatPrice(totalPrice)}</span>
+            </div>
+            <div className="flex items-center justify-between text-[11px] font-medium tracking-widest text-brand-midnight/60">
+              <span>ENVIO ESTIMADO</span>
+              <span className="text-brand-gold">GRÁTIS</span>
+            </div>
           </div>
-          <div className="flex items-center justify-between text-lg font-semibold">
-            <span>Total</span>
-            <span>{formatPrice(totalPrice)}</span>
+
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold tracking-[0.2em]">TOTAL</span>
+            <span className="text-2xl font-sans font-medium tracking-widest">{formatPrice(totalPrice)}</span>
           </div>
         </div>
 
-        {isAuthenticated ? (
-          <button
-            type="button"
-            onClick={() => {
-              router.push("/checkout");
-            }}
-            className="mt-8 w-full rounded-full bg-brand-olive px-5 py-4 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"
-          >
-            Finalizar encomenda
-          </button>
-        ) : (
-          <div className="mt-8">
-            <button
-              type="button"
-              onClick={() => signInWithGoogle("/checkout")}
-              className="w-full rounded-full bg-brand-olive px-5 py-4 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"
-            >
-              Finalizar encomenda
-            </button>
-          </div>
-        )}
+        <div className="space-y-4 pt-10 border-t border-brand-midnight/5">
+           <p className="text-[10px] text-brand-midnight/40 leading-relaxed italic">
+             * Ao finalizar a sua encomenda, concorda com os nossos Termos e Condições de venda.
+           </p>
+           
+           <button
+             type="button"
+             onClick={() => isAuthenticated ? router.push("/checkout") : signInWithGoogle("/checkout")}
+             className="w-full bg-brand-gold py-5 text-[11px] font-bold tracking-[0.3em] text-brand-white transition-all hover:bg-brand-midnight"
+           >
+             FINALIZAR ENCOMENDA
+           </button>
+
+           <Link
+             href="/catalogo"
+             className="block text-center text-[10px] font-bold tracking-[0.3em] text-brand-midnight/40 hover:text-brand-midnight transition-colors"
+           >
+             CONTINUAR A COMPRAR
+           </Link>
+        </div>
       </aside>
-    </section>
+    </div>
   );
 }

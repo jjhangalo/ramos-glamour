@@ -115,18 +115,18 @@ export function SheetContent({ children, className }: SheetContentProps) {
   );
 }
 
-export function SheetHeader({ children }: { children: React.ReactNode }) {
-  return <div className="mb-6 space-y-2">{children}</div>;
+export function SheetHeader({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <div className={cn("mb-6 space-y-2", className)}>{children}</div>;
 }
 
-export function SheetTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-3xl font-semibold text-brand-charcoal">{children}</h2>;
+export function SheetTitle({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <h2 className={cn("text-3xl font-semibold text-brand-charcoal", className)}>{children}</h2>;
 }
 
-export function SheetDescription({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm leading-6 text-brand-charcoal/70">{children}</p>;
+export function SheetDescription({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <p className={cn("text-sm leading-6 text-brand-charcoal/70", className)}>{children}</p>;
 }
 
-export function SheetFooter({ children }: { children: React.ReactNode }) {
-  return <div className="mt-6 flex flex-col gap-3 sm:flex-row">{children}</div>;
+export function SheetFooter({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <div className={cn("mt-6 flex flex-col gap-3 sm:flex-row", className)}>{children}</div>;
 }

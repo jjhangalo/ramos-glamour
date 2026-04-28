@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
         pathname: "/storage/v1/object/public/**",
       },
     ],
+    qualities: [100, 75],
   },
   outputFileTracingRoot: path.resolve(process.cwd(), "../"),
 };

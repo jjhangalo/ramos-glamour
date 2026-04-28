@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product/ProductCard";
+import { CatalogFilters } from "@/components/product/CatalogFilters";
 import { getCategories, getProducts } from "@/lib/actions/products";
+import { cn } from "@/lib/utils";
 
 type CatalogPageProps = {
   searchParams?: Promise<{
@@ -9,6 +11,8 @@ type CatalogPageProps = {
     ordem?: string;
     page?: string;
     busca?: string;
+    novidades?: string;
+    promo?: string;
   }>;
 };
 
@@ -16,8 +20,10 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   const params = (await searchParams) ?? {};
   const categoria = params.categoria;
   const busca = params.busca;
+  const isNovidades = params.novidades === "true";
+  const isPromo = params.promo === "true";
   const page = params.page ? parseInt(params.page) : 1;
-  const limit = 16;
+  const limit = 12;
 
   let order: "newest" | "price-asc" | "price-desc" = "newest";
   if (params.ordem === "preco-asc") order = "price-asc";
@@ -25,7 +31,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
   const [products, categories] = await Promise.all([
     getProducts({
-      categorySlug: categoria,
+      categorySlug: categoria === "todas" ? undefined : categoria,
       order,
       limit,
       search: busca,
@@ -33,120 +39,92 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
     getCategories(),
   ]);
 
+  const activeCategory = categories.find(c => c.slug === categoria);
+
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8">
-      <section className="space-y-4">
-        <p className="text-sm uppercase tracking-[0.3em] text-brand-charcoal/70">
-          Catálogo
-        </p>
-        <div className="flex flex-col gap-4 rounded-[2rem] bg-white/75 p-6 shadow-[0_16px_35px_rgba(98,98,96,0.08)] md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-4xl font-semibold text-brand-charcoal">
-              Explora todas as peças
+    <main className="flex flex-1 flex-col">
+      {/* ── Editorial Page Header ───────────────────────────────────── */}
+      <section className="bg-brand-white border-b border-brand-midnight/5 py-12 md:py-24">
+        <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
+          <div className="flex flex-col items-center text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-brand-gold mb-4">
+              COLEÇÕES
+            </p>
+            <h1 className="heading-luxury text-4xl font-light md:text-7xl">
+              {activeCategory?.name || (isNovidades ? "Novidades" : isPromo ? "Ofertas" : "O Catálogo")}
             </h1>
-            <p className="mt-2 text-base text-brand-charcoal/75">
-              Filtra por categoria e organiza os produtos como preferires.
+            <p className="mt-6 max-w-xl text-[11px] font-medium leading-relaxed tracking-widest text-brand-midnight/40 uppercase">
+              Descubra a nossa curadoria exclusiva de peças desenhadas para elevar a sua essência. Cada detalhe, uma nova forma de elegância.
             </p>
           </div>
-
-          <form className="flex flex-col gap-4">
-            <label className="space-y-2 text-sm text-brand-charcoal">
-              <span>Pesquisar</span>
-              <input
-                name="busca"
-                type="text"
-                defaultValue={busca ?? ""}
-                placeholder="Nome do produto..."
-                className="w-full rounded-full border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
-              />
-            </label>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="space-y-2 text-sm text-brand-charcoal">
-                <span>Categoria</span>
-                <select
-                  name="categoria"
-                  defaultValue={categoria ?? "todas"}
-                  className="w-full rounded-full border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
-                >
-                  <option value="todas">Todas</option>
-                  {categories.map((item) => (
-                    <option key={item.id} value={item.slug}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="space-y-2 text-sm text-brand-charcoal">
-                <span>Ordenação</span>
-                <select
-                  name="ordem"
-                  defaultValue={params.ordem ?? "recentes"}
-                  className="w-full rounded-full border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
-                >
-                  <option value="recentes">Mais recentes</option>
-                  <option value="preco-asc">Menor preço</option>
-                  <option value="preco-desc">Maior preço</option>
-                </select>
-              </label>
-
-              <div className="flex gap-2 sm:col-span-2">
-                <button
-                  type="submit"
-                  className="flex-1 rounded-full bg-brand-olive px-5 py-3 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"
-                >
-                  Aplicar filtros
-                </button>
-                {params.busca || params.categoria || params.ordem ? (
-                  <Link
-                    href="/catalogo"
-                    className="rounded-full bg-brand-charcoal/5 px-5 py-3 text-sm font-medium text-brand-charcoal transition hover:bg-brand-charcoal/10"
-                  >
-                    Limpar
-                  </Link>
-                ) : null}
-              </div>
-            </div>
-          </form>
         </div>
       </section>
 
-      {products.length > 0 ? (
-        <div className="space-y-10">
-          <section className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </section>
+      <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-12 px-6 py-12 lg:flex-row lg:px-12 lg:py-20">
+        
+        {/* ── Filter Component (Sidebar + Mobile Drawer) ───────────────── */}
+        <CatalogFilters 
+          categories={categories}
+          activeCategory={categoria}
+          activeOrder={params.ordem}
+          activeSearch={busca}
+          totalProducts={products.length}
+        />
 
-          <section className="flex items-center justify-center gap-4">
-            {page > 1 && (
-              <Link
-                href={`/catalogo?page=${page - 1}${categoria ? `&categoria=${categoria}` : ""}${busca ? `&busca=${busca}` : ""}${params.ordem ? `&ordem=${params.ordem}` : ""}`}
-                className="rounded-full border border-brand-charcoal/15 px-6 py-2 text-sm font-medium text-brand-charcoal hover:bg-brand-charcoal/5"
+        {/* ── Product Grid ───────────────────────────────────────────── */}
+        <div className="flex-1 space-y-16">
+          {products.length > 0 ? (
+            <>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-3 xl:grid-cols-3">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-center gap-8 pt-12 border-t border-brand-midnight/5">
+                {page > 1 ? (
+                  <Link
+                    href={`/catalogo?page=${page - 1}${categoria ? `&categoria=${categoria}` : ""}${busca ? `&busca=${busca}` : ""}${params.ordem ? `&ordem=${params.ordem}` : ""}`}
+                    className="text-[10px] font-bold tracking-[0.3em] text-brand-midnight/40 hover:text-brand-midnight"
+                  >
+                    ANTERIOR
+                  </Link>
+                ) : (
+                  <span className="text-[10px] font-bold tracking-[0.3em] opacity-10 cursor-not-allowed">ANTERIOR</span>
+                )}
+                
+                <span className="text-[11px] font-semibold tracking-widest text-brand-gold">
+                   {page.toString().padStart(2, '0')}
+                </span>
+
+                {products.length === limit ? (
+                  <Link
+                    href={`/catalogo?page=${page + 1}${categoria ? `&categoria=${categoria}` : ""}${busca ? `&busca=${busca}` : ""}${params.ordem ? `&ordem=${params.ordem}` : ""}`}
+                    className="text-[10px] font-bold tracking-[0.3em] text-brand-midnight/40 hover:text-brand-midnight"
+                  >
+                    PRÓXIMO
+                  </Link>
+                ) : (
+                  <span className="text-[10px] font-bold tracking-[0.3em] opacity-10 cursor-not-allowed">PRÓXIMO</span>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-32 text-center">
+              <p className="heading-luxury text-2xl font-light italic opacity-30 mb-6">
+                Nenhum tesouro encontrado...
+              </p>
+              <Link 
+                href="/catalogo"
+                className="text-[10px] font-bold tracking-[0.3em] border-b border-brand-midnight/20 pb-1 hover:border-brand-gold transition-colors"
               >
-                Anterior
+                VER TODAS AS PEÇAS
               </Link>
-            )}
-            <span className="text-sm font-medium text-brand-charcoal">
-              Página {page}
-            </span>
-            {products.length === limit && (
-              <Link
-                href={`/catalogo?page=${page + 1}${categoria ? `&categoria=${categoria}` : ""}${busca ? `&busca=${busca}` : ""}${params.ordem ? `&ordem=${params.ordem}` : ""}`}
-                className="rounded-full border border-brand-charcoal/15 px-6 py-2 text-sm font-medium text-brand-charcoal hover:bg-brand-charcoal/5"
-              >
-                Próxima
-              </Link>
-            )}
-          </section>
+            </div>
+          )}
         </div>
-      ) : (
-        <section className="rounded-[2rem] bg-white/80 px-6 py-16 text-center text-brand-charcoal shadow-[0_16px_35px_rgba(98,98,96,0.08)]">
-          Nenhum produto encontrado
-        </section>
-      )}
+      </div>
     </main>
   );
 }
