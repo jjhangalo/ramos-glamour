@@ -30,6 +30,50 @@ export async function getProfile() {
       (typeof user.user_metadata.avatar_url === "string"
         ? user.user_metadata.avatar_url
         : null) ?? null,
+    created_at: user.created_at,
+    email_verified: !!user.email_confirmed_at,
+  };
+}
+
+export async function getDashboardData() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Sessão inválida.");
+  }
+
+  // Fetch Latest Order
+  const { data: latestOrder } = await supabase
+    .from("orders")
+    .select("*, order_items(*), addresses(*)")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  // Fetch Default Address
+  const { data: defaultAddress } = await supabase
+    .from("addresses")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("is_default", true)
+    .maybeSingle();
+
+  // Determine Location Signal (Default address city or latest order city)
+  let location = null;
+  if (defaultAddress?.city) {
+    location = `${defaultAddress.city}, AO`;
+  } else if (latestOrder?.addresses?.city) {
+    location = `${latestOrder.addresses.city}, AO`;
+  }
+
+  return {
+    latestOrder,
+    defaultAddress,
+    location,
   };
 }
 
