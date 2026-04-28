@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { ProfileNav } from "@/components/profile/ProfileNav";
 import { createClient } from "@/lib/supabase/server";
+import { getDashboardData, getProfile } from "@/lib/actions/profile";
+import { ProfileIdentity } from "@/components/profile/ProfileIdentity";
 
 export default async function ProfileLayout({
   children,
@@ -14,19 +16,20 @@ export default async function ProfileLayout({
     redirect("/");
   }
 
+  const [profile, dashboardData] = await Promise.all([
+    getProfile(),
+    getDashboardData(),
+  ]);
+
   return (
     <main className="flex flex-1 flex-col">
-      {/* Editorial Header */}
-      <section className="bg-brand-white border-b border-brand-midnight/5 py-12 md:py-24">
+      {/* Administrative Identity Header */}
+      <section className="bg-brand-white/50 border-b border-brand-midnight/5 py-10 md:py-16">
         <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
-          <div className="flex flex-col items-center text-center">
-            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-brand-gold mb-4">
-              A SUA CONTA
-            </p>
-            <h1 className="heading-luxury text-4xl font-light md:text-7xl">
-              Olá, <span className="italic">{user.user_metadata.full_name?.split(' ')[0] || 'Cliente'}</span>
-            </h1>
-          </div>
+          <ProfileIdentity 
+            profile={profile} 
+            location={dashboardData.location} 
+          />
         </div>
       </section>
 
