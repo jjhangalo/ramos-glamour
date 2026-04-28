@@ -8,7 +8,9 @@ import { createClient } from "@/lib/supabase/server";
 export async function signInWithGoogle(returnTo?: string) {
   const supabase = await createClient();
   const headerStore = await headers();
-  const origin = headerStore.get("origin") ?? "http://localhost:3000";
+  const host = headerStore.get("x-forwarded-host") || headerStore.get("host");
+  const protocol = headerStore.get("x-forwarded-proto") || "http";
+  const origin = host ? `${protocol}://${host}` : "http://localhost:3000";
   const callbackUrl = new URL(`${origin}/auth/callback`);
 
   if (returnTo) {
