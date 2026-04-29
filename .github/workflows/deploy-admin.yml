@@ -79,17 +79,15 @@ jobs:
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=${{ inputs.environment || (github.ref == 'refs/heads/main' && 'production' || 'preview') }} --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./admin
 
       - name: Build Project Artifacts
         run: vercel build ${{ (inputs.environment == 'production' || (github.ref == 'refs/heads/main' && !inputs.environment)) && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./admin
 
       - name: Upload .vercel Directory
         uses: actions/upload-artifact@v4
         with:
           name: vercel-admin-artifact
-          path: admin/.vercel
+          path: .vercel
           retention-days: 1
 
   deploy:
@@ -110,8 +108,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: vercel-admin-artifact
-          path: admin/.vercel
+          path: .vercel
 
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt ${{ (inputs.environment == 'production' || (github.ref == 'refs/heads/main' && !inputs.environment)) && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./admin
