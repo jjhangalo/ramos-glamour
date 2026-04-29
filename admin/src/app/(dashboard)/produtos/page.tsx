@@ -10,8 +10,11 @@ import { getProducts } from "@/lib/actions/products";
 
 import { ProductFilters } from "@/components/products/ProductFilters";
 import { ProductRowActions } from "@/components/products/ProductRowActions";
-import { ProductFAB } from "@/components/products/ProductFAB";
-import { ProductPagination } from "@/components/products/ProductPagination";
+
+import { PageHeader } from "@/components/list/PageHeader";
+import { MobileCardRow } from "@/components/list/MobileCardRow";
+import { FAB } from "@/components/list/FAB";
+import { ProductPaginationWrapper } from "@/components/products/ProductPaginationWrapper";
 
 type ProductsPageProps = {
   searchParams?: Promise<{
@@ -50,13 +53,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     limit: pageSize,
   });
 
+  const totalPages = Math.ceil(count / pageSize);
+
   return (
     <PageCanvas size="list" className="relative space-y-6 pb-32 pt-8">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-950">
-          Produtos
-        </h1>
-      </header>
+      <PageHeader title="Produtos" />
 
       <ProductFilters categories={flatCategories} />
 
@@ -138,10 +139,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             {/* Mobile List */}
             <div className="md:hidden divide-y divide-slate-100">
               {products.map((product) => (
-                <div key={product.id} className="flex min-h-[72px] items-center gap-4 p-4 hover:bg-slate-50/50 transition-colors">
-                  {/* Left: Thumbnail */}
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border border-slate-100 bg-slate-100 shadow-sm">
-                    {product.product_images?.[0]?.url ? (
+                <MobileCardRow
+                  key={product.id}
+                  thumbnail={
+                    product.product_images?.[0]?.url ? (
                       <Image
                         src={product.product_images[0].url}
                         alt={product.name}
@@ -149,59 +150,40 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                         sizes="48px"
                         className="object-cover"
                       />
-                    ) : null}
-                  </div>
-
-                  {/* Right: Info */}
-                  <div className="flex flex-1 flex-col min-w-0">
-                    {/* Line 1: Name + Featured */}
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="truncate font-medium text-slate-900 text-sm">
-                        {product.name}
-                      </h3>
-                      {product.is_featured ? (
-                        <Star className="h-3 w-3 fill-amber-400 text-amber-400 shrink-0" />
-                      ) : null}
-                    </div>
-
-                    {/* Line 2: Categories */}
-                    <p className="truncate text-xs text-slate-500">
-                      {product.categories?.length
-                        ? product.categories.map((c) => c.name).join(", ")
-                        : "Sem categoria"}
-                    </p>
-
-                    {/* Line 3: Price + Status */}
-                    <div className="mt-1 flex items-center gap-3">
-                      <span className="text-sm font-semibold text-slate-900">
-                        {formatPrice(product.price)}
-                      </span>
-                      <span className={cn(
-                        "text-[9px] font-bold uppercase tracking-wider",
-                        product.is_active ? "text-emerald-600" : "text-slate-400"
-                      )}>
-                        {product.is_active ? "Activo" : "Inactivo"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Far right: Actions */}
-                  <div className="shrink-0">
+                    ) : null
+                  }
+                  title={product.name}
+                  isFeatured={product.is_featured}
+                  subtitle={
+                    product.categories?.length
+                      ? product.categories.map((c) => c.name).join(", ")
+                      : "Sem categoria"
+                  }
+                  meta={formatPrice(product.price)}
+                  badge={
+                    <span className={cn(
+                      product.is_active ? "text-emerald-600" : "text-slate-400"
+                    )}>
+                      {product.is_active ? "Activo" : "Inactivo"}
+                    </span>
+                  }
+                  actions={
                     <ProductRowActions
                       productId={product.id}
                       isActive={product.is_active}
                       isFeatured={product.is_featured}
                     />
-                  </div>
-                </div>
+                  }
+                />
               ))}
             </div>
           </div>
 
-          <ProductPagination
+          <ProductPaginationWrapper
             totalCount={count}
             currentPage={currentPage}
             pageSize={pageSize}
+            totalPages={totalPages}
           />
         </>
       ) : (
@@ -211,7 +193,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         />
       )}
 
-      <ProductFAB />
+      <FAB href="/produtos/novo" label="Novo Produto" />
     </PageCanvas>
   );
 }
+
+// Client wrapper for pagination to handle router logic
+import { ProductPaginationWrapper } from "@/components/products/ProductPaginationWrapper";

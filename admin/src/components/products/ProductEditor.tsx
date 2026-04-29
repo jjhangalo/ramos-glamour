@@ -1318,6 +1318,6 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
           });
         }}
       />
-    </div>
+    </PageCanvas>
   );
 }
