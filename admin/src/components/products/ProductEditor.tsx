@@ -580,7 +580,6 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               {product ? product.name : "Novo produto"}
             </h1>
           </div>
-          </div>
         </header>
 
         <nav className="sticky top-0 z-20 -mx-4 border-b border-slate-200 bg-slate-50/90 px-4 py-2 backdrop-blur-md md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
@@ -999,7 +998,11 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                           />
                         </FormControl>
                       </FormItem>
-                                   <div className="mt-4 flex items-center justify-between gap-4">
+                    )}
+                  />
+                </div>
+
+                <div className="mt-4 flex items-center justify-between gap-4">
                   <FormField
                     control={variantForm.control}
                     name="is_available"
@@ -1315,7 +1318,6 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
           });
         }}
       />
-    </div>
     </div>
   );
 }

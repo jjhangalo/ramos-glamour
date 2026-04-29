@@ -8,9 +8,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { ProductRecord } from "@/lib/types";
 
 type ProductFilters = {
-  category?: string;
+  category_ids?: string[];
   status?: "all" | "active" | "inactive";
   search?: string;
+  is_featured?: boolean;
+  page?: number;
+  limit?: number;
 };
 
 type ProductInput = {
@@ -122,18 +125,23 @@ async function syncProductCategories(productId: string, categoryIds: string[]) {
 
 export async function getProducts(filters: ProductFilters = {}) {
   const supabase = createAdminClient();
+  const page = filters.page ?? 1;
+  const limit = filters.limit ?? 20;
+  const offset = (page - 1) * limit;
+
   let query = supabase
     .from("products")
     .select(
       "id, name, description, price, stock, category_id, is_active, is_featured, created_at, updated_at, product_images(id, product_id, url, position), product_variants(id)",
+      { count: "exact" }
     )
     .order("created_at", { ascending: false });
 
-  if (filters.category && filters.category !== "all") {
+  if (filters.category_ids && filters.category_ids.length > 0) {
     const { data: relations, error: relationError } = await supabase
       .from("product_categories")
       .select("product_id")
-      .eq("category_id", filters.category);
+      .in("category_id", filters.category_ids);
 
     if (relationError) {
       throw new Error(relationError.message);
@@ -141,7 +149,7 @@ export async function getProducts(filters: ProductFilters = {}) {
 
     const productIds = [...new Set((relations ?? []).map((row) => row.product_id))];
     if (!productIds.length) {
-      return [];
+      return { products: [], count: 0 };
     }
 
     query = query.in("id", productIds);
@@ -155,20 +163,28 @@ export async function getProducts(filters: ProductFilters = {}) {
     query = query.eq("is_active", false);
   }
 
+  if (typeof filters.is_featured === "boolean") {
+    query = query.eq("is_featured", filters.is_featured);
+  }
+
   if (filters.search) {
     query = query.ilike("name", `%${filters.search}%`);
   }
 
-  // Aplica limite absoluto de 20 itens como requisito de UX
-  query = query.limit(20);
+  query = query.range(offset, offset + limit - 1);
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return attachCategoriesToProducts((data ?? []) as ProductRecord[]);
+  const products = await attachCategoriesToProducts((data ?? []) as ProductRecord[]);
+  
+  return {
+    products,
+    count: count ?? 0,
+  };
 }
 
 export async function getProduct(id: string) {
@@ -384,6 +400,36 @@ export async function reorderProductImages(productId: string, orderedIds: string
   }
 
   revalidatePath(`/produtos/${productId}`);
+  revalidatePath("/produtos");
+  return { success: true };
+}
+
+export async function toggleProductActive(productId: string, currentValue: boolean) {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("products")
+    .update({ is_active: !currentValue })
+    .eq("id", productId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/produtos");
+  return { success: true };
+}
+
+export async function toggleProductFeatured(productId: string, currentValue: boolean) {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("products")
+    .update({ is_featured: !currentValue })
+    .eq("id", productId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
   revalidatePath("/produtos");
   return { success: true };
 }
