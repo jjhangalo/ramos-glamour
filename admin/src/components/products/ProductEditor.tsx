@@ -16,6 +16,7 @@ import {
   Save,
 } from "lucide-react";
 import { StickySaveBar } from "@/components/ui/StickySaveBar";
+import { PageCanvas } from "@/components/ui/page-canvas";
 import { useMemo, useState, useTransition, useCallback, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
