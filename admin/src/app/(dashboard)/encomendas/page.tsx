@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { getOrders } from "@/lib/actions/orders";
 import { OrderGlobalSearch } from "@/components/orders/OrderGlobalSearch";
 import { OrderListClient } from "@/components/orders/OrderListClient";
+import { PageCanvas } from "@/components/ui/page-canvas";
 
 type OrdersPageProps = {
   searchParams?: Promise<{
@@ -18,10 +19,10 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const orders = await getOrders(params.estado, params.search);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <PageCanvas size="list" className="space-y-8 py-8">
+      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
             Operações
           </p>
           <h1 className="mt-1 text-3xl font-semibold text-slate-950">
@@ -32,7 +33,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         <OrderGlobalSearch />
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         {[
           { label: "Todas", value: "all" },
           { label: "Pendentes", value: "pending" },
@@ -48,10 +49,10 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
               href={{
                 query: { ...params, estado: tab.value },
               }}
-              className={`rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`rounded-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all ${
                 isActive
-                  ? "bg-slate-950 text-white"
-                  : "bg-white text-slate-500 hover:bg-slate-50"
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "bg-white text-slate-500 border border-slate-200 hover:border-slate-400 hover:text-slate-900"
               }`}
             >
               {tab.label}
@@ -68,6 +69,6 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
           description={params.search ? `Não encontramos resultados para "${params.search}"` : "Ainda não existem encomendas com este filtro."}
         />
       )}
-    </div>
+    </PageCanvas>
   );
 }

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { OrderContextualActions } from "@/components/orders/OrderContextualActions";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { PageCanvas } from "@/components/ui/page-canvas";
 import { formatDate, formatPrice, shortId } from "@/lib/format";
 import { getOrder, getOrderWhatsappLink } from "@/lib/actions/orders";
 
@@ -29,10 +30,10 @@ export default async function OrderDetailPage({
     "Cliente sem nome";
 
   return (
-    <div className="space-y-6">
+    <PageCanvas size="list" className="space-y-8 py-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
             Encomendas
           </p>
           <h1 className="mt-1 text-3xl font-semibold text-slate-950">
@@ -41,98 +42,106 @@ export default async function OrderDetailPage({
         </div>
         <Link
           href="/encomendas"
-          className="inline-flex rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+          className="inline-flex rounded-md border border-slate-200 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-700 transition hover:bg-slate-50 shadow-sm"
         >
-          Voltar às encomendas
+          Voltar
         </Link>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_360px]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
         <section className="space-y-6">
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-lg font-semibold text-slate-950">
+          <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                 Dados da encomenda
               </h2>
               <StatusBadge status={order.status} />
             </div>
-            <dl className="mt-5 grid gap-4 md:grid-cols-2">
+            <dl className="mt-6 grid gap-6 md:grid-cols-3">
               <div>
-                <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Cliente
                 </dt>
-                <dd className="mt-1 text-sm text-slate-900">{customerName}</dd>
+                <dd className="mt-1 text-sm font-semibold text-slate-900">{customerName}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Data
                 </dt>
-                <dd className="mt-1 text-sm text-slate-900">
+                <dd className="mt-1 text-sm font-semibold text-slate-900">
                   {formatDate(order.created_at)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Total
                 </dt>
-                <dd className="mt-1 text-sm text-slate-900">
+                <dd className="mt-1 text-lg font-bold text-slate-950">
                   {formatPrice(order.total)}
                 </dd>
               </div>
-              <div>
-                <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              <div className="md:col-span-3">
+                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Notas
                 </dt>
-                <dd className="mt-1 text-sm text-slate-900">
+                <dd className="mt-1 text-sm text-slate-600">
                   {order.notes || "Sem notas do cliente"}
                 </dd>
               </div>
             </dl>
           </article>
 
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="text-lg font-semibold text-slate-950">
+          <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-4 border-b border-slate-100 pb-3">
               Morada de entrega
             </h2>
-            <div className="mt-4 space-y-1 text-sm text-slate-700">
-              <p>{order.addresses?.label || "Sem etiqueta"}</p>
-              <p>{order.addresses?.recipient_name || "Sem destinatário"}</p>
-              <p>{order.addresses?.phone || "Sem telefone"}</p>
-              <p>
-                {[order.addresses?.street, order.addresses?.neighborhood]
-                  .filter(Boolean)
-                  .join(", ")}
-              </p>
-              <p>
-                {[order.addresses?.city, order.addresses?.province]
-                  .filter(Boolean)
-                  .join(", ")}
-              </p>
-              <p>{order.addresses?.reference || "Sem ponto de referência"}</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1 text-sm text-slate-700">
+                <p className="font-bold text-slate-900">{order.addresses?.recipient_name || "Sem destinatário"}</p>
+                <p className="text-xs text-slate-500">{order.addresses?.phone || "Sem telefone"}</p>
+                <p className="mt-2">
+                  {[order.addresses?.street, order.addresses?.neighborhood]
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
+                <p>
+                  {[order.addresses?.city, order.addresses?.province]
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
+              </div>
+              <div className="rounded-lg bg-slate-50 p-4 text-xs text-slate-600">
+                <p className="font-bold text-slate-900 uppercase tracking-wider text-[9px] mb-1">Referência / Notas</p>
+                <p>{order.addresses?.reference || "Nenhum ponto de referência fornecido."}</p>
+                <p className="mt-2 italic opacity-60">Etiqueta: {order.addresses?.label || "Padrão"}</p>
+              </div>
             </div>
           </article>
 
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="text-lg font-semibold text-slate-950">Itens</h2>
-            <div className="mt-4 space-y-4">
+          <article className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-6 py-4 border-b border-slate-100 bg-slate-50">
+              Itens da encomenda
+            </h2>
+            <div className="divide-y divide-slate-100">
               {order.order_items?.map((item) => (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-slate-100 px-4 py-3"
+                  className="px-6 py-4 transition-colors hover:bg-slate-50/50"
                 >
                   <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <p className="font-medium text-slate-950">
+                      <p className="font-bold text-slate-950">
                         {item.product_name}
                       </p>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-xs text-slate-500">
                         {[item.variant_size, item.variant_color]
                           .filter(Boolean)
-                          .join(" · ") || "Sem variação"}
+                          .join(" · ") || "Opção única"}
                       </p>
                     </div>
-                    <div className="text-sm text-slate-700">
-                      {item.quantity} × {formatPrice(item.product_price)}
+                    <div className="text-sm font-semibold text-slate-700">
+                      <span className="text-xs text-slate-400 font-normal">{item.quantity} × </span>
+                      {formatPrice(item.product_price)}
                     </div>
                   </div>
                 </div>
@@ -142,8 +151,10 @@ export default async function OrderDetailPage({
         </section>
 
         <aside className="space-y-6">
-          <section className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="text-lg font-semibold text-slate-950">Acções</h2>
+          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-4 border-b border-slate-100 pb-3">
+              Acções de Operação
+            </h2>
             <div className="mt-4">
               <OrderContextualActions orderId={order.id} status={order.status} />
             </div>
@@ -152,7 +163,7 @@ export default async function OrderDetailPage({
                 <Link
                   href={whatsappUrl}
                   target="_blank"
-                  className="inline-flex w-full justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                  className="inline-flex w-full justify-center rounded-md border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-700 shadow-sm transition hover:bg-slate-50"
                 >
                   Contactar via WhatsApp
                 </Link>
@@ -160,21 +171,23 @@ export default async function OrderDetailPage({
             )}
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="text-lg font-semibold text-slate-950">Informação</h2>
-            <div className="mt-4 space-y-4">
+          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-4 border-b border-slate-100 pb-3">
+              Logística & Pagamento
+            </h2>
+            <div className="space-y-4">
               <div>
                 <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Canal de Venda</dt>
-                <dd className="text-sm font-medium text-slate-900">Loja Online</dd>
+                <dd className="mt-1 text-sm font-semibold text-slate-900">Loja Online (Direct)</dd>
               </div>
               <div>
                 <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Método de Pagamento</dt>
-                <dd className="text-sm font-medium text-slate-900">Pagamento na Entrega / Transferência</dd>
+                <dd className="mt-1 text-sm font-semibold text-slate-900">Pagamento na Entrega</dd>
               </div>
             </div>
           </section>
         </aside>
       </div>
-    </div>
+    </PageCanvas>
   );
 }

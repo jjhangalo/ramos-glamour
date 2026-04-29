@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Bell } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import toast from "react-hot-toast";
 
@@ -92,19 +93,22 @@ export function NotificationBell({
       <button
         type="button"
         onClick={handleOpen}
-        className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+        className={cn(
+          "relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-all",
+          open ? "bg-slate-100 text-slate-950 shadow-inner" : "hover:bg-slate-50 hover:text-slate-950"
+        )}
         aria-label="Notificações"
       >
-        <Bell className="h-5 w-5" />
+        <Bell className="h-4 w-4" />
         {unreadCount > 0 ? (
-          <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white shadow-sm ring-2 ring-white">
             {unreadCount}
           </span>
         ) : null}
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-12 z-50 w-80 max-w-[calc(100vw-32px)] rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+        <div className="absolute left-0 top-11 z-[100] w-80 max-w-[calc(100vw-32px)] rounded-xl border border-slate-200 bg-white p-3 shadow-xl animate-in fade-in zoom-in-95 duration-200">
           <div className="flex items-center justify-between border-b border-slate-100 px-2 pb-3">
             <h2 className="text-sm font-semibold text-slate-950">Notificações</h2>
             {isPending ? (

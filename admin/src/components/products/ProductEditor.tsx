@@ -570,29 +570,8 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
   const isDirty = productForm.formState.isDirty || hasProductImageChanges;
 
   return (
-    <div className="relative grid gap-12 lg:grid-cols-[240px_1fr]">
-      {/* Sticky Side Nav */}
-      <aside className="hidden lg:block">
-        <nav className="sticky top-32 flex flex-col gap-1">
-          {sections.map((section) => (
-            <a
-              key={section.id}
-              href={`#${section.id}`}
-              className={cn(
-                "rounded-xl px-4 py-2.5 text-sm font-medium transition-all",
-                activeSection === section.id
-                  ? "bg-slate-900 text-white shadow-lg"
-                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-              )}
-            >
-              {section.label}
-            </a>
-          ))}
-        </nav>
-      </aside>
-
-      <div className="space-y-12 pb-32">
-        <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <PageCanvas size="form" className="space-y-8 py-8 pb-40">
+      <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
               Produtos
@@ -601,24 +580,27 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               {product ? product.name : "Novo produto"}
             </h1>
           </div>
-          <div className="flex gap-3">
-            <Link
-              href="/produtos"
-              className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-            >
-              Voltar
-            </Link>
-            {product && (
-              <button
-                type="button"
-                onClick={handleDeleteProduct}
-                className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-50"
-              >
-                Eliminar
-              </button>
-            )}
           </div>
         </header>
+
+        <nav className="sticky top-0 z-20 -mx-4 border-b border-slate-200 bg-slate-50/90 px-4 py-2 backdrop-blur-md md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {sections.map((section) => (
+              <a
+                key={section.id}
+                href={`#${section.id}`}
+                className={cn(
+                  "whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all",
+                  activeSection === section.id
+                    ? "bg-slate-900 text-white"
+                    : "text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+                )}
+              >
+                {section.label}
+              </a>
+            ))}
+          </div>
+        </nav>
 
       <Form {...productForm}>
         <form
@@ -631,18 +613,18 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               <h2 className="text-xl font-bold text-slate-950">Informação Geral</h2>
               <p className="text-sm text-slate-500">Nome e descrição pública do produto.</p>
             </div>
-            <div className="grid gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="grid gap-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm focus-within:shadow-md transition-shadow">
               <FormField
                 control={productForm.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem className="md:col-span-2">
-                    <FormLabel>Nome</FormLabel>
+                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Nome</FormLabel>
                     <FormControl>
                       <input
                         {...field}
                         disabled={isPending}
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
+                        className="w-full rounded-md border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-50"
                       />
                     </FormControl>
                     <FormMessage />
@@ -677,13 +659,13 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               <h2 className="text-xl font-bold text-slate-950">Preço & Stock</h2>
               <p className="text-sm text-slate-500">Valores base e inventário.</p>
             </div>
-            <div className="grid gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2">
+            <div className="grid gap-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm focus-within:shadow-md transition-shadow sm:grid-cols-2">
               <FormField
                 control={productForm.control}
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preço base</FormLabel>
+                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Preço base</FormLabel>
                     <FormControl>
                       <input
                         {...field}
@@ -691,7 +673,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                         min="0"
                         step="0.01"
                         disabled={isPending}
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
+                        className="w-full rounded-md border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-50"
                       />
                     </FormControl>
                     <FormMessage />
@@ -704,14 +686,14 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                 name="stock"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Stock disponível</FormLabel>
+                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Stock disponível</FormLabel>
                     <FormControl>
                       <input
                         {...field}
                         type="number"
                         min="0"
                         disabled={isPending}
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
+                        className="w-full rounded-md border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-50"
                       />
                     </FormControl>
                     <FormMessage />
@@ -726,13 +708,13 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
               <h2 className="text-xl font-bold text-slate-950">Categorias & Visibilidade</h2>
               <p className="text-sm text-slate-500">Organização do catálogo e presença na loja.</p>
             </div>
-            <div className="grid gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="grid gap-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm focus-within:shadow-md transition-shadow">
               <FormField
                 control={productForm.control}
                 name="category_ids"
                 render={() => (
                   <FormItem className="space-y-3">
-                    <FormLabel>Categorias</FormLabel>
+                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Categorias</FormLabel>
                     <FormControl>
                       <div 
                         ref={scrollRef}
@@ -753,14 +735,14 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                               onClick={() => toggleCategory(category.id)}
                               disabled={isPending}
                               className={cn(
-                                "rounded-full border px-3 py-1.5 text-sm font-medium transition whitespace-nowrap shrink-0",
+                                "rounded-md border px-3 py-1.5 text-xs font-medium transition whitespace-nowrap shrink-0",
                                 isSelected
-                                  ? "bg-slate-900 text-white border-slate-900"
-                                  : "bg-white text-slate-700 border-slate-200 hover:border-slate-400"
+                                  ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
                               )}
                             >
                               {parentName && (
-                                <span className={isSelected ? "text-slate-300" : "text-slate-400"}>
+                                <span className={isSelected ? "text-slate-400" : "text-slate-400"}>
                                   {parentName} ·{" "}
                                 </span>
                               )}
@@ -775,26 +757,26 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                 )}
               />
 
-              <div className="grid gap-6 md:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={productForm.control}
                   name="is_active"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-xl border border-slate-100 p-4">
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-lg border border-slate-100 p-4 transition-colors hover:bg-slate-50">
                       <FormControl>
                         <input
                           type="checkbox"
                           disabled={isPending}
                           checked={field.value}
                           onChange={field.onChange}
-                          className="h-5 w-5 rounded border-slate-300 text-slate-950 focus:ring-slate-950 cursor-pointer"
+                          className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                         />
                       </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="cursor-pointer font-bold uppercase text-[10px] tracking-wider text-slate-500">
+                      <div className="space-y-0.5 leading-none">
+                        <FormLabel className="cursor-pointer text-[10px] font-bold uppercase tracking-wider text-slate-500">
                           Disponível
                         </FormLabel>
-                        <p className="text-xs text-slate-400">Controla se o produto aparece na loja.</p>
+                        <p className="text-[11px] text-slate-400">Visível na loja.</p>
                       </div>
                     </FormItem>
                   )}
@@ -804,21 +786,21 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                   control={productForm.control}
                   name="is_featured"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-xl border border-slate-100 p-4">
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-lg border border-slate-100 p-4 transition-colors hover:bg-slate-50">
                       <FormControl>
                         <input
                           type="checkbox"
                           disabled={isPending}
                           checked={field.value}
                           onChange={field.onChange}
-                          className="h-5 w-5 rounded border-slate-300 text-slate-950 focus:ring-slate-950 cursor-pointer"
+                          className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                         />
                       </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="cursor-pointer font-bold uppercase text-[10px] tracking-wider text-slate-500">
+                      <div className="space-y-0.5 leading-none">
+                        <FormLabel className="cursor-pointer text-[10px] font-bold uppercase tracking-wider text-slate-500">
                           Destaque
                         </FormLabel>
-                        <p className="text-xs text-slate-400">Exibe o produto em seções especiais.</p>
+                        <p className="text-[11px] text-slate-400">Seções especiais.</p>
                       </div>
                     </FormItem>
                   )}
@@ -834,13 +816,13 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
           <h2 className="text-xl font-bold text-slate-950">Imagens</h2>
           <p className="text-sm text-slate-500">Gestão de media visual.</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm focus-within:shadow-md transition-shadow">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-950">
+            <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
               Imagens do produto
             </h2>
-            <p className="text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500">
               Formatos aceites: JPEG, PNG, WebP. Máximo 10 MB.
             </p>
           </div>
@@ -850,7 +832,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                 type="button"
                 disabled={isPending}
                 onClick={handleSaveProductOrder}
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-bg px-4 py-2.5 text-sm font-medium text-slate-900 border border-slate-200 transition hover:bg-slate-50 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50"
               >
                 {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                 Guardar Ordem
@@ -858,7 +840,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
             ) : null}
             <label
               className={cn(
-                "inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100",
+                "inline-flex cursor-pointer items-center gap-2 rounded-md border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50",
                 (!product || isPending) && "opacity-50 cursor-not-allowed",
               )}
             >
@@ -934,21 +916,21 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
           <h2 className="text-xl font-bold text-slate-950">Variantes</h2>
           <p className="text-sm text-slate-500">Opções de tamanho e cor.</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm focus-within:shadow-md transition-shadow">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-950">Variações</h2>
-            <p className="text-sm text-slate-500">
-              Define opções por tamanho, cor, stock e preço específico.
+            <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Variações</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Opções por tamanho, cor, stock e preço específico.
             </p>
           </div>
           {product ? (
             <Form {...variantForm}>
               <form
                 onSubmit={variantForm.handleSubmit(onVariantSubmit)}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-lg border border-slate-100 bg-slate-50 p-4"
               >
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
                   <FormField
                     control={variantForm.control}
                     name="size"
@@ -958,11 +940,10 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                           <input
                             {...field}
                             disabled={isPending}
-                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
-                            placeholder="Tamanho (opcional)"
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
+                            placeholder="Tamanho (ex: XL)"
                           />
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -975,11 +956,10 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                           <input
                             {...field}
                             disabled={isPending}
-                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
-                            placeholder="Cor (opcional)"
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
+                            placeholder="Cor (ex: Preto)"
                           />
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -994,11 +974,10 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                             type="number"
                             min="0"
                             disabled={isPending}
-                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
                             placeholder="Stock"
                           />
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -1015,44 +994,39 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                             min="0"
                             step="0.01"
                             disabled={isPending}
-                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
-                            placeholder="Preço override"
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
+                            placeholder="Preço (opcional)"
                           />
                         </FormControl>
-                        <FormMessage />
+                      </FormItem>
+                                   <div className="mt-4 flex items-center justify-between gap-4">
+                  <FormField
+                    control={variantForm.control}
+                    name="is_available"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            disabled={isPending}
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                          />
+                        </FormControl>
+                        <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-slate-500 cursor-pointer">
+                          Disponível
+                        </FormLabel>
                       </FormItem>
                     )}
                   />
-                </div>
-                <FormField
-                  control={variantForm.control}
-                  name="is_available"
-                  render={({ field }) => (
-                    <FormItem className="mt-3 flex flex-row items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          disabled={isPending}
-                          checked={field.value}
-                          onChange={field.onChange}
-                          className="h-4 w-4 rounded border-slate-300 cursor-pointer"
-                        />
-                      </FormControl>
-                      <FormLabel className="cursor-pointer">
-                        Disponível
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                <div className="mt-4 flex gap-3">
+
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
+                    className="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-slate-800 disabled:opacity-50"
                   >
-                    {isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : null}
+                    {isPending ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
                     {variantForm.watch("id")
                       ? "Guardar variação"
                       : "Adicionar variação"}
@@ -1070,7 +1044,7 @@ export function ProductEditor({ product, categories }: ProductEditorProps) {
                           price_override: null,
                         })
                       }
-                      className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                      className="rounded-md border border-slate-200 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                     >
                       Cancelar
                     </button>

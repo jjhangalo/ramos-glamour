@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Eye } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate, formatPrice, shortId } from "@/lib/format";
@@ -34,70 +35,73 @@ export function OrderListClient({ initialOrders }: OrderListClientProps) {
 
   return (
     <>
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
         <table className="min-w-full text-left text-sm">
-          <thead className="text-slate-500">
-            <tr className="border-b border-slate-200 bg-slate-50/50">
-              <th className="px-5 py-4 w-10">
+          <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <tr className="border-b border-slate-200">
+              <th className="px-5 py-3 w-10">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                   checked={selectedIds.length > 0 && selectedIds.length === initialOrders.length}
                   onChange={toggleAll}
                 />
               </th>
-              <th className="px-5 py-3 font-medium">ID</th>
-              <th className="px-5 py-3 font-medium">Cliente</th>
-              <th className="hidden px-5 py-3 font-medium md:table-cell">Itens</th>
-              <th className="px-5 py-3 font-medium">Total</th>
-              <th className="px-5 py-3 font-medium">Estado</th>
-              <th className="hidden px-5 py-3 font-medium lg:table-cell">Data</th>
-              <th className="px-5 py-3 font-medium text-right">Acções</th>
+              <th className="px-5 py-3">ID</th>
+              <th className="px-5 py-3">Cliente</th>
+              <th className="hidden px-5 py-3 md:table-cell">Itens</th>
+              <th className="px-5 py-3">Total</th>
+              <th className="px-5 py-3">Estado</th>
+              <th className="hidden px-5 py-3 lg:table-cell">Data</th>
+              <th className="px-5 py-3 text-right">Acções</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-slate-100">
             {initialOrders.map((order) => {
               const isSelected = selectedIds.includes(order.id);
               return (
                 <tr 
                   key={order.id} 
-                  className={`border-b border-slate-100 transition-colors hover:bg-slate-50/50 ${isSelected ? 'bg-slate-50' : ''}`}
+                  className={cn(
+                    "group transition-colors hover:bg-slate-50/50",
+                    isSelected ? "bg-slate-50" : ""
+                  )}
                 >
                   <td className="px-5 py-4">
                     <input
                       type="checkbox"
-                      className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                      className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                       checked={isSelected}
                       onChange={() => toggleSelection(order.id)}
                     />
                   </td>
-                  <td className="px-5 py-4 font-medium text-slate-950">
+                  <td className="px-5 py-4 font-bold text-slate-950">
                     #{shortId(order.id)}
                   </td>
-                  <td className="px-5 py-4 text-slate-700">
-                    <div className="max-w-[120px] truncate md:max-w-none">
+                  <td className="px-5 py-4">
+                    <div className="max-w-[120px] truncate text-sm font-medium text-slate-700 md:max-w-none">
                       {order.profiles?.full_name || order.profiles?.display_name || "Cliente sem nome"}
                     </div>
                   </td>
-                  <td className="hidden px-5 py-4 text-slate-700 md:table-cell">
+                  <td className="hidden px-5 py-4 text-xs text-slate-500 md:table-cell">
                     {order.order_items?.length ?? 0}
                   </td>
-                  <td className="px-5 py-4 text-slate-700 font-medium">
+                  <td className="px-5 py-4 font-semibold text-slate-900">
                     {formatPrice(order.total)}
                   </td>
                   <td className="px-5 py-4">
                     <StatusBadge status={order.status} />
                   </td>
-                  <td className="hidden px-5 py-4 text-slate-700 lg:table-cell">
+                  <td className="hidden px-5 py-4 text-xs text-slate-500 lg:table-cell">
                     {formatDate(order.created_at)}
                   </td>
                   <td className="px-5 py-4 text-right whitespace-nowrap w-[1%]">
                     <Link
                       href={`/encomendas/${order.id}`}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-700 shadow-sm transition hover:bg-slate-100"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition hover:border-slate-900 hover:text-slate-900"
                       title="Ver detalhes"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-3.5 w-3.5" />
                     </Link>
                   </td>
                 </tr>

@@ -39,16 +39,16 @@ export default async function DashboardLayout({
     "Administrador";
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-950">
-      <aside className="fixed inset-y-0 left-0 hidden w-72 border-r border-slate-200 bg-white px-6 py-6 md:flex md:flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-950">
+      <aside className="fixed inset-y-0 left-0 hidden w-56 border-r border-slate-200 bg-white px-5 py-6 lg:flex lg:flex-col">
         <div className="flex items-center justify-between gap-4">
           <Link href="/" className="flex min-w-0 items-center">
             <Image
               src="/icon1.png"
               alt="Ramos Glamour"
-              width={160}
-              height={40}
-              className="h-10 w-auto object-contain"
+              width={140}
+              height={35}
+              className="h-9 w-auto object-contain"
               priority
             />
           </Link>
@@ -62,14 +62,15 @@ export default async function DashboardLayout({
         <SidebarUser
           id={user.id}
           name={displayName}
+          email={user.email ?? ""}
           avatarUrl={profile?.avatar_url}
           role={profile?.role}
         />
       </aside>
 
-      <div className="flex min-h-screen flex-col md:pl-72">
+      <div className="flex min-h-screen flex-col lg:pl-56">
         {/* Mobile Header */}
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur md:hidden">
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-4">
             {/* Menu trigger (Sheet) */}
             <MobileDashboardNav

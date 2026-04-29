@@ -42,12 +42,19 @@ export function DesktopDashboardNav() {
             key={item.href}
             href={item.href}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 transition hover:bg-slate-100 hover:text-slate-950",
-              active && "bg-gray-100 font-medium text-slate-950",
+              "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200",
+              active 
+                ? "bg-slate-900 text-white shadow-sm" 
+                : "text-slate-500 hover:bg-slate-100 hover:text-slate-950"
             )}
           >
-            <Icon className="h-4 w-4" />
-            <span>{item.label}</span>
+            <Icon className={cn(
+              "h-4 w-4 transition-colors",
+              active ? "text-white" : "text-slate-400 group-hover:text-slate-950"
+            )} />
+            <span className={cn(active ? "font-medium" : "font-normal")}>
+              {item.label}
+            </span>
           </Link>
         );
       })}
@@ -97,12 +104,19 @@ export function MobileDashboardNav({ user }: MobileDashboardNavProps) {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-600 transition hover:bg-slate-100 hover:text-slate-950",
-                  active && "bg-gray-100 font-medium text-slate-950",
+                  "group flex items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200",
+                  active 
+                    ? "bg-slate-900 text-white shadow-sm" 
+                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-950"
                 )}
               >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span>{item.label}</span>
+                <Icon className={cn(
+                  "h-4 w-4 shrink-0 transition-colors",
+                  active ? "text-white" : "text-slate-400 group-hover:text-slate-950"
+                )} />
+                <span className={cn(active ? "font-medium" : "font-normal")}>
+                  {item.label}
+                </span>
               </Link>
             );
           })}

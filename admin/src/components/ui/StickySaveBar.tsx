@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Save, Loader2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PageCanvas } from "@/components/ui/page-canvas";
 
 type StickySaveBarProps = {
   isDirty: boolean;
@@ -48,45 +49,43 @@ export function StickySaveBar({
 
   return (
     <div className={cn(
-      "fixed bottom-6 left-1/2 z-50 w-full max-w-4xl -translate-x-1/2 px-4 transition-all duration-300",
-      show ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
+      "fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/80 backdrop-blur-md transition-all duration-500 pb-safe",
+      show ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
     )}>
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-950 bg-slate-900 p-4 shadow-2xl text-white">
-        <div className="flex flex-col">
-          <p className="text-sm font-semibold">
-            {isSaving ? "A guardar alterações..." : isDirty ? "Tens alterações não guardadas" : "Alterações guardadas"}
+      <PageCanvas size="form" className="flex h-16 items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "h-2 w-2 rounded-full",
+            isSaving ? "animate-pulse bg-amber-500" : isDirty ? "bg-amber-500" : "bg-emerald-500"
+          )} />
+          <p className="text-sm font-medium text-slate-600">
+            {isSaving ? "A guardar alterações..." : isDirty ? "Tens alterações não guardadas" : "Todas as alterações foram guardadas"}
           </p>
-          {lastSaved && !isDirty && !isSaving && (
-            <p className="text-[10px] text-slate-400">
-              Guardado às {lastSaved.toLocaleTimeString()}
-            </p>
-          )}
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
           {isDirty && !isSaving && (
             <button
               onClick={onReset}
-              className="flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-700"
+              className="rounded-md px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
             >
-              <RotateCcw className="h-3 w-3" />
-              DESCARTAR
+              Descartar
             </button>
           )}
           <button
             disabled={!isDirty || isSaving}
             onClick={onSave}
-            className="flex items-center gap-2 rounded-xl bg-white px-5 py-2 text-xs font-bold text-slate-950 transition hover:bg-slate-100 disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-600 px-6 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-50"
           >
             {isSaving ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <Save className="h-3.5 w-3.5" />
             )}
-            {isSaving ? "A GUARDAR" : "GUARDAR ALTERAÇÕES"}
+            {isSaving ? "A guardar..." : "Guardar Alterações"}
           </button>
         </div>
-      </div>
+      </PageCanvas>
     </div>
   );
 }
