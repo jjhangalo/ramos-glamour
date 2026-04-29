@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2, Upload, X, Trash2, Images } from "lucide-react";
+import { Loader2, Upload, X, Trash2, Images, RefreshCcw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
@@ -46,6 +46,30 @@ export function VariantForm({
     },
   });
 
+  // Helper for error toasts
+  const showErrorToast = (message: string, retryAction?: () => void) => {
+    toast((t) => (
+      <div className="flex items-center gap-4">
+        <div className="flex flex-col">
+          <span className="text-sm font-bold text-slate-900">{message}</span>
+          <span className="text-xs text-slate-500">Erro ao guardar, tenta novamente.</span>
+        </div>
+        {retryAction && (
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              retryAction();
+            }}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md bg-slate-100 px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-200"
+          >
+            <RefreshCcw className="mr-2 h-3.5 w-3.5" />
+            Tentar
+          </button>
+        )}
+      </div>
+    ), { duration: Infinity, id: "save-variant-error" });
+  };
+
   const onSubmit = async (values: VariantFormValues) => {
     startTransition(async () => {
       let result;
@@ -56,11 +80,11 @@ export function VariantForm({
       }
 
       if (!result.success) {
-        toast.error(result.error ?? "Erro ao guardar variante.");
+        showErrorToast(result.error ?? "Erro ao guardar variante.", () => onSubmit(values));
         return;
       }
 
-      toast.success("Variante guardada.");
+      toast.success("Variante guardada.", { duration: 3000 });
       router.refresh();
       onClose();
     });

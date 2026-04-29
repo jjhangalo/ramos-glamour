@@ -4,15 +4,47 @@ on:
   push:
     paths:
       - 'store/**'
+      - '!store/**/*.md'
     branches:
       - '**'
+  pull_request:
+    paths:
+      - 'store/**'
+      - '!store/**/*.md'
+  workflow_dispatch:
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STORE }}
 
 jobs:
-  deploy:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: 'store/pnpm-lock.yaml'
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: ./store
+
+      - name: Run Lint
+        run: pnpm lint
+        working-directory: ./store
+
+  build:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +73,33 @@ jobs:
 
       - name: Build Project Artifacts
         run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Upload .vercel Directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-store-artifact
+          path: .vercel
+          retention-days: 1
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install Vercel CLI
+        run: pnpm install --global vercel@latest
+
+      - name: Download .vercel Directory
+        uses: actions/download-artifact@v4
+        with:
+          name: vercel-store-artifact
+          path: .vercel
 
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}

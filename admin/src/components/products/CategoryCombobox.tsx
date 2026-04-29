@@ -128,7 +128,8 @@ export function CategoryCombobox({
               <button
                 type="button"
                 onClick={() => toggleCategory(cat.id)}
-                className="ml-1 text-slate-400 hover:text-slate-600"
+                className="ml-1 -my-2 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 active:bg-slate-200"
+                aria-label={`Remover ${cat.displayName}`}
               >
                 <X className="h-3 w-3" />
               </button>
