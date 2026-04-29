@@ -10,12 +10,15 @@
   --brand-gold: #C5A059;
   --brand-blush: #E8D5D0;
   --brand-white: #FFFFFF;
+  --brand-olive: #5D613F;
+  --brand-charcoal: #2D2D2D;
   --popover: #FFFFFF;
   --popover-foreground: #121212;
   --muted: #F3F4F6;
   --muted-foreground: #6B7280;
   --accent: #FCF9F6;
   --accent-foreground: #C5A059;
+  --header-height: 80px;
 }
 
 @theme inline {
@@ -28,6 +31,8 @@
   --color-brand-gold: var(--brand-gold);
   --color-brand-blush: var(--brand-blush);
   --color-brand-white: var(--brand-white);
+  --color-brand-olive: var(--brand-olive);
+  --color-brand-charcoal: var(--brand-charcoal);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-muted: var(--muted);

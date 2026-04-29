@@ -91,7 +91,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           onClick={() => {
             router.push("/catalogo");
           }}
-          className="mt-6 rounded-full bg-brand-olive px-6 py-3 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"
+          className="mt-6 rounded-full bg-brand-midnight px-6 py-3 text-sm font-medium text-brand-white transition hover:bg-brand-midnight/90 active:scale-95 shadow-md shadow-brand-midnight/10"
         >
           Ir para o catálogo
         </button>
@@ -427,7 +427,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                   }
                 });
               }}
-              className="mt-6 w-full rounded-full bg-brand-olive px-5 py-4 text-sm font-medium text-brand-white transition hover:bg-[#8a904d] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-6 w-full rounded-full bg-brand-midnight px-5 py-4 text-sm font-medium text-brand-white transition hover:bg-brand-midnight/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 shadow-xl shadow-brand-midnight/20"
             >
               {isPending ? "A processar..." : "Confirmar encomenda"}
             </button>

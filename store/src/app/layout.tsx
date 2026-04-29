@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
-import { Toaster } from "react-hot-toast";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartPreservedToast } from "@/components/auth/CartPreservedToast";
+import { ToastProvider } from "@/components/providers/ToastProvider";
 import "./globals.css";
 
 const cormorantGaramond = Cormorant_Garamond({
@@ -46,17 +46,7 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: "#FFFFFF",
-              color: "#121212",
-              borderRadius: "999px",
-              padding: "14px 18px",
-            },
-          }}
-        />
+        <ToastProvider />
       </body>
     </html>
   );

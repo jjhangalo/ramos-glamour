@@ -31,32 +31,48 @@ export function HeaderClient({ user }: HeaderClientProps) {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   const isHomePage = pathname === "/";
   const useWhite = isHomePage && !scrolled && !isMenuOpen;
 
-  // Handle scroll for glassmorphism
+  // Handle scroll for glassmorphism and update header height
   useEffect(() => {
+    const updateHeaderHeight = () => {
+      if (headerRef.current) {
+        const height = headerRef.current.offsetHeight;
+        document.documentElement.style.setProperty("--header-height", `${height}px`);
+      }
+    };
+
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
+      updateHeaderHeight();
     };
+
+    updateHeaderHeight();
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("resize", updateHeaderHeight);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateHeaderHeight);
+    };
   }, []);
 
   // Close menu on click outside
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    function handleClickOutside(event: PointerEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false);
       }
     }
 
     if (isMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("pointerdown", handleClickOutside);
     }
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("pointerdown", handleClickOutside);
     };
   }, [isMenuOpen]);
 
@@ -72,8 +88,9 @@ export function HeaderClient({ user }: HeaderClientProps) {
 
   return (
     <header 
+      ref={headerRef}
       className={cn(
-        "fixed top-0 z-50 w-full transition-all duration-500",
+        "fixed top-0 z-[100] w-full transition-all duration-500",
         scrolled ? "glass py-2" : isHomePage ? "bg-transparent py-6" : "bg-brand-bg py-4 border-b border-brand-midnight/5"
       )}
     >
@@ -84,9 +101,12 @@ export function HeaderClient({ user }: HeaderClientProps) {
           <div className="flex flex-1 items-center">
             {/* Mobile Menu Toggle */}
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(!isMenuOpen);
+              }}
               className={cn(
-                "flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 lg:hidden",
+                "flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 lg:hidden touch-manipulation relative z-[110]",
                 useWhite ? "text-brand-white hover:bg-white/10" : "text-brand-midnight hover:bg-brand-midnight/5"
               )}
               aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
