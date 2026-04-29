@@ -14,6 +14,8 @@ const config: Config = {
         "brand-gold": "var(--brand-gold)",
         "brand-blush": "var(--brand-blush)",
         "brand-white": "var(--brand-white)",
+        "brand-olive": "var(--brand-olive)",
+        "brand-charcoal": "var(--brand-charcoal)",
       },
       fontFamily: {
         serif: ["var(--font-cormorant-garamond)", "serif"],
