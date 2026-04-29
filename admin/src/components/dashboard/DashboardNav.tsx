@@ -18,6 +18,7 @@ type MobileDashboardNavProps = {
     name: string;
     avatarUrl?: string | null;
     role?: string | null;
+    email: string;
   };
 };
 
@@ -128,6 +129,7 @@ export function MobileDashboardNav({ user }: MobileDashboardNavProps) {
             name={user.name}
             avatarUrl={user.avatarUrl}
             role={user.role}
+            email={user.email}
           />
         </div>
       </SheetContent>

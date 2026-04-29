@@ -156,7 +156,8 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
 
   // Form
   const productForm = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(productSchema) as any,
     defaultValues: {
       name: product?.name ?? "",
       description: product?.description ?? "",
@@ -507,7 +508,8 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
       <StickySaveBar
         isDirty={isDirty}
         isSaving={isPending}
-        onSave={productForm.handleSubmit(onProductSubmit)}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onSave={productForm.handleSubmit(onProductSubmit as any)}
         onReset={() => {
           productForm.reset();
           setPromoPrice(initialPromotion?.is_active ? initialPromotion.promo_price.toString() : "");
@@ -522,8 +524,8 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
 
       {/* Delete dialog */}
       <ConfirmDialog
-        isOpen={isDeleteConfirmOpen}
-        onClose={() => setIsDeleteConfirmOpen(false)}
+        open={isDeleteConfirmOpen}
+        onOpenChange={setIsDeleteConfirmOpen}
         onConfirm={async () => {
           if (!product) return;
           const r = await deleteProduct(product.id);
@@ -532,8 +534,8 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
         }}
         title="Apagar Produto"
         description="Tens a certeza? Esta acção é irreversível e removerá todas as variantes e imagens associadas."
-        confirmText="Sim, apagar"
-        variant="danger"
+        confirmLabel="Sim, apagar"
+        variant="destructive"
       />
     </PageCanvas>
   );

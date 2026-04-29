@@ -37,7 +37,8 @@ export function VariantForm({
   const [showImageArea, setShowImageArea] = useState(!!variant?.variant_images?.length);
 
   const form = useForm<VariantFormValues>({
-    resolver: zodResolver(variantSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(variantSchema) as any,
     defaultValues: {
       size: variant?.size || "",
       color: variant?.color || "",

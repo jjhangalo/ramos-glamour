@@ -79,6 +79,7 @@ export default async function DashboardLayout({
                 name: displayName,
                 avatarUrl: profile?.avatar_url,
                 role: profile?.role,
+                email: user.email ?? "",
               }}
             />
 

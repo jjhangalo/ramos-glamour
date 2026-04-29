@@ -2,8 +2,8 @@ import * as z from "zod";
 
 export const variantSchema = z.object({
   id: z.string().optional(),
-  size: z.string().optional(),
-  color: z.string().optional(),
+  size: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
   stock: z.coerce
     .number({
       message: "O stock deve ser um número válido.",
