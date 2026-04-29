@@ -41,6 +41,7 @@ export async function getPromotedProducts(): Promise<PromotionRecord[]> {
   }
 
   const rawData = data || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return rawData.map((promo: any) => ({
     ...promo,
     products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
@@ -64,6 +65,7 @@ export async function getActivePromotions(): Promise<PromotionRecord[]> {
   }
 
   const rawData = data || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return rawData.map((promo: any) => ({
     ...promo,
     products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,

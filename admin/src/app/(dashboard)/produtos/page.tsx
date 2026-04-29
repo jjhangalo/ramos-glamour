@@ -42,6 +42,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const categories = await getCategories();
   const flatCategories = categories.flatMap((c) => [
     { id: c.id, name: c.name },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...(c.children?.map((child: any) => ({ id: child.id, name: `↳ ${child.name}` })) || []),
   ]);
 

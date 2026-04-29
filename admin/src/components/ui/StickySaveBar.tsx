@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Save, Loader2, RotateCcw } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageCanvas } from "@/components/ui/page-canvas";
 
@@ -18,12 +18,12 @@ export function StickySaveBar({
   isSaving,
   onSave,
   onReset,
-  lastSaved,
 }: StickySaveBarProps) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
     if (isDirty || isSaving) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShow(true);
     } else {
       const timer = setTimeout(() => setShow(false), 2000);

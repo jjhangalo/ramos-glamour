@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useTransition } from "react";
-import { Loader2, Upload, X, Trash2, Images, RefreshCcw } from "lucide-react";
+import { Loader2, X, Trash2, Images, RefreshCcw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
@@ -232,7 +233,7 @@ export function VariantForm({
                 <div className="grid grid-cols-3 gap-2">
                   {variant.variant_images?.map((img) => (
                     <div key={img.id} className="group relative aspect-square overflow-hidden rounded-lg border border-slate-100">
-                      <img src={img.url} className="h-full w-full object-cover" />
+                      <Image src={img.url} alt="Imagem da variante" fill className="object-cover" sizes="(max-width: 768px) 100vw, 300px" />
                       <button
                         type="button"
                         onClick={() => {

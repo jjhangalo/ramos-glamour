@@ -25,7 +25,6 @@ export function CategoryCombobox({
   disabled,
 }: CategoryComboboxProps) {
   const [search, setSearch] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
 
   const flatCategories = useMemo(() => {
     return categories.map(c => {

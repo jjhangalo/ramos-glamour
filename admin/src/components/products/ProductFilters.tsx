@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Filter, X } from "lucide-react";
+import { Filter } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -9,7 +9,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import { FilterChipRow, type FilterChip } from "@/components/list/FilterChipRow";
@@ -225,17 +224,5 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
         />
       )}
     </div>
-  );
-}
-
-function Chip({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex h-11 items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-1 text-xs font-bold uppercase tracking-wider text-slate-700 shadow-sm transition hover:border-slate-900 active:scale-95"
-    >
-      <span>{label}</span>
-      <X className="h-3.5 w-3.5 text-slate-400" />
-    </button>
   );
 }

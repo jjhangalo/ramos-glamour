@@ -36,6 +36,7 @@ export function OrderContextualActions({
   }
 
   // Primary Action Mapping
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const actions: Record<string, { label: string; icon: any; target: OrderRecord["status"]; color: string }> = {
     pending: {
       label: "Confirmar Encomenda",

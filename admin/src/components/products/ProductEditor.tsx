@@ -3,12 +3,10 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  Loader2,
   Trash2,
   Upload,
   GripVertical,
   Plus,
-  ExternalLink,
   ChevronRight,
   RefreshCcw,
   Images,
@@ -179,6 +177,7 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
   const isPromoDirty = promoPrice !== (initialPromotion?.is_active ? initialPromotion.promo_price.toString() : "");
   const isDirty = isFormDirty || isImagesDirty || isPromoDirty;
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const isActive = productForm.watch("is_active");
 
   // Submit

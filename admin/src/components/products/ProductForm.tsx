@@ -1,9 +1,17 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { StickySaveBar } from "@/components/ui/StickySaveBar";
 import { cn } from "@/lib/utils";
 import type { ProductRecord, CategoryRecord } from "@/lib/types";
+
+const sections = [
+  { id: "geral", label: "Informação Geral" },
+  { id: "preco", label: "Preço & Stock" },
+  { id: "organizacao", label: "Organização" },
+  { id: "imagens", label: "Imagens" },
+  { id: "variantes", label: "Variantes" },
+];
 
 type ProductFormProps = {
   product: ProductRecord;
@@ -18,15 +26,7 @@ export function ProductForm({ product, categories, onSave }: ProductFormProps) {
   const [lastSaved, setLastSaved] = useState<Date | undefined>();
   const [activeSection, setActiveSection] = useState("geral");
 
-  const sections = [
-    { id: "geral", label: "Informação Geral" },
-    { id: "preco", label: "Preço & Stock" },
-    { id: "organizacao", label: "Organização" },
-    { id: "imagens", label: "Imagens" },
-    { id: "variantes", label: "Variantes" },
-  ];
-
-  const handleFieldChange = (field: keyof ProductRecord, value: any) => {
+  const handleFieldChange = (field: keyof ProductRecord, value: unknown) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setIsDirty(true);
   };

@@ -20,7 +20,7 @@ export function ProductRowActions({
   isActive,
   isFeatured,
 }: ProductRowActionsProps) {
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const handleToggleActive = () => {
     startTransition(async () => {
