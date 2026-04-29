@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { Star } from "lucide-react";
+import Link from "next/link";
+import { Star, Plus } from "lucide-react";
 import { PageCanvas } from "@/components/ui/page-canvas";
 import { cn } from "@/lib/utils";
 
@@ -57,7 +58,18 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   return (
     <PageCanvas size="list" className="relative space-y-6 pb-32 pt-8">
-      <PageHeader title="Produtos" />
+      <PageHeader 
+        title="Produtos" 
+        actions={
+          <Link
+            href="/produtos/novo"
+            className="hidden items-center justify-center rounded-xl bg-slate-900 px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-slate-800 md:flex"
+          >
+            <Plus className="mr-2 h-5 w-5" />
+            Novo Produto
+          </Link>
+        }
+      />
 
       <ProductFilters categories={flatCategories} />
 
@@ -198,5 +210,3 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   );
 }
 
-// Client wrapper for pagination to handle router logic
-import { ProductPaginationWrapper } from "@/components/products/ProductPaginationWrapper";

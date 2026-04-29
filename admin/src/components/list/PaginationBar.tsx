@@ -26,12 +26,12 @@ export function PaginationBar({
   const endRange = Math.min(currentPage * pageSize, totalCount);
 
   return (
-    <div className={cn("mt-8 space-y-4", className)}>
-      <p className="text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+    <div className={cn("mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between", className)}>
+      <p className="text-center text-[10px] font-bold uppercase tracking-wider text-slate-400 md:text-left">
         Mostrando {startRange}-{endRange} de {totalCount} resultados encontrados
       </p>
 
-      <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
+      <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-2 shadow-sm md:justify-end">
         <div className="flex items-center">
           <select
             value={pageSize}
@@ -46,6 +46,8 @@ export function PaginationBar({
           </select>
         </div>
 
+        <div className="h-6 w-px bg-slate-200 md:mx-1" />
+
         <div className="flex items-center gap-2">
           <button
             onClick={() => onPageChange(currentPage - 1)}
@@ -55,8 +57,8 @@ export function PaginationBar({
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900">
-            Página {currentPage} de {totalPages}
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 min-w-[80px] text-center">
+            Pág. {currentPage} / {totalPages}
           </span>
 
           <button
