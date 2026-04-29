@@ -49,25 +49,25 @@ export function StickySaveBar({
 
   return (
     <div className={cn(
-      "fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/80 backdrop-blur-md transition-all duration-500 pb-safe",
+      "fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/90 backdrop-blur-md transition-all duration-500",
+      "pb-[env(safe-area-inset-bottom)]",
       show ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
     )}>
-      <PageCanvas size="form" className="flex h-16 items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className={cn(
-            "h-2 w-2 rounded-full",
-            isSaving ? "animate-pulse bg-amber-500" : isDirty ? "bg-amber-500" : "bg-emerald-500"
-          )} />
-          <p className="text-sm font-medium text-slate-600">
-            {isSaving ? "A guardar alterações..." : isDirty ? "Tens alterações não guardadas" : "Todas as alterações foram guardadas"}
+      <PageCanvas size="form" className="flex h-20 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col">
+          <p className="text-sm font-bold text-slate-900">
+            {isSaving ? "A guardar..." : "Alterações não guardadas"}
+          </p>
+          <p className="hidden text-xs text-slate-500 sm:block">
+            {isSaving ? "Isto pode levar alguns segundos." : "Clica em guardar para aplicar as alterações."}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          {isDirty && !isSaving && (
+          {!isSaving && (
             <button
               onClick={onReset}
-              className="rounded-md px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+              className="rounded-xl px-4 py-3 text-sm font-bold text-slate-500 transition hover:bg-slate-100 active:scale-95"
             >
               Descartar
             </button>
@@ -75,14 +75,14 @@ export function StickySaveBar({
           <button
             disabled={!isDirty || isSaving}
             onClick={onSave}
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-600 px-6 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-50"
+            className="inline-flex min-w-[120px] items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
           >
             {isSaving ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Save className="h-3.5 w-3.5" />
+              <Save className="h-4 w-4" />
             )}
-            {isSaving ? "A guardar..." : "Guardar Alterações"}
+            Guardar
           </button>
         </div>
       </PageCanvas>

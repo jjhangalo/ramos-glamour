@@ -112,15 +112,6 @@ async function syncProductCategories(productId: string, categoryIds: string[]) {
       throw new Error(insertError.message);
     }
   }
-
-  const { error: updateError } = await supabase
-    .from("products")
-    .update({ category_id: uniqueCategoryIds[0] ?? null })
-    .eq("id", productId);
-
-  if (updateError) {
-    throw new Error(updateError.message);
-  }
 }
 
 export async function getProducts(filters: ProductFilters = {}) {
@@ -132,7 +123,7 @@ export async function getProducts(filters: ProductFilters = {}) {
   let query = supabase
     .from("products")
     .select(
-      "id, name, description, price, stock, category_id, is_active, is_featured, created_at, updated_at, product_images(id, product_id, url, position), product_variants(id)",
+      "id, name, description, price, stock, is_active, is_featured, created_at, updated_at, product_images(id, product_id, url, position), product_variants(id)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false });
@@ -192,7 +183,7 @@ export async function getProduct(id: string) {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, name, description, price, stock, category_id, is_active, is_featured, created_at, updated_at, product_images(id, product_id, url, position), product_variants(id, product_id, size, color, stock, is_available, price_override, created_at, updated_at, variant_images(id, variant_id, url, position))",
+      "id, name, description, price, stock, is_active, is_featured, created_at, updated_at, product_images(id, product_id, url, position), product_variants(id, product_id, size, color, stock, is_available, price_override, created_at, updated_at, variant_images(id, variant_id, url, position))",
     )
     .eq("id", id)
     .single();
@@ -212,7 +203,6 @@ export async function createProduct(input: ProductInput) {
     description: input.description.trim() || null,
     price: input.price,
     stock: input.stock,
-    category_id: input.category_ids[0] ?? null,
     is_active: input.is_active,
     is_featured: input.is_featured,
   };
