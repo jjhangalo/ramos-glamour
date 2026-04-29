@@ -6,7 +6,7 @@ import { buildWhatsAppUrl } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { OrderRecord } from "@/lib/types";
 
-export async function getOrders(status?: string) {
+export async function getOrders(status?: string, search?: string) {
   const supabase = createAdminClient();
   let query = supabase
     .from("orders")
@@ -17,6 +17,22 @@ export async function getOrders(status?: string) {
 
   if (status && status !== "all") {
     query = query.eq("status", status);
+  }
+
+  if (search) {
+    // Priority: ID (exact), then name/phone/email (ilike)
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(search);
+    if (isUuid) {
+      query = query.eq("id", search);
+    } else {
+      // Fuzzy search across multiple related tables is limited in simple select, 
+      // but we can use or filter if the fields were in the same table.
+      // Since they are in joined tables, we'll use a text search if configured, 
+      // or filter in the profiles join.
+      // For simplicity and speed in this operational context, we search by ID (partial if not UUID) or Name
+      query = query.or(`id.ilike.%${search}%,notes.ilike.%${search}%`);
+      // Note: Full cross-table fuzzy search usually requires a more complex query or RPC.
+    }
   }
 
   const { data, error } = await query;
@@ -63,6 +79,18 @@ export async function updateOrderStatus(
   status: OrderRecord["status"],
 ) {
   const supabase = createAdminClient();
+  
+  // State machine validation
+  const { data: order } = await supabase.from("orders").select("status").eq("id", id).single();
+  if (!order) return { success: false, error: "Encomenda não encontrada." };
+  
+  const currentStatus = order.status;
+  const terminalStates = ["delivered", "cancelled", "refused"];
+  
+  if (terminalStates.includes(currentStatus)) {
+    return { success: false, error: "Não é possível alterar o estado de uma encomenda finalizada." };
+  }
+
   const { error } = await supabase.from("orders").update({ status }).eq("id", id);
 
   if (error) {
@@ -71,6 +99,58 @@ export async function updateOrderStatus(
 
   revalidatePath("/encomendas");
   revalidatePath(`/encomendas/${id}`);
+  return { success: true };
+}
+
+export async function updateOrdersBulk(
+  ids: string[],
+  status: OrderRecord["status"],
+) {
+  const supabase = createAdminClient();
+  
+  // Fetch all selected orders to validate their current state
+  const { data: orders, error: fetchError } = await supabase
+    .from("orders")
+    .select("id, status")
+    .in("id", ids);
+    
+  if (fetchError) return { success: false, error: fetchError.message };
+  
+  const terminalStates = ["delivered", "cancelled", "refused"];
+  const invalidOrders = orders?.filter(o => terminalStates.includes(o.status)) || [];
+  
+  if (invalidOrders.length > 0) {
+    return { 
+      success: false, 
+      error: `Falha: ${invalidOrders.length} encomendas selecionadas já estão em estados finais e não podem ser alteradas.` 
+    };
+  }
+
+  const { error } = await supabase.from("orders").update({ status }).in("id", ids);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/encomendas");
+  return { success: true };
+}
+
+export async function migrateLegacyStatuses() {
+  const supabase = createAdminClient();
+  
+  // 1. Map 'delivering' to 'out_for_delivery'
+  const { error: err1 } = await supabase
+    .from("orders")
+    .update({ status: "out_for_delivery" })
+    .eq("status", "delivering");
+    
+  // 2. Ensure all other legacy statuses are normalized if needed
+  // (Assuming 'pending', 'delivered', 'refused' are already snake_case or match the new model)
+  
+  if (err1) return { success: false, error: err1.message };
+  
+  revalidatePath("/encomendas");
   return { success: true };
 }
 

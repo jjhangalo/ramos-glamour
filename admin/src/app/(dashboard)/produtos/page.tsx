@@ -106,6 +106,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                           src={product.product_images[0].url}
                           alt={product.name}
                           fill
+                          sizes="(max-width: 768px) 32px, 48px"
                           className="object-cover"
                         />
                       ) : null}

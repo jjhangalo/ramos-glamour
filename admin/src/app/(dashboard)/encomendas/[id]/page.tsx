@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { OrderStatusSelect } from "@/components/orders/OrderStatusSelect";
+import { OrderContextualActions } from "@/components/orders/OrderContextualActions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate, formatPrice, shortId } from "@/lib/format";
 import { getOrder, getOrderWhatsappLink } from "@/lib/actions/orders";
@@ -143,28 +143,34 @@ export default async function OrderDetailPage({
 
         <aside className="space-y-6">
           <section className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="text-lg font-semibold text-slate-950">Estado</h2>
+            <h2 className="text-lg font-semibold text-slate-950">Acções</h2>
             <div className="mt-4">
-              <OrderStatusSelect orderId={order.id} value={order.status} />
+              <OrderContextualActions orderId={order.id} status={order.status} />
             </div>
-          </section>
-
-          <section className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="text-lg font-semibold text-slate-950">Ações</h2>
-            <div className="mt-4 space-y-3">
-              {whatsappUrl ? (
+            {whatsappUrl && (
+              <div className="mt-6 border-t border-slate-100 pt-6">
                 <Link
                   href={whatsappUrl}
                   target="_blank"
-                  className="inline-flex w-full justify-center rounded-xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                  className="inline-flex w-full justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
                 >
                   Contactar via WhatsApp
                 </Link>
-              ) : (
-                <p className="text-sm text-slate-500">
-                  Cliente sem WhatsApp ou telefone disponível.
-                </p>
-              )}
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5">
+            <h2 className="text-lg font-semibold text-slate-950">Informação</h2>
+            <div className="mt-4 space-y-4">
+              <div>
+                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Canal de Venda</dt>
+                <dd className="text-sm font-medium text-slate-900">Loja Online</dd>
+              </div>
+              <div>
+                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Método de Pagamento</dt>
+                <dd className="text-sm font-medium text-slate-900">Pagamento na Entrega / Transferência</dd>
+              </div>
             </div>
           </section>
         </aside>

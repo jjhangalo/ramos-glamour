@@ -12,6 +12,7 @@ import type { CategoryRecord } from "@/lib/types";
 import { categorySchema, type CategoryFormValues } from "@/lib/validations/category";
 import { DropdownMenu, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { StickySaveBar } from "@/components/ui/StickySaveBar";
 
 type CategoryManagerProps = {
   categories: CategoryRecord[];
@@ -39,7 +40,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
     reset,
     setValue,
     control,
-    formState: { dirtyFields },
+    formState: { dirtyFields, isDirty },
   } = form;
 
   const nameValue = useWatch({ control, name: "name" });
@@ -190,24 +191,35 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
             />
 
             <div className="flex gap-3">
-              <button
-                type="submit"
-                disabled={isPending}
-                className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isEditing ? "Guardar alterações" : "Criar categoria"}
-              </button>
-              <button
-                type="button"
-                onClick={resetForm}
-                className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-              >
-                {isEditing ? "Cancelar" : "Limpar"}
-              </button>
+              {!isDirty && (
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full rounded-xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isEditing ? "Guardar alterações" : "Criar categoria"}
+                </button>
+              )}
+              {isEditing && !isDirty && (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                >
+                  Cancelar
+                </button>
+              )}
             </div>
           </form>
         </Form>
       </section>
+
+      <StickySaveBar
+        isDirty={isDirty}
+        isSaving={isPending}
+        onSave={handleSubmit(onSubmit)}
+        onReset={resetForm}
+      />
 
       <section className="rounded-2xl border border-slate-200 bg-white">
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
