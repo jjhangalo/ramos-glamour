@@ -8,11 +8,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { ProductVariantRecord } from "@/lib/types";
 
 type VariantInput = {
-  size: string;
-  color: string;
+  size?: string | null;
+  color?: string | null;
   stock: number;
   is_available: boolean;
-  price_override: number | null;
+  price_override?: number | null;
 };
 
 function validateImage(file: File) {
@@ -58,8 +58,8 @@ export async function createVariant(productId: string, input: VariantInput) {
   const supabase = createAdminClient();
   const { error } = await supabase.from("product_variants").insert({
     product_id: productId,
-    size: input.size.trim() || null,
-    color: input.color.trim() || null,
+    size: input.size?.trim() || null,
+    color: input.color?.trim() || null,
     stock: input.stock,
     is_available: input.is_available,
     price_override: input.price_override,
@@ -83,8 +83,8 @@ export async function updateVariant(
   const { error } = await supabase
     .from("product_variants")
     .update({
-      size: input.size.trim() || null,
-      color: input.color.trim() || null,
+      size: input.size?.trim() || null,
+      color: input.color?.trim() || null,
       stock: input.stock,
       is_available: input.is_available,
       price_override: input.price_override,

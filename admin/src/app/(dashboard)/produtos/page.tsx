@@ -1,162 +1,213 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Pencil, Star } from "lucide-react";
+import { Star, Plus } from "lucide-react";
+import { PageCanvas } from "@/components/ui/page-canvas";
+import { cn } from "@/lib/utils";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatPrice } from "@/lib/format";
 import { getCategories } from "@/lib/actions/categories";
 import { getProducts } from "@/lib/actions/products";
 
+import { ProductFilters } from "@/components/products/ProductFilters";
+import { ProductRowActions } from "@/components/products/ProductRowActions";
+
+import { PageHeader } from "@/components/list/PageHeader";
+import { MobileCardRow } from "@/components/list/MobileCardRow";
+import { FAB } from "@/components/list/FAB";
+import { ProductPaginationWrapper } from "@/components/products/ProductPaginationWrapper";
+
 type ProductsPageProps = {
   searchParams?: Promise<{
-    categoria?: string;
+    categoria?: string | string[];
     estado?: "all" | "active" | "inactive";
+    destaque?: "all" | "true" | "false";
     pesquisa?: string;
+    pagina?: string;
+    limite?: string;
   }>;
 };
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = (await searchParams) ?? {};
-  const [categories, products] = await Promise.all([
-    getCategories(),
-    getProducts({
-      category: params.categoria,
-      status: params.estado,
-      search: params.pesquisa,
-    }),
+  const currentPage = Number(params.pagina || "1");
+  const pageSize = Number(params.limite || "20");
+
+  const categoryIds = Array.isArray(params.categoria) 
+    ? params.categoria 
+    : params.categoria 
+      ? [params.categoria] 
+      : [];
+
+  const categories = await getCategories();
+  const flatCategories = categories.flatMap((c) => [
+    { id: c.id, name: c.name },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...(c.children?.map((child: any) => ({ id: child.id, name: `↳ ${child.name}` })) || []),
   ]);
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
-            Produtos
-          </p>
-          <h1 className="mt-1 text-3xl font-semibold text-slate-950">
-            Catálogo do painel
-          </h1>
-        </div>
-        <Link
-          href="/produtos/novo"
-          className="inline-flex items-center rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
-        >
-          Novo produto
-        </Link>
-      </div>
+  const { products, count } = await getProducts({
+    category_ids: categoryIds,
+    status: params.estado,
+    is_featured: params.destaque === "true" ? true : params.destaque === "false" ? false : undefined,
+    search: params.pesquisa,
+    page: currentPage,
+    limit: pageSize,
+  });
 
-      <form className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-[1.2fr_220px_220px_auto]">
-        <input
-          type="search"
-          name="pesquisa"
-          defaultValue={params.pesquisa ?? ""}
-          placeholder="Pesquisar por nome"
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500"
-        />
-        <select
-          name="categoria"
-          defaultValue={params.categoria ?? "all"}
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-500"
-        >
-          <option value="all">Todas as categorias</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-        <select
-          name="estado"
-          defaultValue={params.estado ?? "all"}
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-500"
-        >
-          <option value="all">Todos os estados</option>
-          <option value="active">Activos</option>
-          <option value="inactive">Inactivos</option>
-        </select>
-        <button
-          type="submit"
-          className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-        >
-          Filtrar
-        </button>
-      </form>
+  const totalPages = Math.ceil(count / pageSize);
+
+  return (
+    <PageCanvas size="list" className="relative space-y-6 pb-32 pt-8">
+      <PageHeader 
+        title="Produtos" 
+        actions={
+          <Link
+            href="/produtos/novo"
+            className="hidden items-center justify-center rounded-xl bg-slate-900 px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-slate-800 md:flex"
+          >
+            <Plus className="mr-2 h-5 w-5" />
+            Novo Produto
+          </Link>
+        }
+      />
+
+      <ProductFilters categories={flatCategories} />
 
       {products.length ? (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-          <table className="min-w-full text-left text-sm">
-            <thead className="text-slate-500">
-              <tr className="border-b border-slate-200">
-                <th className="px-5 py-3 font-medium">Imagem</th>
-                <th className="px-5 py-3 font-medium">Nome</th>
-                <th className="hidden px-5 py-3 font-medium md:table-cell">Categoria</th>
-                <th className="px-5 py-3 font-medium">Preço</th>
-                <th className="hidden px-5 py-3 font-medium lg:table-cell">Estado</th>
-                <th className="hidden px-5 py-3 font-medium xl:table-cell">Variações</th>
-                <th className="px-5 py-3 font-medium text-right">Acções</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr key={product.id} className="border-b border-slate-100">
-                  <td className="px-5 py-4">
-                    <div className="relative h-8 w-8 overflow-hidden rounded-xl bg-slate-100 md:h-12 md:w-12">
-                      {product.product_images?.[0]?.url ? (
-                        <Image
-                          src={product.product_images[0].url}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
+        <>
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  <tr className="border-b border-slate-200">
+                    <th className="px-5 py-3">Imagem</th>
+                    <th className="px-5 py-3">Nome</th>
+                    <th className="hidden px-5 py-3 md:table-cell">Categoria</th>
+                    <th className="px-5 py-3">Preço</th>
+                    <th className="hidden px-5 py-3 lg:table-cell">Estado</th>
+                    <th className="hidden px-5 py-3 xl:table-cell">Variações</th>
+                    <th className="px-5 py-3 text-right">Acções</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {products.map((product) => (
+                    <tr key={product.id} className="group hover:bg-slate-50/50">
+                      <td className="px-5 py-4">
+                        <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-slate-100 border border-slate-100 shadow-sm transition-transform group-hover:scale-105">
+                          {product.product_images?.[0]?.url ? (
+                            <Image
+                              src={product.product_images[0].url}
+                              alt={product.name}
+                              fill
+                              sizes="48px"
+                              className="object-cover"
+                            />
+                          ) : null}
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 font-medium text-slate-950">
+                        <div className="flex items-center gap-1.5 max-w-[150px] md:max-w-[200px]">
+                          <span className="truncate" title={product.name}>{product.name}</span>
+                          {product.is_featured ? (
+                            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />
+                          ) : null}
+                        </div>
+                      </td>
+                      <td className="hidden px-5 py-4 text-slate-600 md:table-cell">
+                        <div className="max-w-[120px] truncate text-xs">
+                          {product.categories?.length
+                            ? product.categories.map((category) => category.name).join(", ")
+                            : "Sem categoria"}
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-slate-700 font-semibold">
+                        {formatPrice(product.price)}
+                      </td>
+                      <td className="hidden px-5 py-4 lg:table-cell">
+                        <span className={cn(
+                          "inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                          product.is_active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                        )}>
+                          {product.is_active ? "Activo" : "Inactivo"}
+                        </span>
+                      </td>
+                      <td className="hidden px-5 py-4 text-slate-500 xl:table-cell text-xs">
+                        {product.product_variants?.length ?? 0}
+                      </td>
+                      <td className="px-5 py-4 text-right whitespace-nowrap w-[1%]">
+                        <ProductRowActions
+                          productId={product.id}
+                          isActive={product.is_active}
+                          isFeatured={product.is_featured}
                         />
-                      ) : null}
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 font-medium text-slate-950">
-                    <div className="flex items-center gap-1.5 max-w-[150px] md:max-w-[200px]">
-                      <span className="truncate" title={product.name}>{product.name}</span>
-                      {product.is_featured ? (
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 shrink-0" />
-                      ) : null}
-                    </div>
-                  </td>
-                  <td className="hidden px-5 py-4 text-slate-700 md:table-cell">
-                    <div className="max-w-[120px] truncate">
-                      {product.categories?.length
-                        ? product.categories.map((category) => category.name).join(", ")
-                        : "Sem categoria"}
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-slate-700">
-                    {formatPrice(product.price)}
-                  </td>
-                  <td className="hidden px-5 py-4 text-slate-700 lg:table-cell">
-                    {product.is_active ? "Activo" : "Inactivo"}
-                  </td>
-                  <td className="hidden px-5 py-4 text-slate-700 xl:table-cell">
-                    {product.product_variants?.length ?? 0}
-                  </td>
-                  <td className="px-5 py-4 text-right whitespace-nowrap w-[1%]">
-                    <Link
-                      href={`/produtos/${product.id}`}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:bg-slate-100"
-                      title="Gerir produto"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Link>
-                  </td>
-                </tr>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile List */}
+            <div className="md:hidden divide-y divide-slate-100">
+              {products.map((product) => (
+                <MobileCardRow
+                  key={product.id}
+                  thumbnail={
+                    product.product_images?.[0]?.url ? (
+                      <Image
+                        src={product.product_images[0].url}
+                        alt={product.name}
+                        fill
+                        sizes="48px"
+                        className="object-cover"
+                      />
+                    ) : null
+                  }
+                  title={product.name}
+                  isFeatured={product.is_featured}
+                  subtitle={
+                    product.categories?.length
+                      ? product.categories.map((c) => c.name).join(", ")
+                      : "Sem categoria"
+                  }
+                  meta={formatPrice(product.price)}
+                  badge={
+                    <span className={cn(
+                      product.is_active ? "text-emerald-600" : "text-slate-400"
+                    )}>
+                      {product.is_active ? "Activo" : "Inactivo"}
+                    </span>
+                  }
+                  actions={
+                    <ProductRowActions
+                      productId={product.id}
+                      isActive={product.is_active}
+                      isFeatured={product.is_featured}
+                    />
+                  }
+                />
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </div>
+
+          <ProductPaginationWrapper
+            totalCount={count}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalPages={totalPages}
+          />
+        </>
       ) : (
         <EmptyState
           title="Nenhum produto encontrado"
-          description="Ajusta os filtros ou cria um novo produto para começar."
-          actionHref="/produtos/novo"
-          actionLabel="Novo produto"
+          description="Ajusta os filtros para recomeçar a tua pesquisa."
         />
       )}
-    </div>
+
+      <FAB href="/produtos/novo" label="Novo Produto" />
+    </PageCanvas>
   );
 }
+

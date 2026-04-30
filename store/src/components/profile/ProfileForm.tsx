@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import { User, Mail, Phone, MessageSquare, ArrowRight } from "lucide-react";
 
 import { updateProfile } from "@/lib/actions/profile";
-import { cn } from "@/lib/utils";
 
 type ProfileFormProps = {
   profile: {
@@ -33,11 +32,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   return (
     <div className="space-y-16 animate-fade-in">
       {/* Profile Header section within form if needed, but we have the layout header */}
-      
+
       <div className="grid gap-16 lg:grid-cols-[1fr_2fr]">
         {/* Identity Card */}
         <div className="space-y-8">
-           <div className="relative aspect-square w-32 overflow-hidden bg-brand-midnight/5 border border-brand-midnight/5">
+          <div className="relative aspect-square w-32 overflow-hidden bg-brand-midnight/5 border border-brand-midnight/5">
             {profile.avatar_url ? (
               <Image
                 src={profile.avatar_url}
@@ -48,7 +47,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center">
-                 <User className="h-12 w-12 text-brand-midnight/10" strokeWidth={1} />
+                <User className="h-12 w-12 text-brand-midnight/10" strokeWidth={1} />
               </div>
             )}
           </div>

@@ -58,7 +58,6 @@ export type ProductRecord = {
   description: string | null;
   price: number;
   stock: number;
-  category_id: string | null;
   is_active: boolean;
   is_featured: boolean;
   created_at: string;
@@ -103,7 +102,7 @@ export type OrderRecord = {
   id: string;
   user_id: string;
   address_id: string | null;
-  status: "pending" | "delivering" | "delivered" | "refused";
+  status: "pending" | "confirmed" | "out_for_delivery" | "delivered" | "cancelled" | "refused";
   notes: string | null;
   total: number;
   created_at: string;

@@ -41,6 +41,7 @@ export async function getPromotedProducts(): Promise<PromotionRecord[]> {
   }
 
   const rawData = data || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return rawData.map((promo: any) => ({
     ...promo,
     products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
@@ -64,6 +65,7 @@ export async function getActivePromotions(): Promise<PromotionRecord[]> {
   }
 
   const rawData = data || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return rawData.map((promo: any) => ({
     ...promo,
     products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
@@ -129,6 +131,69 @@ export async function togglePromotion(id: string, isActive: boolean) {
   if (error) {
     return { success: false, error: error.message };
   }
+
+  revalidatePath("/promocoes");
+  return { success: true };
+}
+
+export async function getPromotionByProductId(productId: string): Promise<PromotionRecord | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("promotions")
+    .select("*")
+    .eq("product_id", productId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as PromotionRecord | null;
+}
+
+export async function upsertPromotion(input: PromotionInput) {
+  const supabase = createAdminClient();
+  
+  const { data: existing } = await supabase
+    .from("promotions")
+    .select("id")
+    .eq("product_id", input.product_id)
+    .maybeSingle();
+
+  if (existing) {
+    const { error } = await supabase
+      .from("promotions")
+      .update({
+        promo_price: input.promo_price,
+        is_active: true,
+      })
+      .eq("id", existing.id);
+
+    if (error) return { success: false, error: error.message };
+  } else {
+    const { error } = await supabase.from("promotions").insert({
+      product_id: input.product_id,
+      promo_price: input.promo_price,
+      is_active: true,
+    });
+
+    if (error) return { success: false, error: error.message };
+  }
+
+  revalidatePath("/promocoes");
+  return { success: true };
+}
+
+export async function deactivatePromotionByProductId(productId: string) {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("promotions")
+    .update({ is_active: false })
+    .eq("product_id", productId);
+
+  if (error) return { success: false, error: error.message };
 
   revalidatePath("/promocoes");
   return { success: true };

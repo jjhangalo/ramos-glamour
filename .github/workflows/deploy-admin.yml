@@ -4,43 +4,73 @@ on:
   push:
     paths:
       - 'admin/**'
+      - '!admin/**/*.md'
     branches:
       - '**'
+  pull_request:
+    paths:
+      - 'admin/**'
+      - '!admin/**/*.md'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
 
 jobs:
-  deploy:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'pnpm'
           cache-dependency-path: 'admin/pnpm-lock.yaml'
-
       - name: Install dependencies
         run: pnpm install
         working-directory: ./admin
+      - name: Run Lint
+        run: pnpm lint
+        working-directory: ./admin
 
+  deploy:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+          cache-dependency-path: 'admin/pnpm-lock.yaml'
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: ./admin
       - name: Install Vercel CLI
-        run: pnpm install --global vercel@latest
-
+        run: npm install --global vercel@latest
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
-
+        run: vercel pull --yes --environment=${{ inputs.environment || (github.ref == 'refs/heads/main' && 'production' || 'preview') }} --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts
-        run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
-
+        run: vercel build ${{ (inputs.environment == 'production' || (github.ref == 'refs/heads/main' && !inputs.environment)) && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt ${{ (inputs.environment == 'production' || (github.ref == 'refs/heads/main' && !inputs.environment)) && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}

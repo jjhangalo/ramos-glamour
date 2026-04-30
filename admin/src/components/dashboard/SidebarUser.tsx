@@ -16,9 +16,10 @@ type SidebarUserProps = {
 export function SidebarUser({
   id,
   name,
+  email,
   avatarUrl,
   role,
-}: Omit<SidebarUserProps, "email">) {
+}: SidebarUserProps) {
   const isMasterAdmin = id === process.env.NEXT_PUBLIC_MASTER_ADMIN_ID;
 
   return (
@@ -41,10 +42,16 @@ export function SidebarUser({
               {name}
             </p>
             {isMasterAdmin && (
-              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-brand-olive" />
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-amber-600" />
             )}
           </div>
-          <p className="truncate text-xs text-slate-500">
+          <p 
+            className="truncate text-[11px] text-slate-500" 
+            title={email}
+          >
+            {email}
+          </p>
+          <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             {role === "admin" ? "Administrador" : role || "Utilizador"}
           </p>
         </div>
@@ -53,7 +60,7 @@ export function SidebarUser({
       <form action={signOut} className="mt-4">
         <button
           type="submit"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-950"
         >
           <LogOut className="h-4 w-4" />
           Sair

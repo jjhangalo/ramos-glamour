@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default async function PromocoesPage() {
-  const [promotions, products] = await Promise.all([
+  const [promotions, { products }] = await Promise.all([
     getPromotedProducts(),
     getProducts(),
   ]);

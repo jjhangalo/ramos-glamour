@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ProductEditor } from "@/components/products/ProductEditor";
 import { getCategories } from "@/lib/actions/categories";
 import { getProduct } from "@/lib/actions/products";
+import { getPromotionByProductId } from "@/lib/actions/promotions";
 
 type ProductDetailPageProps = {
   params: Promise<{
@@ -17,7 +18,7 @@ export default async function ProductDetailPage({
   const categories = await getCategories();
 
   if (id === "novo") {
-    return <ProductEditor product={null} categories={categories} />;
+    return <ProductEditor product={null} categories={categories} initialPromotion={null} />;
   }
 
   const product = await getProduct(id).catch(() => null);
@@ -25,5 +26,13 @@ export default async function ProductDetailPage({
     notFound();
   }
 
-  return <ProductEditor product={product} categories={categories} />;
+  const promotion = await getPromotionByProductId(id).catch(() => null);
+
+  return (
+    <ProductEditor 
+      product={product} 
+      categories={categories} 
+      initialPromotion={promotion}
+    />
+  );
 }

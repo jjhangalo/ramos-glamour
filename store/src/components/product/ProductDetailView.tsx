@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, Star, User, ChevronRight, ChevronLeft } from "lucide-react";
+import { Minus, Plus, Star, User, ChevronRight } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ProductPrice } from "@/components/product/ProductPrice";
@@ -328,7 +328,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                     {new Date(review.created_at).toLocaleDateString("pt-PT")}
                   </span>
                 </div>
-                <p className="text-sm italic leading-relaxed text-brand-midnight/70">"{review.comment}"</p>
+                <p className="text-sm italic leading-relaxed text-brand-midnight/70">&quot;{review.comment}&quot;</p>
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-brand-gold/10 flex items-center justify-center">
                     <User className="h-4 w-4 text-brand-gold" />

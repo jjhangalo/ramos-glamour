@@ -2,19 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import {
-  ArrowDown,
-  ArrowUp,
-  Images,
-  Loader2,
-  Pencil,
   Trash2,
   Upload,
   GripVertical,
-  Check,
+  Plus,
+  ChevronRight,
+  RefreshCcw,
+  Images,
 } from "lucide-react";
-import { useMemo, useState, useTransition, useCallback, useEffect, useRef } from "react";
+import { StickySaveBar } from "@/components/ui/StickySaveBar";
+import { PageCanvas } from "@/components/ui/page-canvas";
+import { useMemo, useState, useTransition, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,7 +30,6 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
   rectSortingStrategy,
   useSortable,
 } from "@dnd-kit/sortable";
@@ -47,14 +45,10 @@ import {
 } from "@/lib/actions/products";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
-  createVariant,
-  deleteVariant,
-  deleteVariantImage,
-  updateVariant,
-  uploadVariantImages,
-  reorderVariantImages,
-} from "@/lib/actions/variants";
-import { allowedImageMimeTypes, maxImageSize } from "@/lib/constants";
+  upsertPromotion,
+  deactivatePromotionByProductId,
+  type PromotionRecord,
+} from "@/lib/actions/promotions";
 import { formatPrice } from "@/lib/format";
 import type {
   CategoryRecord,
@@ -63,9 +57,7 @@ import type {
 } from "@/lib/types";
 import {
   productSchema,
-  variantSchema,
   type ProductFormValues,
-  type VariantFormValues,
 } from "@/lib/validations/product";
 import {
   Form,
@@ -74,1191 +66,477 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { CategoryCombobox } from "./CategoryCombobox";
+import { VariantEditor } from "./VariantEditor";
+import { VariantForm } from "./VariantForm";
 
-type SortableImageProps = {
-  id: string;
-  url: string;
-  onRemove: () => void;
-  isPending: boolean;
-  aspectClassName?: string;
-  overlayLabel?: string;
-};
+/* ─── SortableImage (internal) ─── */
 
 function SortableImage({
-  id,
-  url,
-  onRemove,
-  isPending,
-  aspectClassName = "aspect-[4/5]",
-  overlayLabel,
-}: SortableImageProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 50 : undefined,
-    opacity: isDragging ? 0.5 : undefined,
-  };
+  id, url, onRemove, isPending,
+}: {
+  id: string; url: string; onRemove: () => void; isPending: boolean;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 50 : undefined, opacity: isDragging ? 0.5 : undefined };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="group relative h-fit rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md"
-    >
-      <div className={cn("relative overflow-hidden rounded-xl bg-slate-100", aspectClassName)}>
-        <Image 
-          src={url} 
-          alt={overlayLabel || "Imagem"} 
-          fill 
-          className="object-cover" 
-          sizes="(max-width: 768px) 100vw, 300px"
-        />
-        
-        {/* Drag Handle Overlay */}
-        <div 
-          {...attributes} 
-          {...listeners}
-          className="absolute inset-0 flex cursor-grab items-center justify-center bg-slate-950/0 transition-colors group-hover:bg-slate-950/20 active:cursor-grabbing"
-        >
-          <GripVertical className="h-8 w-8 text-white opacity-0 transition-opacity group-hover:opacity-100" />
+    <div ref={setNodeRef} style={style} className="group relative rounded-xl border border-slate-200 bg-white p-2 shadow-sm transition-shadow hover:shadow-md">
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-100">
+        <Image src={url} alt="Imagem do produto" fill className="object-cover" sizes="(max-width: 768px) 100vw, 300px" />
+        <div {...attributes} {...listeners} className="absolute inset-0 flex cursor-grab items-center justify-center bg-slate-950/0 transition-colors group-hover:bg-slate-950/20 active:cursor-grabbing">
+          <GripVertical className="h-6 w-6 text-white opacity-0 transition-opacity group-hover:opacity-100" />
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between gap-2">
-        <span className="text-xs font-medium text-slate-400">Arraste para reordenar</span>
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={onRemove}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 text-red-600 transition hover:bg-red-50 disabled:opacity-50"
-        >
-          {isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Trash2 className="h-4 w-4" />
-          )}
-        </button>
-      </div>
+      <button type="button" disabled={isPending} onClick={onRemove} className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-red-500 shadow-sm transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
+        <Trash2 className="h-4 w-4" />
+      </button>
     </div>
   );
 }
 
+/* ─── Main Component ─── */
+
 type ProductEditorProps = {
   product: ProductRecord | null;
   categories: CategoryRecord[];
+  initialPromotion: PromotionRecord | null;
 };
 
-function validateClientFile(file: File) {
-  if (!allowedImageMimeTypes.includes(file.type)) {
-    return "Formato não suportado. Usa JPEG, PNG ou WebP.";
-  }
-
-  if (file.size > maxImageSize) {
-    return "A imagem não pode ter mais de 10 MB.";
-  }
-
-  return null;
-}
-
-export function ProductEditor({ product, categories }: ProductEditorProps) {
+export function ProductEditor({ product, categories, initialPromotion }: ProductEditorProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [activeVariantForImages, setActiveVariantForImages] =
-    useState<ProductVariantRecord | null>(null);
-  const [isProductConfirmOpen, setIsProductConfirmOpen] = useState(false);
-  const [isVariantConfirmOpen, setIsVariantConfirmOpen] = useState(false);
-  const [selectedVariant, setSelectedVariant] = useState<{
-    id: string;
-    productId: string;
-  } | null>(null);
+  const [activeTab, setActiveTab] = useState<"produto" | "variantes">("produto");
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
-  // Local states for image ordering
+  // Variant editor state
+  const [activeVariant, setActiveVariant] = useState<ProductVariantRecord | null>(null);
+  const [isVariantEditorOpen, setIsVariantEditorOpen] = useState(false);
+  const [expandedVariantId, setExpandedVariantId] = useState<string | null>(null);
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  // Promotion state
+  const [promoPrice, setPromoPrice] = useState<string>(
+    initialPromotion?.is_active ? initialPromotion.promo_price.toString() : ""
+  );
+
+  // Helper for error toasts
+  const showErrorToast = (message: string, retryAction?: () => void) => {
+    toast((t) => (
+      <div className="flex items-center gap-4">
+        <div className="flex flex-col">
+          <span className="text-sm font-bold text-slate-900">{message}</span>
+          <span className="text-xs text-slate-500">Erro ao guardar, tenta novamente.</span>
+        </div>
+        {retryAction && (
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              retryAction();
+            }}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md bg-slate-100 px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-200"
+          >
+            <RefreshCcw className="mr-2 h-3.5 w-3.5" />
+            Tentar
+          </button>
+        )}
+      </div>
+    ), { duration: Infinity, id: "save-error" });
+  };
+
+  // Image ordering
   const [localProductImages, setLocalProductImages] = useState<{ id: string; url: string; position: number }[]>([]);
-  const [localVariantImages, setLocalVariantImages] = useState<{ id: string; url: string; position: number }[]>([]);
-
-  // Sync product images from props
   useEffect(() => {
-    const sortedProps = [...(product?.product_images ?? [])].sort(
-      (a, b) => a.position - b.position
-    );
-    setLocalProductImages(sortedProps);
+    const sorted = [...(product?.product_images ?? [])].sort((a, b) => a.position - b.position);
+    setLocalProductImages(sorted);
   }, [product?.product_images]);
 
-  // Sync variant images when side panel opens or images change
-  useEffect(() => {
-    if (activeVariantForImages) {
-      const sortedProps = [...(activeVariantForImages.variant_images ?? [])].sort(
-        (a, b) => a.position - b.position
-      );
-      setLocalVariantImages(sortedProps);
-    } else {
-      setLocalVariantImages([]);
-    }
-  }, [activeVariantForImages, activeVariantForImages?.variant_images]);
-
-  const hasProductImageChanges = useMemo(() => {
-    const propIds = (product?.product_images ?? [])
-      .sort((a, b) => a.position - b.position)
-      .map((img) => img.id)
-      .join(",");
-    const localIds = localProductImages.map((img) => img.id).join(",");
-    return propIds !== localIds;
-  }, [product?.product_images, localProductImages]);
-
-  const hasVariantImageChanges = useMemo(() => {
-    if (!activeVariantForImages) return false;
-    const propIds = (activeVariantForImages.variant_images ?? [])
-      .sort((a, b) => a.position - b.position)
-      .map((img) => img.id)
-      .join(",");
-    const localIds = localVariantImages.map((img) => img.id).join(",");
-    return propIds !== localIds;
-  }, [activeVariantForImages, localVariantImages]);
-
+  // Form
   const productForm = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema) as import("react-hook-form").Resolver<ProductFormValues>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(productSchema) as any,
     defaultValues: {
       name: product?.name ?? "",
       description: product?.description ?? "",
       price: product?.price ?? 0,
-      category_ids: product?.categories?.map((category) => category.id) ?? [],
+      category_ids: product?.categories?.map((c) => c.id) ?? [],
       stock: product?.stock ?? 0,
       is_active: product?.is_active ?? true,
       is_featured: product?.is_featured ?? false,
     },
   });
 
-  const variantForm = useForm<VariantFormValues>({
-    resolver: zodResolver(variantSchema) as import("react-hook-form").Resolver<VariantFormValues>,
-    defaultValues: {
-      size: "",
-      color: "",
-      stock: 0,
-      is_available: true,
-      price_override: null,
-    },
-  });
+  // Dirty tracking
+  const isFormDirty = productForm.formState.isDirty;
+  const isImagesDirty = useMemo(() => {
+    const propIds = (product?.product_images ?? []).sort((a, b) => a.position - b.position).map((img) => img.id).join(",");
+    return propIds !== localProductImages.map((img) => img.id).join(",");
+  }, [product?.product_images, localProductImages]);
+  const isPromoDirty = promoPrice !== (initialPromotion?.is_active ? initialPromotion.promo_price.toString() : "");
+  const isDirty = isFormDirty || isImagesDirty || isPromoDirty;
 
-  // Replaced memo with state + useEffect above
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const isActive = productForm.watch("is_active");
 
-  const variants = useMemo(
-    () =>
-      [...(product?.product_variants ?? [])].sort((left, right) =>
-        left.created_at.localeCompare(right.created_at),
-      ),
-    [product?.product_variants],
-  );
-
-  const flatCategories = useMemo(
-    () =>
-      categories.flatMap((category) => [
-        {
-          id: category.id,
-          name: category.name,
-          slug: category.slug,
-          parent_id: category.parent_id,
-        },
-        ...(category.children ?? []).map((child) => ({
-          id: child.id,
-          name: child.name,
-          slug: child.slug,
-          parent_id: child.parent_id,
-        })),
-      ]),
-    [categories],
-  );
-
-  const watchedCategoryIds = productForm.watch("category_ids") ?? [];
-
-  const sortedFlatCategories = useMemo(() => {
-    return [...flatCategories].sort((a, b) => a.name.localeCompare(b.name));
-  }, [flatCategories]);
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const isDown = useRef(false);
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!scrollRef.current) return;
-    isDown.current = true;
-    scrollRef.current.classList.add("cursor-grabbing");
-    startX.current = e.pageX - scrollRef.current.offsetLeft;
-    scrollLeft.current = scrollRef.current.scrollLeft;
-  };
-
-  const handleMouseLeave = () => {
-    isDown.current = false;
-    if (scrollRef.current) scrollRef.current.classList.remove("cursor-grabbing");
-  };
-
-  const handleMouseUp = () => {
-    isDown.current = false;
-    if (scrollRef.current) scrollRef.current.classList.remove("cursor-grabbing");
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDown.current || !scrollRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX.current) * 2;
-    scrollRef.current.scrollLeft = scrollLeft.current - walk;
-  };
-
-  function getParentName(parentId: string | null) {
-    if (!parentId) return null;
-    return categories.find((c) => c.id === parentId)?.name ?? null;
-  }
-
-  function toggleCategory(categoryId: string) {
-    const currentIds = productForm.getValues("category_ids");
-    const newIds = currentIds.includes(categoryId)
-      ? currentIds.filter((id) => id !== categoryId)
-      : [...currentIds, categoryId];
-    productForm.setValue("category_ids", newIds, { shouldValidate: true });
-  }
-
-  const onProductSubmit = (values: ProductFormValues) => {
+  // Submit
+  const onProductSubmit = async (values: ProductFormValues) => {
     startTransition(async () => {
-      const result = product
-        ? await updateProduct(product.id, values)
-        : await createProduct(values);
-
-      if (!result.success) {
-        toast.error(result.error ?? "Erro ao guardar o produto.");
-        return;
+      const result = product ? await updateProduct(product.id, values) : await createProduct(values);
+      if (!result.success) { 
+        showErrorToast(result.error ?? "Erro ao guardar produto.", () => onProductSubmit(values));
+        return; 
       }
 
-      toast.success(product ? "Produto actualizado." : "Produto criado.");
-      if (!product && "id" in result && typeof result.id === "string") {
-        router.push(`/produtos/${result.id}`);
-      } else {
-        router.refresh();
-      }
-    });
-  };
+      const pid = product?.id || ("id" in result ? (result.id as string) : "");
 
-  const onVariantSubmit = (values: VariantFormValues) => {
-    if (!product) return;
-
-    startTransition(async () => {
-      const input = {
-        ...values,
-        size: values.size ?? "",
-        color: values.color ?? "",
-        price_override: values.price_override ?? null,
-      };
-
-      const result = values.id
-        ? await updateVariant(values.id, product.id, input)
-        : await createVariant(product.id, input);
-
-      if (!result.success) {
-        toast.error(result.error ?? "Erro ao guardar a variação.");
-        return;
+      if (isPromoDirty && pid) {
+        if (promoPrice) {
+          const r = await upsertPromotion({ product_id: pid, promo_price: parseFloat(promoPrice), is_active: true });
+          if (!r.success) {
+            showErrorToast("Erro ao guardar promoção.", () => onProductSubmit(values));
+            return;
+          }
+        } else {
+          const r = await deactivatePromotionByProductId(pid);
+          if (!r.success) {
+            showErrorToast("Erro ao desactivar promoção.", () => onProductSubmit(values));
+            return;
+          }
+        }
       }
 
-      toast.success(values.id ? "Variação actualizada." : "Variação criada.");
-      variantForm.reset({
-        size: "",
-        color: "",
-        stock: 0,
-        is_available: true,
-        price_override: null,
+      if (isImagesDirty && pid) {
+        const r = await reorderProductImages(pid, localProductImages.map((img) => img.id));
+        if (!r.success) {
+          showErrorToast("Erro ao guardar ordem das imagens.", () => onProductSubmit(values));
+          return;
+        }
+      }
+
+      toast.success("Alterações guardadas.", { 
+        duration: 3000,
+        position: isDesktop ? "top-right" : "top-center"
       });
-      router.refresh();
+      if (!product && pid) { router.push(`/produtos/${pid}`); } else { router.refresh(); }
     });
   };
 
-  function handleDeleteProduct() {
-    if (!product) return;
-    setIsProductConfirmOpen(true);
-  }
-
-  function handleProductImageUpload(fileList: FileList | null) {
+  // Image upload
+  const handleImageUpload = (fileList: FileList | null) => {
     if (!product || !fileList?.length) return;
-
-    const files = Array.from(fileList);
     const formData = new FormData();
-    
-    for (const file of files) {
-      const clientError = validateClientFile(file);
-      if (clientError) {
-        toast.error(`${file.name}: ${clientError}`);
-        return;
-      }
-      formData.append("files", file);
-    }
-
+    Array.from(fileList).forEach((f) => formData.append("files", f));
     startTransition(async () => {
-      const result = await uploadProductImages(product.id, formData);
-      if (!result.success) {
-        toast.error(result.error ?? "Erro ao enviar as imagens.");
-        return;
-      }
-
-      toast.success(files.length > 1 ? "Imagens adicionadas." : "Imagem adicionada.");
+      const r = await uploadProductImages(product.id, formData);
+      if (!r.success) { toast.error(r.error ?? "Erro no upload."); return; }
+      toast.success("Imagens carregadas.");
       router.refresh();
     });
-  }
+  };
 
-  function handleVariantImageUpload(fileList: FileList | null) {
-    if (!activeVariantForImages || !fileList?.length) return;
-
-    const files = Array.from(fileList);
-    const formData = new FormData();
-
-    for (const file of files) {
-      const clientError = validateClientFile(file);
-      if (clientError) {
-        toast.error(`${file.name}: ${clientError}`);
-        return;
-      }
-      formData.append("files", file);
-    }
-
-    startTransition(async () => {
-      const result = await uploadVariantImages(
-        activeVariantForImages.id,
-        formData,
-      );
-      if (!result.success) {
-        toast.error(result.error ?? "Erro ao enviar as imagens.");
-        return;
-      }
-
-      toast.success(files.length > 1 ? "Imagens da variação adicionadas." : "Imagem da variação adicionada.");
-      router.refresh();
-    });
-  }
-
+  // DnD
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-
-  const handleProductDragEnd = useCallback((event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-
     setLocalProductImages((items) => {
-      const oldIndex = items.findIndex((img) => img.id === active.id);
-      const newIndex = items.findIndex((img) => img.id === over.id);
-      return arrayMove(items, oldIndex, newIndex);
-    });
-  }, []);
-
-  const handleSaveProductOrder = () => {
-    if (!product) return;
-    const orderedIds = localProductImages.map((img) => img.id);
-
-    startTransition(async () => {
-      const result = await reorderProductImages(product.id, orderedIds);
-      if (!result.success) {
-        toast.error(result.error ?? "Erro ao guardar a ordem das imagens.");
-        return;
-      }
-      toast.success("Ordem das imagens guardada.");
-      router.refresh();
+      const oi = items.findIndex((img) => img.id === active.id);
+      const ni = items.findIndex((img) => img.id === over.id);
+      return arrayMove(items, oi, ni);
     });
   };
 
-  const handleVariantDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    setLocalVariantImages((items) => {
-      const oldIndex = items.findIndex((img) => img.id === active.id);
-      const newIndex = items.findIndex((img) => img.id === over.id);
-      return arrayMove(items, oldIndex, newIndex);
-    });
-  }, []);
-
-  const handleSaveVariantOrder = () => {
-    if (!activeVariantForImages) return;
-    const orderedIds = localVariantImages.map((img) => img.id);
-
-    startTransition(async () => {
-      const result = await reorderVariantImages(
-        activeVariantForImages.id,
-        product?.id ?? "",
-        orderedIds
-      );
-      if (!result.success) {
-        toast.error(result.error ?? "Erro ao guardar a ordem das imagens.");
-        return;
-      }
-      toast.success("Ordem das imagens da variação guardada.");
-      router.refresh();
-    });
-  };
-
-  function handleImageReorder(imageId: string, direction: "up" | "down") {
-    // Mantido apenas para compatibilidade se necessário, mas removido do UI
-    if (!product) return;
-
-    const orderedIds = [...localProductImages].map((image) => image.id);
-    const currentIndex = orderedIds.indexOf(imageId);
-    const targetIndex =
-      direction === "up" ? currentIndex - 1 : currentIndex + 1;
-
-    if (targetIndex < 0 || targetIndex >= orderedIds.length) return;
-
-    [orderedIds[currentIndex], orderedIds[targetIndex]] = [
-      orderedIds[targetIndex],
-      orderedIds[currentIndex],
-    ];
-
-    startTransition(async () => {
-      const result = await reorderProductImages(product.id, orderedIds);
-      if (!result.success) {
-        toast.error(result.error ?? "Erro ao reordenar as imagens.");
-        return;
-      }
-      router.refresh();
-    });
-  }
+  /* ─── Render ─── */
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 md:flex-row md:items-center md:justify-between">
+    <PageCanvas size="form" className="pb-40 pt-8">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-6">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
-            Produtos
-          </p>
-          <h1 className="mt-1 text-2xl font-semibold text-slate-950">
-            {product ? product.name : "Novo produto"}
-          </h1>
+          <h1 className="text-2xl font-bold text-slate-950">{product ? "Editar Produto" : "Novo Produto"}</h1>
+          <p className="text-sm text-slate-500">Gere os detalhes e visibilidade do teu produto.</p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/produtos"
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-          >
-            Voltar
-          </Link>
-          {product ? (
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={handleDeleteProduct}
-              className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-            >
-              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Remover produto
-            </button>
-          ) : null}
-          <button
-            type="submit"
-            form="product-form"
-            disabled={isPending}
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
-          >
-            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Guardar produto
+        {product && (
+          <button onClick={() => setIsDeleteConfirmOpen(true)} className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-red-500 shadow-sm transition hover:bg-red-50 hover:text-red-600">
+            <Trash2 className="h-5 w-5" />
           </button>
-        </div>
+        )}
       </div>
 
-      <Form {...productForm}>
-        <form
-          id="product-form"
-          onSubmit={productForm.handleSubmit(onProductSubmit)}
-          className="space-y-6"
-        >
-          <section className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="text-lg font-semibold text-slate-950">
-              Informação base
-            </h2>
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <FormField
-                control={productForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <input
-                        {...field}
-                        disabled={isPending}
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={productForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Descrição</FormLabel>
-                    <FormControl>
-                      <textarea
-                        {...field}
-                        disabled={isPending}
-                        rows={5}
-                        className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={productForm.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Preço base</FormLabel>
-                    <FormControl>
-                      <input
-                        {...field}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        disabled={isPending}
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={productForm.control}
-                name="category_ids"
-                render={() => (
-                  <FormItem className="space-y-3">
-                    <FormLabel>Categorias</FormLabel>
-                    <FormControl>
-                      <div 
-                        ref={scrollRef}
-                        onMouseDown={handleMouseDown}
-                        onMouseLeave={handleMouseLeave}
-                        onMouseUp={handleMouseUp}
-                        onMouseMove={handleMouseMove}
-                        className="flex w-full cursor-grab select-none gap-2 overflow-x-auto pb-2 scrollbar-hide flex-nowrap [&::-webkit-scrollbar]:hidden"
-                      >
-                        {sortedFlatCategories.map((category) => {
-                          const isSelected = watchedCategoryIds.includes(category.id);
-                          const parentName = getParentName(category.parent_id);
-                          
-                          return (
-                            <button
-                              key={category.id}
-                              type="button"
-                              onClick={() => toggleCategory(category.id)}
-                              disabled={isPending}
-                              className={cn(
-                                "rounded-full border px-3 py-1.5 text-sm font-medium transition whitespace-nowrap shrink-0",
-                                isSelected
-                                  ? "bg-slate-900 text-white border-slate-900"
-                                  : "bg-white text-slate-700 border-slate-200 hover:border-slate-400"
-                              )}
-                            >
-                              {parentName && (
-                                <span className={isSelected ? "text-slate-300" : "text-slate-400"}>
-                                  {parentName} ·{" "}
-                                </span>
-                              )}
-                              {category.name}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-
-              <FormField
-                control={productForm.control}
-                name="stock"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Stock disponível</FormLabel>
-                    <FormControl>
-                      <input
-                        {...field}
-                        type="number"
-                        min="0"
-                        disabled={isPending}
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500 disabled:bg-slate-50"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={productForm.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        disabled={isPending}
-                        checked={field.value}
-                        onChange={field.onChange}
-                        className="h-4 w-4 rounded border-slate-300 cursor-pointer"
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="cursor-pointer">
-                        Disponível para encomenda
-                      </FormLabel>
-                      <FormDescription className="text-xs">
-                        Controla se o produto aparece na loja.
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={productForm.control}
-                name="is_featured"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        disabled={isPending}
-                        checked={field.value}
-                        onChange={field.onChange}
-                        className="h-4 w-4 rounded border-slate-300 cursor-pointer"
-                      />
-                    </FormControl>
-                    <FormLabel className="cursor-pointer">
-                      Produto em destaque
-                    </FormLabel>
-                  </FormItem>
-                )}
-              />
-            </div>
-          </section>
-        </form>
-      </Form>
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-950">
-              Imagens do produto
-            </h2>
-            <p className="text-sm text-slate-500">
-              Formatos aceites: JPEG, PNG, WebP. Máximo 10 MB.
-            </p>
-          </div>
-          <div className="flex gap-3">
-            {hasProductImageChanges ? (
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={handleSaveProductOrder}
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-bg px-4 py-2.5 text-sm font-medium text-slate-900 border border-slate-200 transition hover:bg-slate-50 disabled:opacity-50"
-              >
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                Guardar Ordem
-              </button>
-            ) : null}
-            <label
+      {/* Tab Bar */}
+      <nav className="sticky top-0 z-10 -mx-4 border-b border-slate-200 bg-slate-50/80 px-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <div className="flex">
+          {(["produto", "variantes"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
               className={cn(
-                "inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100",
-                (!product || isPending) && "opacity-50 cursor-not-allowed",
+                "relative flex h-11 min-w-[44px] items-center justify-center px-5 text-xs font-bold uppercase tracking-wider transition-colors",
+                activeTab === tab ? "text-slate-950" : "text-slate-400 hover:text-slate-600"
               )}
             >
-            {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Upload className="h-4 w-4" />
-            )}
-            Carregar imagem
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              multiple
-              disabled={!product || isPending}
-              onChange={(event) => handleProductImageUpload(event.target.files)}
-            />
-          </label>
+              {tab === "produto" ? "Produto" : "Variantes"}
+              {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-950" />}
+            </button>
+          ))}
         </div>
-      </div>
+      </nav>
 
-        {product ? (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleProductDragEnd}
-          >
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <SortableContext
-                items={localProductImages.map((img) => img.id)}
-                strategy={rectSortingStrategy}
-              >
-                {localProductImages.map((image) => (
-                  <SortableImage
-                    key={image.id}
-                    id={image.id}
-                    url={image.url}
-                    isPending={isPending}
-                    overlayLabel={product.name}
-                    onRemove={() =>
-                      startTransition(async () => {
-                        const result = await deleteProductImage(image.id);
-                        if (!result.success) {
-                          toast.error(
-                            result.error ?? "Erro ao remover a imagem.",
-                          );
-                          return;
-                        }
-                        toast.success("Imagem removida.");
-                        router.refresh();
-                      })
-                    }
-                  />
-                ))}
-              </SortableContext>
-              {!localProductImages.length ? (
-                <p className="text-sm text-slate-500">
-                  Ainda não há imagens carregadas.
-                </p>
-              ) : null}
-            </div>
-          </DndContext>
-        ) : (
-          <p className="mt-5 text-sm text-slate-500">
-            Guarda primeiro o produto para activar os uploads.
-          </p>
-        )}
-      </section>
+      {/* ═══ Tab: Produto ═══ */}
+      {activeTab === "produto" && (
+        <div className="mt-8 space-y-8">
+          <Form {...productForm}>
+            <form onSubmit={productForm.handleSubmit(onProductSubmit)} className="space-y-8">
+              {/* Geral */}
+              <div className="rounded-xl bg-white p-6 shadow-sm space-y-6">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">Geral</h2>
+                <FormField control={productForm.control} name="name" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">Nome do Produto</FormLabel>
+                    <FormControl>
+                      <input {...field} disabled={isPending} className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-slate-400" placeholder="Ex: Vestido de Seda..." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={productForm.control} name="description" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">Descrição</FormLabel>
+                    <FormControl>
+                      <textarea {...field} disabled={isPending} rows={4} className="w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400" placeholder="Detalhes sobre o material, corte, etc..." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-950">Variações</h2>
-            <p className="text-sm text-slate-500">
-              Define opções por tamanho, cor, stock e preço específico.
-            </p>
-          </div>
-          {product ? (
-            <Form {...variantForm}>
-              <form
-                onSubmit={variantForm.handleSubmit(onVariantSubmit)}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-              >
-                <div className="grid gap-3 md:grid-cols-2">
-                  <FormField
-                    control={variantForm.control}
-                    name="size"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <input
-                            {...field}
-                            disabled={isPending}
-                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
-                            placeholder="Tamanho (opcional)"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={variantForm.control}
-                    name="color"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <input
-                            {...field}
-                            disabled={isPending}
-                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
-                            placeholder="Cor (opcional)"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={variantForm.control}
-                    name="stock"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <input
-                            {...field}
-                            type="number"
-                            min="0"
-                            disabled={isPending}
-                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
-                            placeholder="Stock"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={variantForm.control}
-                    name="price_override"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <input
-                            {...field}
-                            value={field.value ?? ""}
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            disabled={isPending}
-                            className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-100 placeholder:text-slate-400"
-                            placeholder="Preço override"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={variantForm.control}
-                  name="is_available"
-                  render={({ field }) => (
-                    <FormItem className="mt-3 flex flex-row items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          disabled={isPending}
-                          checked={field.value}
-                          onChange={field.onChange}
-                          className="h-4 w-4 rounded border-slate-300 cursor-pointer"
-                        />
-                      </FormControl>
-                      <FormLabel className="cursor-pointer">
-                        Disponível
-                      </FormLabel>
+              {/* Preço & Stock */}
+              <div className="rounded-xl bg-white p-6 shadow-sm space-y-6">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">Preço & Stock</h2>
+                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                  <FormField control={productForm.control} name="price" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">Preço Base (KZ)</FormLabel>
+                      <FormControl><input {...field} type="number" disabled={isPending} className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-slate-400" /></FormControl>
+                      <FormMessage />
                     </FormItem>
-                  )}
-                />
-                <div className="mt-4 flex gap-3">
-                  <button
-                    type="submit"
-                    disabled={isPending}
-                    className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
-                  >
-                    {isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : null}
-                    {variantForm.watch("id")
-                      ? "Guardar variação"
-                      : "Adicionar variação"}
-                  </button>
-                  {variantForm.watch("id") ? (
-                    <button
-                      type="button"
-                      disabled={isPending}
-                      onClick={() =>
-                        variantForm.reset({
-                          size: "",
-                          color: "",
-                          stock: 0,
-                          is_available: true,
-                          price_override: null,
-                        })
-                      }
-                      className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
-                    >
-                      Cancelar
-                    </button>
-                  ) : null}
+                  )} />
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Stock Total</label>
+                    <FormField control={productForm.control} name="stock" render={({ field }) => (
+                      <FormItem>
+                        <FormControl><input {...field} type="number" disabled={isPending} className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-slate-400" /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Preço Promocional (KZ)</label>
+                    <input type="number" value={promoPrice} onChange={(e) => setPromoPrice(e.target.value)} disabled={isPending} className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-slate-400" placeholder="Opcional" />
+                  </div>
                 </div>
-              </form>
-            </Form>
-          ) : null}
-        </div>
-
-        {product ? (
-          <div className="mt-5 overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead className="text-slate-500">
-                <tr className="border-b border-slate-200">
-                  <th className="py-3 pr-4 font-medium">Tamanho</th>
-                  <th className="py-3 pr-4 font-medium">Cor</th>
-                  <th className="py-3 pr-4 font-medium">Stock</th>
-                  <th className="py-3 pr-4 font-medium">Disponível</th>
-                  <th className="py-3 pr-4 font-medium">Preço override</th>
-                  <th className="py-3 font-medium">Acções</th>
-                </tr>
-              </thead>
-              <tbody>
-                {variants.map((variant) => (
-                  <tr key={variant.id} className="border-b border-slate-100">
-                    <td className="py-4 pr-4 text-slate-700">
-                      {variant.size || "—"}
-                    </td>
-                    <td className="py-4 pr-4 text-slate-700">
-                      {variant.color || "—"}
-                    </td>
-                    <td className="py-4 pr-4 text-slate-700">{variant.stock}</td>
-                    <td className="py-4 pr-4 text-slate-700">
-                      {variant.is_available ? "Sim" : "Não"}
-                    </td>
-                    <td className="py-4 pr-4 text-slate-700">
-                      {variant.price_override
-                        ? formatPrice(variant.price_override)
-                        : "Preço base"}
-                    </td>
-                    <td className="py-4">
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          disabled={isPending}
-                          onClick={() =>
-                            variantForm.reset({
-                              id: variant.id,
-                              size: variant.size ?? "",
-                              color: variant.color ?? "",
-                              stock: variant.stock,
-                              is_available: variant.is_available,
-                              price_override: variant.price_override,
-                            })
-                          }
-                          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
-                        >
-                          <Pencil className="h-4 w-4" />
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          disabled={isPending}
-                          onClick={() => setActiveVariantForImages(variant)}
-                          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
-                        >
-                          <Images className="h-4 w-4" />
-                          Imagens da variação
-                        </button>
-                        <button
-                          type="button"
-                          disabled={isPending}
-                          onClick={() => {
-                            setSelectedVariant({
-                              id: variant.id,
-                              productId: product.id,
-                            });
-                            setIsVariantConfirmOpen(true);
-                          }}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-                        >
-                          {isPending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {!variants.length ? (
-                  <tr>
-                    <td colSpan={6} className="py-6 text-slate-500">
-                      Ainda não há variações cadastradas.
-                    </td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="mt-5 text-sm text-slate-500">
-            Guarda o produto primeiro para activar as variações.
-          </p>
-        )}
-      </section>
-
-      {activeVariantForImages ? (
-        <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/30 p-4">
-          <div className="h-full w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-950">
-                  Imagens da variação
-                </h2>
-                <p className="text-sm text-slate-500">
-                  {activeVariantForImages.size || "Sem tamanho"} ·{" "}
-                  {activeVariantForImages.color || "Sem cor"}
-                </p>
               </div>
-              <div className="flex gap-2">
-                {hasVariantImageChanges ? (
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={handleSaveVariantOrder}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-bg text-slate-900 border border-slate-200 transition hover:bg-slate-50 disabled:opacity-50"
-                    title="Guardar Ordem"
-                  >
-                    {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => setActiveVariantForImages(null)}
-                  className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-                >
-                  Fechar
-                </button>
+
+              {/* Organização */}
+              <div className="rounded-xl bg-white p-6 shadow-sm space-y-6">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">Organização</h2>
+                <FormField control={productForm.control} name="category_ids" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">Categorias</FormLabel>
+                    <FormControl>
+                      <CategoryCombobox categories={categories} selectedIds={field.value} onChange={field.onChange} disabled={isPending} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <div className="grid gap-6 sm:grid-cols-2 pt-2">
+                  <FormField control={productForm.control} name="is_active" render={({ field }) => (
+                    <FormItem>
+                      <label className="flex min-h-[44px] cursor-pointer items-center gap-3">
+                        <div className="relative flex h-6 w-11 items-center rounded-full bg-slate-200 transition">
+                          <input type="checkbox" checked={field.value} onChange={field.onChange} disabled={isPending} className="peer sr-only" />
+                          <div className={cn("absolute inset-0 rounded-full transition-colors peer-checked:bg-emerald-500", "bg-slate-200")} />
+                          <div className="absolute h-5 w-5 translate-x-0.5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-[22px]" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <span className="block text-sm font-medium text-slate-700">Estado</span>
+                          <span className="block text-[11px] text-slate-400">{field.value ? "Activo" : "Inactivo"}</span>
+                        </div>
+                      </label>
+                    </FormItem>
+                  )} />
+
+                  <FormField control={productForm.control} name="is_featured" render={({ field }) => (
+                    <FormItem>
+                      <label className={cn("flex min-h-[44px] items-center gap-3", !isActive ? "cursor-not-allowed opacity-40" : "cursor-pointer")}>
+                        <div className="relative flex h-6 w-11 items-center rounded-full bg-slate-200 transition">
+                          <input type="checkbox" checked={field.value} onChange={field.onChange} disabled={isPending || !isActive} className="peer sr-only" />
+                          <div className={cn("absolute inset-0 rounded-full transition-colors peer-checked:bg-emerald-500", "bg-slate-200")} />
+                          <div className="absolute h-5 w-5 translate-x-0.5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-[22px]" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <span className="block text-sm font-medium text-slate-700">Destaque</span>
+                          <span className="block text-[11px] text-slate-400">Página inicial</span>
+                        </div>
+                      </label>
+                    </FormItem>
+                  )} />
+                </div>
               </div>
+            </form>
+          </Form>
+
+          {/* Imagens (outside <form> since uploads are independent) */}
+          <div className="rounded-xl bg-white p-6 shadow-sm space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">Imagens</h2>
+              <label className={cn("flex min-h-[44px] cursor-pointer items-center gap-2 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition", (!product || isPending) && "opacity-50 pointer-events-none")}>
+                <Upload className="h-3.5 w-3.5" />
+                Carregar Imagem
+                <input type="file" multiple className="hidden" onChange={(e) => handleImageUpload(e.target.files)} disabled={!product || isPending} />
+              </label>
             </div>
-
-            <label
-              className={cn(
-                "mt-5 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100",
-                isPending && "opacity-50 cursor-not-allowed",
-              )}
-            >
-              {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Upload className="h-4 w-4" />
-              )}
-              Carregar imagem
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                multiple
-                disabled={isPending}
-                onChange={(event) =>
-                  handleVariantImageUpload(event.target.files)
-                }
-              />
-            </label>
-
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleVariantDragEnd}
-            >
-              <div className="mt-5 space-y-4">
-                <SortableContext
-                  items={localVariantImages.map((img) => img.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {localVariantImages.length ? (
-                    localVariantImages.map((image) => (
-                      <SortableImage
-                        key={image.id}
-                        id={image.id}
-                        url={image.url}
-                        isPending={isPending}
-                        overlayLabel="Imagem da variação"
-                        onRemove={() =>
-                          startTransition(async () => {
-                            const result = await deleteVariantImage(
-                              image.id,
-                              product?.id ?? "",
-                            );
-                            if (!result.success) {
-                              toast.error(
-                                result.error ?? "Erro ao remover a imagem.",
-                              );
-                              return;
-                            }
-                            toast.success("Imagem removida.");
-                            router.refresh();
-                          })
-                        }
-                      />
-                    ))
-                  ) : (
-                    <p className="text-sm text-slate-500">
-                      Esta variação ainda não tem imagens próprias.
-                    </p>
-                  )}
-                </SortableContext>
+            {!product ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Images className="h-12 w-12 text-slate-200 mb-4" />
+                <p className="text-sm text-slate-500">Guarda o produto primeiro para activar os uploads.</p>
               </div>
-            </DndContext>
+            ) : (
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                  <SortableContext items={localProductImages.map((img) => img.id)} strategy={rectSortingStrategy}>
+                    {localProductImages.map((image) => (
+                      <SortableImage key={image.id} id={image.id} url={image.url} isPending={isPending} onRemove={() => {
+                        if (confirm("Remover esta imagem?")) {
+                          startTransition(async () => { await deleteProductImage(image.id); router.refresh(); });
+                        }
+                      }} />
+                    ))}
+                  </SortableContext>
+                </div>
+                {localProductImages.length === 0 && <p className="py-8 text-center text-sm text-slate-400">Nenhuma imagem carregada.</p>}
+              </DndContext>
+            )}
           </div>
         </div>
-      ) : null}
+      )}
 
+      {/* ═══ Tab: Variantes ═══ */}
+      {activeTab === "variantes" && (
+        <div className="mt-8">
+          <div className="rounded-xl bg-white overflow-hidden shadow-sm">
+            {!product ? (
+              <p className="p-12 text-center text-sm text-slate-500">Guarda o produto para adicionar variantes.</p>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {product.product_variants?.map((variant) => (
+                  <div key={variant.id}>
+                    <button
+                      onClick={() => {
+                        if (isDesktop) {
+                          setExpandedVariantId(expandedVariantId === variant.id ? null : variant.id);
+                        } else {
+                          setActiveVariant(variant);
+                          setIsVariantEditorOpen(true);
+                        }
+                      }}
+                      className={cn(
+                        "flex w-full min-h-[44px] items-center justify-between px-6 py-4 text-left transition hover:bg-slate-50 active:bg-slate-100",
+                        expandedVariantId === variant.id && "bg-slate-50/50"
+                      )}
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-950">{variant.size || "S/T"} · {variant.color || "S/C"}</span>
+                        <span className="text-xs text-slate-500">Stock: {variant.stock} · {variant.is_available ? "Disponível" : "Indisponível"}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {variant.variant_images?.length ? <Images className="h-4 w-4 text-slate-300" /> : null}
+                        {variant.price_override && <span className="text-xs font-bold text-emerald-600">{formatPrice(variant.price_override)}</span>}
+                        <ChevronRight className={cn("h-4 w-4 text-slate-300 transition-transform", expandedVariantId === variant.id && "rotate-90")} />
+                      </div>
+                    </button>
+
+                    {isDesktop && expandedVariantId === variant.id && (
+                      <div className="bg-slate-50/30 px-6 py-8 border-t border-slate-100">
+                        <VariantForm productId={product.id} variant={variant} onClose={() => setExpandedVariantId(null)} />
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isDesktop && expandedVariantId === "new" && (
+                  <div className="bg-slate-50/30 px-6 py-8 border-t border-slate-100">
+                    <VariantForm productId={product.id} variant={null} onClose={() => setExpandedVariantId(null)} />
+                  </div>
+                )}
+
+                {!product.product_variants?.length && !expandedVariantId && (
+                  <p className="p-12 text-center text-sm text-slate-400">Nenhuma variante criada.</p>
+                )}
+
+                {/* Add variant button */}
+                {product && (
+                  <button
+                    onClick={() => {
+                      if (isDesktop) {
+                        setExpandedVariantId(expandedVariantId === "new" ? null : "new");
+                      } else {
+                        setActiveVariant(null);
+                        setIsVariantEditorOpen(true);
+                      }
+                    }}
+                    className="flex w-full min-h-[44px] items-center justify-center gap-2 px-6 py-4 text-sm font-bold text-emerald-600 transition hover:bg-emerald-50"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Adicionar Variante
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Save Bar — monitors both tabs */}
+      <StickySaveBar
+        isDirty={isDirty}
+        isSaving={isPending}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onSave={productForm.handleSubmit(onProductSubmit as any)}
+        onReset={() => {
+          productForm.reset();
+          setPromoPrice(initialPromotion?.is_active ? initialPromotion.promo_price.toString() : "");
+          setLocalProductImages([...(product?.product_images ?? [])].sort((a, b) => a.position - b.position));
+        }}
+      />
+
+      {/* Mobile variant drawer */}
+      {product && (
+        <VariantEditor productId={product.id} variant={activeVariant} isOpen={isVariantEditorOpen} onClose={() => setIsVariantEditorOpen(false)} />
+      )}
+
+      {/* Delete dialog */}
       <ConfirmDialog
-        open={isProductConfirmOpen}
-        onOpenChange={setIsProductConfirmOpen}
-        title="Eliminar produto"
-        description="Esta acção é irreversível. Tens a certeza que pretendes remover este produto?"
-        confirmLabel="Sim, eliminar"
-        variant="destructive"
-        onConfirm={() => {
+        open={isDeleteConfirmOpen}
+        onOpenChange={setIsDeleteConfirmOpen}
+        onConfirm={async () => {
           if (!product) return;
-          startTransition(async () => {
-            const result = await deleteProduct(product.id);
-            if (!result.success) {
-              toast.error(result.error ?? "Erro ao remover o produto.");
-              return;
-            }
-
-            toast.success("Produto removido.");
-            router.push("/produtos");
-            router.refresh();
-          });
+          const r = await deleteProduct(product.id);
+          if (r.success) { toast.success("Produto removido."); router.push("/produtos"); }
+          else { toast.error(r.error ?? "Erro ao remover produto."); }
         }}
-      />
-
-      <ConfirmDialog
-        open={isVariantConfirmOpen}
-        onOpenChange={setIsVariantConfirmOpen}
-        title="Eliminar variação"
-        description="Esta acção é irreversível. Tens a certeza que pretendes remover esta variação?"
-        confirmLabel="Sim, eliminar"
+        title="Apagar Produto"
+        description="Tens a certeza? Esta acção é irreversível e removerá todas as variantes e imagens associadas."
+        confirmLabel="Sim, apagar"
         variant="destructive"
-        onConfirm={() => {
-          if (!selectedVariant) return;
-          startTransition(async () => {
-            const result = await deleteVariant(
-              selectedVariant.id,
-              selectedVariant.productId,
-            );
-            if (!result.success) {
-              toast.error(result.error ?? "Erro ao remover a variação.");
-              return;
-            }
-            toast.success("Variação removida.");
-            router.refresh();
-          });
-        }}
       />
-    </div>
+    </PageCanvas>
   );
 }

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ProductCard } from "@/components/product/ProductCard";
 import { CatalogFilters } from "@/components/product/CatalogFilters";
 import { getCategories, getProducts } from "@/lib/actions/products";
-import { cn } from "@/lib/utils";
 
 type CatalogPageProps = {
   searchParams?: Promise<{
