@@ -75,7 +75,7 @@ jobs:
         working-directory: ./store
 
       - name: Install Vercel CLI
-        run: pnpm install --global vercel@latest
+        run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=${{ inputs.environment || (github.ref == 'refs/heads/main' && 'production' || 'preview') }} --token=${{ secrets.VERCEL_TOKEN }}
@@ -96,6 +96,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
