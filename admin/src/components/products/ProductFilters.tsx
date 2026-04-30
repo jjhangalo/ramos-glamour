@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Filter } from "lucide-react";
+import { Filter, X, Check } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -9,6 +9,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet";
 
 import { FilterChipRow, type FilterChip } from "@/components/list/FilterChipRow";
@@ -24,6 +25,13 @@ type ProductFiltersProps = {
   categories: Category[];
 };
 
+type DraftFilters = {
+  estado: string;
+  destaque: string;
+  pesquisa: string;
+  categorias: string[];
+};
+
 export function ProductFilters({ categories }: ProductFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -31,11 +39,28 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  // Parse active filters from URL
-  const activeStatus = searchParams.get("estado");
-  const activeFeatured = searchParams.get("destaque");
-  const activeCategories = searchParams.getAll("categoria");
-  const activeSearch = searchParams.get("pesquisa");
+  // Local draft state initialized from URL
+  const [draft, setDraft] = useState<DraftFilters>({
+    estado: searchParams.get("estado") || "all",
+    destaque: searchParams.get("destaque") || "all",
+    pesquisa: searchParams.get("pesquisa") || "",
+    categorias: searchParams.getAll("categoria"),
+  });
+
+  // Unique key to reset draft state when opening or when URL changes externally
+  const filtersKey = `${isOpen}-${searchParams.toString()}`;
+  
+  // Sync draft state when filtersKey changes (e.g. when opening the sheet/popover or URL changes)
+  const [prevKey, setPrevKey] = useState(filtersKey);
+  if (filtersKey !== prevKey) {
+    setPrevKey(filtersKey);
+    setDraft({
+      estado: searchParams.get("estado") || "all",
+      destaque: searchParams.get("destaque") || "all",
+      pesquisa: searchParams.get("pesquisa") || "",
+      categorias: searchParams.getAll("categoria"),
+    });
+  }
 
   const removeFilter = (key: string, value?: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -50,20 +75,14 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
     router.push(`?${params.toString()}`);
   };
 
-  const handleApply = (formData: FormData) => {
+  const handleApply = (e?: React.FormEvent) => {
+    e?.preventDefault();
     const params = new URLSearchParams();
     
-    const estado = formData.get("estado") as string;
-    if (estado && estado !== "all") params.set("estado", estado);
-
-    const destaque = formData.get("destaque") as string;
-    if (destaque && destaque !== "all") params.set("destaque", destaque);
-
-    const pesquisa = formData.get("pesquisa") as string;
-    if (pesquisa) params.set("pesquisa", pesquisa);
-
-    const selectedCategories = formData.getAll("categoria") as string[];
-    selectedCategories.forEach((c) => params.append("categoria", c));
+    if (draft.estado && draft.estado !== "all") params.set("estado", draft.estado);
+    if (draft.destaque && draft.destaque !== "all") params.set("destaque", draft.destaque);
+    if (draft.pesquisa) params.set("pesquisa", draft.pesquisa);
+    draft.categorias.forEach((c) => params.append("categoria", c));
 
     params.set("pagina", "1");
     params.set("limite", searchParams.get("limite") ?? "20");
@@ -74,8 +93,22 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
     });
   };
 
+  const toggleCategory = (id: string) => {
+    setDraft(prev => ({
+      ...prev,
+      categorias: prev.categorias.includes(id)
+        ? prev.categorias.filter(c => c !== id)
+        : [...prev.categorias, id]
+    }));
+  };
+
   // Build active filters for shared component
   const activeFilters: FilterChip[] = [];
+  const activeSearch = searchParams.get("pesquisa");
+  const activeStatus = searchParams.get("estado");
+  const activeFeatured = searchParams.get("destaque");
+  const activeCategories = searchParams.getAll("categoria");
+
   if (activeSearch) activeFilters.push({ key: "pesquisa", label: `"${activeSearch}"` });
   if (activeStatus && activeStatus !== "all") {
     activeFilters.push({ key: "estado", label: activeStatus === "active" ? "Activo" : "Inactivo" });
@@ -89,7 +122,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
   });
 
   const filterForm = (
-    <form action={handleApply} className="space-y-6">
+    <div className="space-y-6">
       {/* Search */}
       <div className="space-y-2">
         <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -97,8 +130,8 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
         </label>
         <input
           type="search"
-          name="pesquisa"
-          defaultValue={activeSearch ?? ""}
+          value={draft.pesquisa}
+          onChange={(e) => setDraft(prev => ({ ...prev, pesquisa: e.target.value }))}
           placeholder="Ex: T-shirt branca..."
           className="w-full rounded-md border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400"
         />
@@ -111,8 +144,8 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
             Estado
           </label>
           <select
-            name="estado"
-            defaultValue={activeStatus ?? "all"}
+            value={draft.estado}
+            onChange={(e) => setDraft(prev => ({ ...prev, estado: e.target.value }))}
             className="w-full rounded-md border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
           >
             <option value="all">Todos</option>
@@ -127,8 +160,8 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
             Destaque
           </label>
           <select
-            name="destaque"
-            defaultValue={activeFeatured ?? "all"}
+            value={draft.destaque}
+            onChange={(e) => setDraft(prev => ({ ...prev, destaque: e.target.value }))}
             className="w-full rounded-md border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
           >
             <option value="all">Todos</option>
@@ -144,35 +177,36 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
           Categorias (Multi-selecção)
         </label>
         <div className="grid max-h-[160px] grid-cols-1 gap-2 overflow-y-auto pr-2">
-          {categories.map((category) => (
-            <label
-              key={category.id}
-              className={cn(
-                "flex items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-3 py-2.5 text-xs font-medium transition active:scale-95 cursor-pointer",
-                activeCategories.includes(category.id) && "border-slate-900 bg-slate-900 text-white"
-              )}
-            >
-              <input
-                type="checkbox"
-                name="categoria"
-                value={category.id}
-                defaultChecked={activeCategories.includes(category.id)}
-                className="hidden"
-              />
-              <span className="truncate">{category.name}</span>
-            </label>
-          ))}
+          {categories.map((category) => {
+            const isSelected = draft.categorias.includes(category.id);
+            return (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => toggleCategory(category.id)}
+                className={cn(
+                  "flex items-center justify-between rounded-md border px-3 py-2.5 text-xs font-medium transition cursor-pointer",
+                  isSelected 
+                    ? "border-slate-900 bg-slate-900 text-white" 
+                    : "border-slate-100 bg-slate-50 text-slate-600 hover:border-slate-200"
+                )}
+              >
+                <span className="truncate">{category.name}</span>
+                {isSelected && <Check className="h-3.5 w-3.5" />}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <button
-        type="submit"
+        onClick={() => handleApply()}
         disabled={isPending}
         className="w-full rounded-md bg-slate-900 py-4 text-xs font-bold uppercase tracking-wider text-white shadow-lg transition active:scale-95 disabled:opacity-50"
       >
-        Aplicar Filtros
+        {isPending ? "A aplicar..." : "Aplicar Filtros"}
       </button>
-    </form>
+    </div>
   );
 
   const hasFilters = activeFilters.length > 0;
@@ -189,6 +223,9 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
           <SheetContent side="bottom" className="rounded-t-[2rem] px-6 pb-10 pt-8">
             <SheetHeader>
               <SheetTitle>Filtrar Catálogo</SheetTitle>
+              <SheetDescription className="sr-only">
+                Ajuste os filtros para encontrar produtos específicos no catálogo.
+              </SheetDescription>
             </SheetHeader>
             <div className="mt-6">
               {filterForm}
@@ -201,8 +238,11 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
           onRemoveFilter={removeFilter}
           trigger={
             <Popover
+              open={isOpen}
+              onOpenChange={setIsOpen}
               trigger={
                 <button
+                  type="button"
                   className={cn(
                     "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50",
                     hasFilters && "border-slate-900 bg-slate-900 text-white"
