@@ -62,10 +62,10 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
-          cache-dependency-path: 'admin/pnpm-lock.yaml'
+          cache-dependency-path: 'store/pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install
-        working-directory: ./admin
+        working-directory: ./store
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       - name: Pull Vercel Environment Information
@@ -75,7 +75,7 @@ jobs:
       - name: Upload .vercel Directory
         uses: actions/upload-artifact@v4
         with:
-          name: vercel-admin-artifact
+          name: vercel-store-artifact
           path: .vercel
           if-no-files-found: error
           retention-days: 1
@@ -95,16 +95,17 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
-          cache-dependency-path: 'admin/pnpm-lock.yaml'
+          cache-dependency-path: 'store/pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install
-        working-directory: ./admin
+        working-directory: ./store
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       - name: Download .vercel Directory
         uses: actions/download-artifact@v4
         with:
-          name: vercel-admin-artifact
-          path: .vercel
+          name: vercel-store-artifact
+          path: store/.vercel
+
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt ${{ (inputs.environment == 'production' || (github.ref == 'refs/heads/main' && !inputs.environment)) && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
