@@ -128,4 +128,3 @@ jobs:
 
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt ${{ (inputs.environment == 'production' || (github.ref == 'refs/heads/main' && !inputs.environment)) && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./admin
