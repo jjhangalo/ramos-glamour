@@ -90,6 +90,7 @@ jobs:
           path: .vercel
           if-no-files-found: error
           retention-days: 1
+          include-hidden-files: true
 
   deploy:
     needs: build
