@@ -106,6 +106,17 @@ jobs:
         with:
           version: 10
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: 'admin/pnpm-lock.yaml'
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: ./admin
+
       - name: Install Vercel CLI
         run: pnpm install --global vercel@latest
 
@@ -113,7 +124,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: vercel-admin-artifact
-          path: .vercel
+          path: admin/.vercel
 
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt ${{ (inputs.environment == 'production' || (github.ref == 'refs/heads/main' && !inputs.environment)) && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./admin
