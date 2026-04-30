@@ -25,15 +25,27 @@ const dateFormatter = new Intl.DateTimeFormat("pt-AO", {
   year: "numeric",
 });
 
+interface OrderItem {
+  quantity: number;
+}
+
+interface Order {
+  id: string;
+  status: string;
+  total: number | string;
+  created_at: string;
+  order_items?: OrderItem[];
+}
+
 interface DashboardOrderCardProps {
-  order: any;
+  order: Order;
 }
 
 export function DashboardOrderCard({ order }: DashboardOrderCardProps) {
   if (!order) return null;
 
   const status = (order.status as keyof typeof statusLabels) || "pending";
-  const itemsCount = order.order_items?.reduce((acc: number, item: any) => acc + item.quantity, 0) || 0;
+  const itemsCount = order.order_items?.reduce((acc: number, item: OrderItem) => acc + item.quantity, 0) || 0;
 
   return (
     <div className="group relative overflow-hidden rounded-2xl bg-white border border-brand-midnight/5 p-8 transition-all hover:border-brand-gold/20">

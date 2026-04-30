@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Eye } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { getOrders } from "@/lib/actions/orders";

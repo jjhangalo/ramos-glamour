@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
@@ -31,7 +31,65 @@ export function CatalogFilters({
   const [isOpen, setIsOpen] = useState(false);
   const rootCategories = categories.filter((c) => !c.parent_id);
 
-  const FilterContent = () => (
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden w-64 flex-shrink-0 lg:block">
+        <FilterContent 
+          rootCategories={rootCategories}
+          activeCategory={activeCategory}
+          activeSearch={activeSearch}
+          activeOrder={activeOrder}
+          setIsOpen={setIsOpen}
+        />
+      </aside>
+
+      {/* Mobile Filter Trigger */}
+      <div className="flex items-center justify-between lg:hidden border-y border-brand-midnight/5 py-4 mb-8">
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>
+            <button className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em]">
+              <SlidersHorizontal className="h-4 w-4" />
+              FILTROS
+            </button>
+          </SheetTrigger>
+          <SheetContent className="glass border-none">
+            <SheetHeader>
+              <SheetTitle className="heading-luxury text-3xl font-light">Filtros</SheetTitle>
+            </SheetHeader>
+            <FilterContent 
+              rootCategories={rootCategories}
+              activeCategory={activeCategory}
+              activeSearch={activeSearch}
+              activeOrder={activeOrder}
+              setIsOpen={setIsOpen}
+            />
+          </SheetContent>
+        </Sheet>
+        <p className="text-[10px] font-bold tracking-[0.2em] text-brand-midnight/40">
+          {totalProducts} PRODUTOS
+        </p>
+      </div>
+    </>
+  );
+}
+
+type FilterContentProps = {
+  rootCategories: Category[];
+  activeCategory?: string;
+  activeSearch?: string;
+  activeOrder?: string;
+  setIsOpen: (open: boolean) => void;
+};
+
+function FilterContent({
+  rootCategories,
+  activeCategory,
+  activeSearch,
+  activeOrder,
+  setIsOpen,
+}: FilterContentProps) {
+  return (
     <div className="space-y-12 py-6">
       {/* Categories */}
       <div className="space-y-6">
@@ -125,35 +183,5 @@ export function CatalogFilters({
         )}
       </form>
     </div>
-  );
-
-  return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden w-64 flex-shrink-0 lg:block">
-        <FilterContent />
-      </aside>
-
-      {/* Mobile Filter Trigger */}
-      <div className="flex items-center justify-between lg:hidden border-y border-brand-midnight/5 py-4 mb-8">
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>
-            <button className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em]">
-              <SlidersHorizontal className="h-4 w-4" />
-              FILTROS
-            </button>
-          </SheetTrigger>
-          <SheetContent className="glass border-none">
-            <SheetHeader>
-              <SheetTitle className="heading-luxury text-3xl font-light">Filtros</SheetTitle>
-            </SheetHeader>
-            <FilterContent />
-          </SheetContent>
-        </Sheet>
-        <p className="text-[10px] font-bold tracking-[0.2em] text-brand-midnight/40">
-          {totalProducts} PRODUTOS
-        </p>
-      </div>
-    </>
   );
 }

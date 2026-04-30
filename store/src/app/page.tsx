@@ -149,7 +149,7 @@ export default async function Home() {
       <section className="py-24 text-center">
         <div className="mx-auto max-w-3xl px-6">
           <p className="heading-luxury text-3xl font-light leading-relaxed md:text-5xl">
-            "A verdadeira elegância está no <span className="italic text-brand-gold">detalhe</span>, no toque de seda e na confiança de ser única."
+            &quot;A verdadeira elegância está no <span className="italic text-brand-gold">detalhe</span>, no toque de seda e na confiança de ser única.&quot;
           </p>
           <div className="mt-12 h-12 w-[1px] bg-brand-gold mx-auto" />
           <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.4em] text-brand-midnight/60">

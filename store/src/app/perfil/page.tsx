@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, ShoppingBag, ArrowRight, Compass, Sparkles } from "lucide-react";
+import { ShoppingBag, ArrowRight, Compass, Sparkles } from "lucide-react";
 import { getDashboardData } from "@/lib/actions/profile";
 import { DashboardOrderCard } from "@/components/profile/DashboardOrderCard";
 import PageWithHeaderOffset from "@/components/layout/PageWithHeaderOffset";

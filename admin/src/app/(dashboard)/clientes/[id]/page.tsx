@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AdminNotesCard } from "@/components/clients/AdminNotesCard";
-import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PageCanvas } from "@/components/ui/page-canvas";
 import { cn } from "@/lib/utils";

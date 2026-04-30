@@ -3,18 +3,16 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from "lucide-react";
 
 import { signInWithGoogle } from "@/lib/actions/auth";
 import { createClient } from "@/lib/supabase/client";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils/format";
-import { cn } from "@/lib/utils";
 
 export function CartPageClient() {
   const router = useRouter();
-  const pathname = usePathname();
   const items = useCartStore((state) => state.items);
   const totalItems = useCartStore((state) => state.totalItems);
   const totalPrice = useCartStore((state) => state.totalPrice);
