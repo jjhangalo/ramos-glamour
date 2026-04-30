@@ -76,7 +76,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
       {products.length ? (
         <>
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
             {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full text-left text-sm">
@@ -93,7 +93,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {products.map((product) => (
-                    <tr key={product.id} className="group hover:bg-slate-50/50">
+                    <tr 
+                      key={product.id} 
+                      className="group hover:bg-slate-50/50"
+                    >
                       <td className="px-5 py-4">
                         <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-slate-100 border border-slate-100 shadow-sm transition-transform group-hover:scale-105">
                           {product.product_images?.[0]?.url ? (
@@ -155,39 +158,39 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 <MobileCardRow
                   key={product.id}
                   thumbnail={
-                    product.product_images?.[0]?.url ? (
-                      <Image
-                        src={product.product_images[0].url}
-                        alt={product.name}
-                        fill
-                        sizes="48px"
-                        className="object-cover"
+                      product.product_images?.[0]?.url ? (
+                        <Image
+                          src={product.product_images[0].url}
+                          alt={product.name}
+                          fill
+                          sizes="48px"
+                          className="object-cover"
+                        />
+                      ) : null
+                    }
+                    title={product.name}
+                    isFeatured={product.is_featured}
+                    subtitle={
+                      product.categories?.length
+                        ? product.categories.map((c) => c.name).join(", ")
+                        : "Sem categoria"
+                    }
+                    meta={formatPrice(product.price)}
+                    badge={
+                      <span className={cn(
+                        product.is_active ? "text-emerald-600" : "text-slate-400"
+                      )}>
+                        {product.is_active ? "Activo" : "Inactivo"}
+                      </span>
+                    }
+                    actions={
+                      <ProductRowActions
+                        productId={product.id}
+                        isActive={product.is_active}
+                        isFeatured={product.is_featured}
                       />
-                    ) : null
-                  }
-                  title={product.name}
-                  isFeatured={product.is_featured}
-                  subtitle={
-                    product.categories?.length
-                      ? product.categories.map((c) => c.name).join(", ")
-                      : "Sem categoria"
-                  }
-                  meta={formatPrice(product.price)}
-                  badge={
-                    <span className={cn(
-                      product.is_active ? "text-emerald-600" : "text-slate-400"
-                    )}>
-                      {product.is_active ? "Activo" : "Inactivo"}
-                    </span>
-                  }
-                  actions={
-                    <ProductRowActions
-                      productId={product.id}
-                      isActive={product.is_active}
-                      isFeatured={product.is_featured}
-                    />
-                  }
-                />
+                    }
+                  />
               ))}
             </div>
           </div>

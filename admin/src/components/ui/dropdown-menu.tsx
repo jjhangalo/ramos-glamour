@@ -52,12 +52,12 @@ export function DropdownMenu({
       {isOpen && (
         <div
           className={cn(
-            "absolute z-50 mt-2 w-48 origin-top-right rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl outline-none ring-0",
+            "absolute mt-2 w-48 origin-top-right rounded-2xl border border-slate-200 !bg-white p-1.5 shadow-2xl outline-none ring-1 ring-black/10 z-[100] !opacity-100",
             align === "right" ? "right-0" : "left-0",
           )}
         >
           <div
-            className="flex flex-col gap-1"
+            className="flex flex-col gap-1 !opacity-100"
             onClick={() => setIsOpen(false)}
           >
             {children}

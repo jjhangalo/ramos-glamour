@@ -39,6 +39,30 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+
+  /* Animation Stagger */
+  --animation-delay-50: 50ms;
+  --animation-delay-100: 100ms;
+  --animation-delay-150: 150ms;
+  --animation-delay-200: 200ms;
+  --animation-delay-250: 250ms;
+}
+
+@utility stagger-1 { animation-delay: 50ms; }
+@utility stagger-2 { animation-delay: 100ms; }
+@utility stagger-3 { animation-delay: 150ms; }
+@utility stagger-4 { animation-delay: 200ms; }
+@utility stagger-5 { animation-delay: 250ms; }
+@utility fill-mode-both { animation-fill-mode: both; }
+
+@utility slide-in-from-bottom-4 {
+  --tw-enter-translate-y: 1rem;
+  animation-name: slide-in-from-bottom;
+}
+
+@keyframes slide-in-from-bottom {
+  from { transform: translateY(var(--tw-enter-translate-y, 100%)); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 body {
