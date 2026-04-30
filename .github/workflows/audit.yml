@@ -1,0 +1,35 @@
+name: Dependency Audit
+
+on:
+  push:
+    paths:
+      - '**/pnpm-lock.yaml'
+      - '**/package.json'
+  pull_request:
+    paths:
+      - '**/pnpm-lock.yaml'
+      - '**/package.json'
+  schedule:
+    - cron: '0 0 * * 1' # Run every Monday at midnight
+
+jobs:
+  audit:
+    name: pnpm audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          
+      # Run audit for the whole workspace
+      # Failing only on high or critical vulnerabilities to avoid breaking the build on minor issues
+      - name: Run Workspace Audit
+        run: pnpm audit --audit-level high
