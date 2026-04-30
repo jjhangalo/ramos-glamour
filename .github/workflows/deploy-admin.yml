@@ -52,7 +52,7 @@ jobs:
         run: pnpm lint
         working-directory: ./admin
 
-  build:
+  build-and-deploy:
     needs: lint
     runs-on: ubuntu-latest
     steps:
@@ -79,52 +79,12 @@ jobs:
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=${{ inputs.environment || (github.ref == 'refs/heads/main' && 'production' || 'preview') }} --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./admin
 
       - name: Build Project Artifacts
         run: vercel build ${{ (inputs.environment == 'production' || (github.ref == 'refs/heads/main' && !inputs.environment)) && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Debug - List files
-        run: ls -laR . | grep .vercel || echo "Not found"
-
-      - name: Upload .vercel Directory
-        uses: actions/upload-artifact@v4
-        with:
-          name: vercel-admin-artifact
-          path: .vercel
-          include-hidden-files: true
-          if-no-files-found: error
-          retention-days: 1
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-          cache-dependency-path: 'admin/pnpm-lock.yaml'
-
-      - name: Install dependencies
-        run: pnpm install
         working-directory: ./admin
-
-      - name: Install Vercel CLI
-        run: pnpm install --global vercel@latest
-
-      - name: Download .vercel Directory
-        uses: actions/download-artifact@v4
-        with:
-          name: vercel-admin-artifact
-          path: .vercel
 
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt ${{ (inputs.environment == 'production' || (github.ref == 'refs/heads/main' && !inputs.environment)) && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./admin
