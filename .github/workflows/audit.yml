@@ -31,5 +31,8 @@ jobs:
           
       # Run audit for the whole workspace
       # Failing only on high or critical vulnerabilities to avoid breaking the build on minor issues
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+        
       - name: Run Workspace Audit
         run: pnpm audit --audit-level high

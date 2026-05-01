@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
@@ -58,7 +58,10 @@ function PromotionDialog({ products }: PromotionDialogProps) {
     },
   });
 
-  const selectedProductId = form.watch("product_id");
+  const selectedProductId = useWatch({
+    control: form.control,
+    name: "product_id",
+  });
   const selectedProduct = products.find((p) => p.id === selectedProductId);
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase()),
