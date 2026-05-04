@@ -3,36 +3,54 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/lib/store/app";
 
 export function SplashScreen() {
+  const { isInitialLoading } = useAppStore();
   const [isVisible, setIsVisible] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
   useEffect(() => {
-    // Start animation after a short delay
+    // Start internal animations after hydration
     const startTimeout = setTimeout(() => {
       setIsAnimating(true);
     }, 100);
 
-    // Fade out after 2.5 seconds
-    const hideTimeout = setTimeout(() => {
-      setIsVisible(false);
-    }, 2800);
+    // Minimum display time for branding (2s)
+    const minTimeTimeout = setTimeout(() => {
+      setMinTimeElapsed(true);
+    }, 2000);
 
     return () => {
       clearTimeout(startTimeout);
-      clearTimeout(hideTimeout);
+      clearTimeout(minTimeTimeout);
     };
   }, []);
 
+  useEffect(() => {
+    // Only fade out when BOTH the app is ready and minimum time has passed
+    if (!isInitialLoading && minTimeElapsed) {
+      const hideTimeout = setTimeout(() => {
+        setIsVisible(false);
+      }, 1000); // Duration of the fade out transition
+
+      return () => clearTimeout(hideTimeout);
+    }
+  }, [isInitialLoading, minTimeElapsed]);
+
   if (!isVisible) return null;
+
+  // Determining opacity: 
+  // - Always 100 on server (isMounted is false)
+  // - Stays 100 until (isInitialLoading is false AND minTimeElapsed is true)
+  const isFadingOut = !isInitialLoading && minTimeElapsed;
 
   return (
     <div
       className={cn(
         "fixed inset-0 z-[9999] flex items-center justify-center bg-black transition-opacity duration-1000",
-        isAnimating ? "opacity-100" : "opacity-0",
-        !isVisible && "pointer-events-none opacity-0"
+        isFadingOut ? "pointer-events-none opacity-0" : "opacity-100"
       )}
     >
       <div className="relative flex flex-col items-center">

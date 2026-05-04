@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Outfit } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SplashScreen } from "@/components/layout/SplashScreen";
+import { LoadingTrigger } from "@/components/common/LoadingTrigger";
 import { CartPreservedToast } from "@/components/auth/CartPreservedToast";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import "./globals.css";
@@ -59,6 +60,7 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-screen w-full flex-col overflow-x-hidden bg-brand-bg font-sans text-foreground">
         <SplashScreen />
+        <LoadingTrigger />
         <CartPreservedToast />
         <Header />
         <main className="flex-1">
