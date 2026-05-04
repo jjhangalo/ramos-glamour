@@ -37,19 +37,19 @@ const SheetContent = React.forwardRef<
   SheetContentProps
 >(({ side = "right", className, children, ...props }, ref) => (
   <SheetPortal>
-    <SheetOverlay />
+    <SheetOverlay className="data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0" />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed z-50 flex flex-col gap-4 bg-white shadow-xl transition",
+        "fixed z-50 flex flex-col gap-4 bg-white shadow-xl",
         side === "left" &&
-          "inset-y-0 left-0 h-full w-3/4 max-w-xs border-r",
+          "inset-y-0 left-0 h-full w-3/4 max-w-xs border-r data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left duration-300 ease-out",
         side === "right" &&
-          "inset-y-0 right-0 h-full w-3/4 max-w-xs border-l",
+          "inset-y-0 right-0 h-full w-3/4 max-w-xs border-l data-[state=open]:animate-in data-[state=open]:slide-in-from-right data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right duration-300 ease-out",
         side === "top" &&
-          "inset-x-0 top-0 border-b",
+          "inset-x-0 top-0 border-b data-[state=open]:animate-in data-[state=open]:slide-in-from-top data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top duration-300 ease-out",
         side === "bottom" &&
-          "inset-x-0 bottom-0 border-t",
+          "inset-x-0 bottom-0 border-t data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom duration-300 ease-out",
         className,
       )}
       {...props}

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { DesktopDashboardNav, MobileDashboardNav } from "@/components/dashboard/DashboardNav";
 import { SidebarUser } from "@/components/dashboard/SidebarUser";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { PageTransition } from "@/components/shared/PageTransition";
 import { getUnreadNotifications } from "@/lib/actions/notifications";
 import { createClient } from "@/lib/supabase/server";
 
@@ -101,7 +102,9 @@ export default async function DashboardLayout({
         </header>
 
         <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </main>
       </div>
     </div>

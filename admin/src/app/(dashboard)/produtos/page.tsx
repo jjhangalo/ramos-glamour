@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/list/PageHeader";
 import { MobileCardRow } from "@/components/list/MobileCardRow";
 import { FAB } from "@/components/list/FAB";
 import { ProductPaginationWrapper } from "@/components/products/ProductPaginationWrapper";
+import { StaggerContainer, StaggerItem, FadeUp } from "@/components/shared/Animations";
 
 type ProductsPageProps = {
   searchParams?: Promise<{
@@ -59,23 +60,27 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   return (
     <PageCanvas size="list" className="relative space-y-6 pb-32 pt-8">
-      <PageHeader 
-        title="Produtos" 
-        actions={
-          <Link
-            href="/produtos/novo"
-            className="hidden items-center justify-center rounded-xl bg-brand-midnight px-6 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-white shadow-md transition hover:bg-brand-charcoal md:flex"
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            NOVO PRODUTO
-          </Link>
-        }
-      />
+      <FadeUp>
+        <PageHeader 
+          title="Produtos" 
+          actions={
+            <Link
+              href="/produtos/novo"
+              className="hidden items-center justify-center rounded-xl bg-brand-midnight px-6 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-white shadow-md transition hover:bg-brand-charcoal md:flex"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              NOVO PRODUTO
+            </Link>
+          }
+        />
+      </FadeUp>
 
-      <ProductFilters categories={flatCategories} />
+      <FadeUp delay={0.1}>
+        <ProductFilters categories={flatCategories} />
+      </FadeUp>
 
       {products.length ? (
-        <>
+        <StaggerContainer>
           <div className="rounded-xl border border-brand-midnight/5 bg-white shadow-sm overflow-hidden">
             {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto">
@@ -91,9 +96,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     <th className="px-5 py-3 text-right font-semibold">Acções</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <StaggerContainer as="tbody" className="divide-y divide-slate-100">
                   {products.map((product) => (
-                    <tr 
+                    <StaggerItem
+                      as="tr"
                       key={product.id} 
                       className="group hover:bg-slate-50/50"
                     >
@@ -146,53 +152,54 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                           isFeatured={product.is_featured}
                         />
                       </td>
-                    </tr>
+                    </StaggerItem>
                   ))}
-                </tbody>
+                </StaggerContainer>
               </table>
             </div>
 
             {/* Mobile List */}
-            <div className="md:hidden divide-y divide-slate-100">
+            <StaggerContainer className="md:hidden divide-y divide-slate-100">
               {products.map((product) => (
-                <MobileCardRow
-                  key={product.id}
-                  thumbnail={
-                      product.product_images?.[0]?.url ? (
-                        <Image
-                          src={product.product_images[0].url}
-                          alt={product.name}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
+                <StaggerItem key={product.id}>
+                  <MobileCardRow
+                    thumbnail={
+                        product.product_images?.[0]?.url ? (
+                          <Image
+                            src={product.product_images[0].url}
+                            alt={product.name}
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                          />
+                        ) : null
+                      }
+                      title={product.name}
+                      isFeatured={product.is_featured}
+                      subtitle={
+                        product.categories?.length
+                          ? product.categories.map((c) => c.name).join(", ")
+                          : "Sem categoria"
+                      }
+                      meta={formatPrice(product.price)}
+                      badge={
+                        <span className={cn(
+                          product.is_active ? "text-emerald-600" : "text-slate-400"
+                        )}>
+                          {product.is_active ? "Activo" : "Inactivo"}
+                        </span>
+                      }
+                      actions={
+                        <ProductRowActions
+                          productId={product.id}
+                          isActive={product.is_active}
+                          isFeatured={product.is_featured}
                         />
-                      ) : null
-                    }
-                    title={product.name}
-                    isFeatured={product.is_featured}
-                    subtitle={
-                      product.categories?.length
-                        ? product.categories.map((c) => c.name).join(", ")
-                        : "Sem categoria"
-                    }
-                    meta={formatPrice(product.price)}
-                    badge={
-                      <span className={cn(
-                        product.is_active ? "text-emerald-600" : "text-slate-400"
-                      )}>
-                        {product.is_active ? "Activo" : "Inactivo"}
-                      </span>
-                    }
-                    actions={
-                      <ProductRowActions
-                        productId={product.id}
-                        isActive={product.is_active}
-                        isFeatured={product.is_featured}
-                      />
-                    }
-                  />
+                      }
+                    />
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
 
           <ProductPaginationWrapper
@@ -201,7 +208,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             pageSize={pageSize}
             totalPages={totalPages}
           />
-        </>
+        </StaggerContainer>
       ) : (
         <EmptyState
           title="Nenhum produto encontrado"

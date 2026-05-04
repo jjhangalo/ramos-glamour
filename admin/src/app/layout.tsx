@@ -31,9 +31,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt" className={`${cormorantGaramond.variable} ${outfit.variable} h-full antialiased`}>
+    <html 
+      lang="pt" 
+      className={`${cormorantGaramond.variable} ${outfit.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
       <head>
         <meta name="apple-mobile-web-app-title" content="Ramos Glamour | Administração" />
+        <script dangerouslySetInnerHTML={{ __html: `
+          // Unregister any service workers that might be lingering from other local apps (like the store)
+          if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+              for (let registration of registrations) {
+                registration.unregister();
+              }
+            });
+          }
+        ` }} />
       </head>
       <body className="min-h-full bg-brand-bg font-sans text-brand-midnight">
         {children}

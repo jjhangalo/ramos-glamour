@@ -1,4 +1,5 @@
 import { signIn } from "@/lib/actions/auth";
+import { LoginForm } from "./LoginForm";
 
 type LoginPageProps = {
   searchParams?: Promise<{
@@ -22,51 +23,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
         </div>
 
-        <form action={signIn} className="mt-10 space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40 ml-1">
-              Email Corporativo
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="w-full rounded-xl border border-brand-midnight/10 bg-white/50 px-4 py-3 text-sm outline-none transition focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/50"
-              placeholder="admin@ramosglamour.com"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label
-              htmlFor="password"
-              className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40 ml-1"
-            >
-              Palavra-passe
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              className="w-full rounded-xl border border-brand-midnight/10 bg-white/50 px-4 py-3 text-sm outline-none transition focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/50"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {params.error ? (
-            <div className="rounded-xl border border-red-200 bg-red-50/50 px-4 py-3 text-xs font-medium text-red-700 text-center animate-in fade-in slide-in-from-top-1">
-              {params.error}
-            </div>
-          ) : null}
-
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-brand-midnight px-4 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-brand-white shadow-lg shadow-brand-midnight/20 transition-all hover:bg-brand-charcoal hover:shadow-xl active:scale-[0.98]"
-          >
-            Entrar no Painel
-          </button>
-        </form>
+        <LoginForm action={signIn} error={params.error} />
 
         <div className="mt-12 border-t border-brand-midnight/5 pt-8 text-center">
           <p className="text-[9px] font-medium text-brand-midnight/30 uppercase tracking-[0.4em]">
@@ -77,3 +34,4 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     </main>
   );
 }
+
