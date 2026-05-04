@@ -9,7 +9,7 @@ type PageHeaderProps = {
 export function PageHeader({ title, actions, className }: PageHeaderProps) {
   return (
     <header className={cn("mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between", className)}>
-      <h1 className="text-3xl font-bold tracking-tight text-slate-950">
+      <h1 className="heading-luxury text-4xl font-light text-brand-midnight">
         {title}
       </h1>
       {actions && (

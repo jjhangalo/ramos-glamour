@@ -42,7 +42,7 @@ export function DropdownMenu({
         {trigger ?? (
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:bg-slate-100"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-brand-midnight/10 text-brand-midnight/70 transition hover:bg-brand-bg bg-white"
           >
             <MoreHorizontal className="h-5 w-5" />
           </button>
@@ -52,7 +52,7 @@ export function DropdownMenu({
       {isOpen && (
         <div
           className={cn(
-            "absolute mt-2 w-48 origin-top-right rounded-2xl border border-slate-200 !bg-white p-1.5 shadow-2xl outline-none ring-1 ring-black/10 z-[100] !opacity-100",
+            "absolute mt-2 w-48 origin-top-right rounded-2xl border border-brand-midnight/5 !bg-white p-1.5 shadow-2xl outline-none ring-1 ring-black/5 z-[100] !opacity-100",
             align === "right" ? "right-0" : "left-0",
           )}
         >
@@ -84,7 +84,7 @@ export function DropdownMenuItem({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100",
+        "flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-brand-midnight/70 transition hover:bg-brand-bg hover:text-brand-midnight",
         className,
       )}
     >

@@ -125,7 +125,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
     <div className="space-y-6">
       {/* Search */}
       <div className="space-y-2">
-        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+        <label className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/40">
           Pesquisar por nome
         </label>
         <input
@@ -133,20 +133,20 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
           value={draft.pesquisa}
           onChange={(e) => setDraft(prev => ({ ...prev, pesquisa: e.target.value }))}
           placeholder="Ex: T-shirt branca..."
-          className="w-full rounded-md border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400"
+          className="w-full rounded-xl border border-brand-midnight/5 px-4 py-3 text-sm outline-none focus:border-brand-gold/50 transition-colors"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         {/* Status */}
         <div className="space-y-2">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          <label className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/40">
             Estado
           </label>
           <select
             value={draft.estado}
             onChange={(e) => setDraft(prev => ({ ...prev, estado: e.target.value }))}
-            className="w-full rounded-md border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+            className="w-full rounded-xl border border-brand-midnight/5 bg-white px-3 py-3 text-sm outline-none focus:border-brand-gold/50 transition-colors appearance-none"
           >
             <option value="all">Todos</option>
             <option value="active">Activos</option>
@@ -156,13 +156,13 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
 
         {/* Featured */}
         <div className="space-y-2">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          <label className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/40">
             Destaque
           </label>
           <select
             value={draft.destaque}
             onChange={(e) => setDraft(prev => ({ ...prev, destaque: e.target.value }))}
-            className="w-full rounded-md border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-slate-400"
+            className="w-full rounded-xl border border-brand-midnight/5 bg-white px-3 py-3 text-sm outline-none focus:border-brand-gold/50 transition-colors appearance-none"
           >
             <option value="all">Todos</option>
             <option value="true">Destacados</option>
@@ -173,7 +173,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
 
       {/* Categories */}
       <div className="space-y-2">
-        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+        <label className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/40">
           Categorias (Multi-selecção)
         </label>
         <div className="grid max-h-[160px] grid-cols-1 gap-2 overflow-y-auto pr-2">
@@ -185,10 +185,10 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
                 type="button"
                 onClick={() => toggleCategory(category.id)}
                 className={cn(
-                  "flex items-center justify-between rounded-md border px-3 py-2.5 text-xs font-medium transition cursor-pointer",
+                  "flex items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-medium transition cursor-pointer",
                   isSelected 
-                    ? "border-slate-900 bg-slate-900 text-white" 
-                    : "border-slate-100 bg-slate-50 text-slate-600 hover:border-slate-200"
+                    ? "border-brand-midnight bg-brand-midnight text-brand-white" 
+                    : "border-brand-midnight/5 bg-brand-bg/50 text-brand-midnight/60 hover:border-brand-midnight/10"
                 )}
               >
                 <span className="truncate">{category.name}</span>
@@ -202,9 +202,9 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
       <button
         onClick={() => handleApply()}
         disabled={isPending}
-        className="w-full rounded-md bg-slate-900 py-4 text-xs font-bold uppercase tracking-wider text-white shadow-lg transition active:scale-95 disabled:opacity-50"
+        className="w-full rounded-xl bg-brand-midnight py-4 text-[10px] font-bold uppercase tracking-widest text-brand-white shadow-lg transition active:scale-[0.98] disabled:opacity-50 hover:bg-brand-charcoal"
       >
-        {isPending ? "A aplicar..." : "Aplicar Filtros"}
+        {isPending ? "A APLICAR..." : "APLICAR FILTROS"}
       </button>
     </div>
   );
@@ -244,8 +244,8 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
                 <button
                   type="button"
                   className={cn(
-                    "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50",
-                    hasFilters && "border-slate-900 bg-slate-900 text-white"
+                    "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-midnight/10 bg-white text-brand-midnight shadow-sm transition hover:bg-brand-bg",
+                    hasFilters && "border-brand-midnight bg-brand-midnight text-brand-white"
                   )}
                 >
                   <Filter className="h-4 w-4" />
@@ -254,7 +254,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
               className="mt-1"
             >
               <div className="flex flex-col gap-4">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-brand-midnight">
                   Filtros
                 </h3>
                 {filterForm}

@@ -8,11 +8,11 @@ export default async function CategoriesPage() {
   return (
     <PageCanvas size="list" className="space-y-8 py-8">
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-midnight/40">
           Categorias
         </p>
-        <h1 className="mt-1 text-3xl font-semibold text-slate-950">
-          Gestão de categorias
+        <h1 className="heading-luxury mt-2 text-4xl font-light text-brand-midnight">
+          Gestão de Categorias
         </h1>
       </div>
       <CategoryManager categories={categories} />
