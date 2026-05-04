@@ -47,11 +47,11 @@ export default async function DashboardPage() {
   return (
     <PageCanvas size="list" className="space-y-8 py-8">
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
-          Painel
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-midnight/40">
+          Administração
         </p>
-        <h1 className="mt-1 text-3xl font-semibold text-slate-950">
-          Visão geral do backoffice
+        <h1 className="heading-luxury mt-2 text-4xl font-light text-brand-midnight">
+          Visão Geral
         </h1>
       </div>
 
@@ -59,51 +59,51 @@ export default async function DashboardPage() {
         {metrics.map((metric) => (
           <article
             key={metric.label}
-            className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+            className="rounded-xl border border-brand-midnight/5 bg-white p-6 shadow-sm transition-all hover:shadow-md"
           >
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{metric.label}</p>
-            <p className="mt-3 text-3xl font-bold text-slate-950 tracking-tight">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">{metric.label}</p>
+            <p className="mt-3 text-3xl font-light text-brand-midnight tracking-tight">
               {metric.value}
             </p>
           </article>
         ))}
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between bg-slate-50 border-b border-slate-200 px-6 py-4">
+      <section className="rounded-xl border border-brand-midnight/5 bg-white shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between bg-brand-bg/50 border-b border-brand-midnight/5 px-6 py-4">
           <div>
-            <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
               Encomendas recentes
             </h2>
-            <p className="mt-1 text-sm font-semibold text-slate-950">
+            <p className="mt-1 text-sm font-semibold text-brand-midnight">
               Últimas 5 operações
             </p>
           </div>
           <Link
             href="/encomendas"
-            className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-700 shadow-sm transition hover:bg-slate-50"
+            className="rounded-md border border-brand-midnight/10 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/70 shadow-sm transition hover:bg-brand-bg"
           >
-            Ver catálogo completo
+            VER CATÁLOGO COMPLETO
           </Link>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              <tr className="border-b border-slate-200">
-                <th className="px-6 py-3">ID</th>
-                <th className="px-6 py-3">Cliente</th>
-                <th className="px-6 py-3">Total</th>
-                <th className="px-6 py-3">Estado</th>
-                <th className="px-6 py-3">Data</th>
+            <thead className="bg-brand-bg/30 text-[11px] font-bold uppercase tracking-[0.15em] text-brand-midnight/40">
+              <tr className="border-b border-brand-midnight/5">
+                <th className="px-6 py-3 font-semibold">ID</th>
+                <th className="px-6 py-3 font-semibold">Cliente</th>
+                <th className="px-6 py-3 font-semibold">Total</th>
+                <th className="px-6 py-3 font-semibold">Estado</th>
+                <th className="px-6 py-3 font-semibold">Data</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-brand-midnight/5">
               {(recentOrders ?? []).map((order) => (
-                <tr key={order.id} className="transition-colors hover:bg-slate-50/50">
-                  <td className="px-6 py-4 font-bold text-slate-950">
+                <tr key={order.id} className="transition-colors hover:bg-brand-bg/40">
+                  <td className="px-6 py-4 font-bold text-brand-midnight">
                     #{shortId(order.id)}
                   </td>
-                  <td className="px-6 py-4 text-slate-700">
+                  <td className="px-6 py-4 text-brand-midnight/70">
                     {Array.isArray(order.profiles)
                       ? (order.profiles as unknown as { full_name: string | null; display_name: string | null }[])[0]?.full_name ||
                         (order.profiles as unknown as { full_name: string | null; display_name: string | null }[])[0]?.display_name ||
@@ -112,13 +112,13 @@ export default async function DashboardPage() {
                         (order.profiles as unknown as { full_name: string | null; display_name: string | null })?.display_name ||
                         "Cliente sem nome"}
                   </td>
-                  <td className="px-6 py-4 font-semibold text-slate-900">
+                  <td className="px-6 py-4 font-semibold text-brand-midnight">
                     {formatPrice(order.total)}
                   </td>
                   <td className="px-6 py-4">
                     <StatusBadge status={order.status} />
                   </td>
-                  <td className="px-6 py-4 text-xs text-slate-500">
+                  <td className="px-6 py-4 text-xs text-brand-midnight/40 font-medium">
                     {formatDate(order.created_at)}
                   </td>
                 </tr>

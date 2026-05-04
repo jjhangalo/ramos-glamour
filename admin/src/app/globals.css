@@ -1,21 +1,45 @@
 @config "../../tailwind.config.ts";
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FCF9F6;
+  --foreground: #121212;
+  --brand-bg: #FCF9F6;
+  --brand-midnight: #121212;
+  --brand-gold: #C5A059;
+  --brand-blush: #E8D5D0;
+  --brand-white: #FFFFFF;
+  --brand-olive: #5D613F;
+  --brand-charcoal: #2D2D2D;
+  --popover: #FFFFFF;
+  --popover-foreground: #121212;
+  --muted: #F3F4F6;
+  --muted-foreground: #6B7280;
+  --accent: #FCF9F6;
+  --accent-foreground: #C5A059;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --font-serif: var(--font-cormorant-garamond);
+  --font-sans: var(--font-outfit);
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-midnight: var(--brand-midnight);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-blush: var(--brand-blush);
+  --color-brand-white: var(--brand-white);
+  --color-brand-olive: var(--brand-olive);
+  --color-brand-charcoal: var(--brand-charcoal);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
 }
 
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
-@keyframes zoom-in { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes zoom-out { from { transform: scale(1); opacity: 1; } to { transform: scale(0.95); opacity: 0; } }
 @keyframes slide-in-from-top { from { transform: translateY(-100%); } to { transform: translateY(0); } }
 @keyframes slide-out-to-top { from { transform: translateY(0); } to { transform: translateY(-100%); } }
 @keyframes slide-in-from-bottom { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -30,15 +54,43 @@
   to { transform: scale(1); }
 }
 
-@keyframes slide-in-from-bottom {
-  from { transform: translateY(var(--tw-enter-translate-y, 100%)); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
 html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.heading-luxury {
+  font-family: var(--font-cormorant-garamond), serif;
+  letter-spacing: -0.01em;
+}
+
+/* Luxury Grain Overlay */
+.grain-overlay {
+  position: relative;
+}
+
+.grain-overlay::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  mix-blend-mode: overlay;
+  z-index: 10;
 }

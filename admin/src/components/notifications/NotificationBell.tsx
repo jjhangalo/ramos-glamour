@@ -94,25 +94,25 @@ export function NotificationBell({
         type="button"
         onClick={handleOpen}
         className={cn(
-          "relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-all",
-          open ? "bg-slate-100 text-slate-950 shadow-inner" : "hover:bg-slate-50 hover:text-slate-950"
+          "relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-brand-midnight/10 text-brand-midnight/60 transition-all",
+          open ? "bg-brand-midnight/5 text-brand-midnight shadow-inner" : "hover:bg-brand-midnight/5 hover:text-brand-midnight"
         )}
         aria-label="Notificações"
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white shadow-sm ring-2 ring-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-[9px] font-bold text-brand-white shadow-sm ring-2 ring-brand-bg">
             {unreadCount}
           </span>
         ) : null}
       </button>
 
       {open ? (
-        <div className="absolute left-0 top-11 z-[100] w-80 max-w-[calc(100vw-32px)] rounded-xl border border-slate-200 bg-white p-3 shadow-xl animate-in fade-in zoom-in-95 duration-200">
-          <div className="flex items-center justify-between border-b border-slate-100 px-2 pb-3">
-            <h2 className="text-sm font-semibold text-slate-950">Notificações</h2>
+        <div className="absolute left-0 top-11 z-[100] w-80 max-w-[calc(100vw-32px)] rounded-xl border border-brand-midnight/5 bg-white/90 backdrop-blur-md p-3 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex items-center justify-between border-b border-brand-midnight/5 px-2 pb-3">
+            <h2 className="text-sm font-semibold text-brand-midnight">Notificações</h2>
             {isPending ? (
-              <span className="text-xs text-slate-500">A actualizar...</span>
+              <span className="text-xs text-brand-midnight/40">A actualizar...</span>
             ) : null}
           </div>
           <div className="mt-2 space-y-2">
@@ -126,13 +126,13 @@ export function NotificationBell({
                   <Link
                     key={notification.id}
                     href={orderId ? `/encomendas/${orderId}` : "/encomendas"}
-                    className="block rounded-xl px-3 py-3 text-sm transition hover:bg-slate-50"
+                    className="block rounded-xl px-3 py-3 text-sm transition hover:bg-brand-midnight/5"
                     onClick={() => setOpen(false)}
                   >
-                    <p className="font-medium text-slate-900">
+                    <p className="font-medium text-brand-midnight">
                       Nova encomenda de {customerName}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-brand-midnight/40">
                       {orderId ? `#${shortId(orderId)} · ` : null}
                       {formatTime(notification.created_at)}
                     </p>
@@ -140,7 +140,7 @@ export function NotificationBell({
                 );
               })
             ) : (
-              <p className="px-3 py-6 text-sm text-slate-500">
+              <p className="px-3 py-6 text-sm text-brand-midnight/40">
                 Não há notificações não lidas.
               </p>
             )}

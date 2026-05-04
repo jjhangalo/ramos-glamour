@@ -11,27 +11,27 @@ const statusMap: Record<
 > = {
   pending: {
     label: "Pendente",
-    className: "bg-amber-100 text-amber-800",
+    className: "bg-brand-gold/10 text-brand-gold",
   },
   confirmed: {
     label: "Confirmada",
-    className: "bg-sky-100 text-sky-800",
+    className: "bg-blue-50 text-blue-600",
   },
   out_for_delivery: {
     label: "Em entrega",
-    className: "bg-blue-100 text-blue-800",
+    className: "bg-indigo-50 text-indigo-600",
   },
   delivered: {
     label: "Entregue",
-    className: "bg-emerald-100 text-emerald-800",
+    className: "bg-emerald-50 text-emerald-600",
   },
   cancelled: {
     label: "Cancelada",
-    className: "bg-slate-100 text-slate-600",
+    className: "bg-brand-midnight/5 text-brand-midnight/40",
   },
   refused: {
     label: "Recusada",
-    className: "bg-red-100 text-red-800",
+    className: "bg-red-50 text-red-600",
   },
 };
 
