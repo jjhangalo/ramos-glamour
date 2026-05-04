@@ -19,13 +19,14 @@ type OrdersPageProps = {
   }>;
 };
 
+import { ORDER_STATUSES } from "@/lib/constants/orders";
+
 const STATUS_TABS = [
   { label: "Todas", value: "all" },
-  { label: "Pendentes", value: "pending" },
-  { label: "Confirmadas", value: "confirmed" },
-  { label: "Em entrega", value: "out_for_delivery" },
-  { label: "Entregues", value: "delivered" },
-  { label: "Canceladas", value: "cancelled" },
+  ...ORDER_STATUSES.map((status) => ({
+    label: status.label,
+    value: status.value,
+  })),
 ];
 
 export default async function OrdersPage({ searchParams }: OrdersPageProps) {
@@ -55,7 +56,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
       {/* Status Filter Tabs */}
       <FadeUp delay={0.05}>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 whitespace-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {STATUS_TABS.map((tab) => {
             const isActive = currentStatus === tab.value;
             return (
