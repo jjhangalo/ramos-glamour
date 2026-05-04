@@ -48,7 +48,7 @@ export default async function DashboardLayout({
               alt="Ramos Glamour"
               width={160}
               height={40}
-              className="h-10 w-auto object-contain brightness-0 dark:brightness-100"
+              className="h-10 w-auto object-contain"
               priority
             />
           </Link>

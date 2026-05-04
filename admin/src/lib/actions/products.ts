@@ -240,7 +240,6 @@ export async function updateProduct(id: string, input: ProductInput) {
     description: input.description.trim() || null,
     price: input.price,
     stock: input.stock,
-    category_id: input.category_ids[0] ?? null,
     is_active: input.is_active,
     is_featured: input.is_featured,
   };

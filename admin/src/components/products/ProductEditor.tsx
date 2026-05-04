@@ -124,12 +124,29 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
   );
 
   // Helper for error toasts
-  const showErrorToast = (message: string, retryAction?: () => void) => {
+  const showErrorToast = (rawError: string, retryAction?: () => void) => {
+    // Basic error categorization for user-friendliness
+    let friendlyMessage = "Ocorreu um erro ao processar o seu pedido.";
+    let errorCode = "ERR_GENERIC";
+
+    if (rawError.includes("category_id")) {
+      friendlyMessage = "Não foi possível associar as categorias selecionadas.";
+      errorCode = "ERR_DB_RELATION";
+    } else if (rawError.includes("price") || rawError.includes("stock")) {
+      friendlyMessage = "Os valores de preço ou stock parecem ser inválidos.";
+      errorCode = "ERR_VALIDATION";
+    } else if (rawError.includes("network") || rawError.includes("fetch")) {
+      friendlyMessage = "Verifique a sua ligação à internet.";
+      errorCode = "ERR_NETWORK";
+    }
+
     toast((t) => (
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 bg-white p-1">
         <div className="flex flex-col">
-          <span className="text-sm font-bold text-slate-900">{message}</span>
-          <span className="text-xs text-slate-500">Erro ao guardar, tenta novamente.</span>
+          <span className="text-sm font-bold text-brand-midnight">{friendlyMessage}</span>
+          <span className="text-[10px] uppercase tracking-wider text-brand-midnight/40">
+            Código: {errorCode} · Tente novamente
+          </span>
         </div>
         {retryAction && (
           <button
@@ -137,7 +154,7 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
               toast.dismiss(t.id);
               retryAction();
             }}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md bg-slate-100 px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-200"
+            className="flex min-h-[44px] items-center justify-center rounded-lg bg-brand-midnight px-4 text-xs font-bold uppercase tracking-widest text-brand-white transition hover:bg-brand-charcoal"
           >
             <RefreshCcw className="mr-2 h-3.5 w-3.5" />
             Tentar
