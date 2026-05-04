@@ -13,18 +13,21 @@ type FABProps = {
 
 export function FAB({ href, onClick, label, className }: FABProps) {
   const content = (
-    <>
-      <Plus className="h-6 w-6 md:mr-2" />
+    <div className="flex items-center gap-2">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-gold text-white shadow-inner transition-transform group-active:scale-90">
+        <Plus className="h-6 w-6" />
+      </div>
       {label && (
-        <span className="hidden text-sm font-bold uppercase tracking-wider md:block">
+        <span className="pr-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
           {label}
         </span>
       )}
-    </>
+    </div>
   );
 
   const baseStyles = cn(
-    "fixed bottom-24 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-2xl transition-all hover:bg-slate-800 active:scale-90 md:hidden",
+    "fixed bottom-24 right-6 z-40 group flex h-14 items-center justify-center rounded-full bg-brand-midnight p-2 text-white shadow-[0_20px_50px_rgba(18,18,18,0.3)] transition-all hover:scale-105 active:scale-95 md:hidden",
+    label ? "px-2" : "w-14",
     className
   );
 

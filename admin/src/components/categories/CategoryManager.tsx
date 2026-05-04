@@ -185,14 +185,23 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
           <div className="flex items-center justify-between">
             <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-midnight/40">Estrutura do Catálogo</h2>
             
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className="group relative flex h-10 w-10 items-center justify-center rounded-full border border-brand-midnight/10 bg-white transition-all hover:border-brand-gold/50 hover:bg-brand-gold/5">
-                  <HelpCircle className="h-5 w-5 text-brand-midnight/40 transition-colors group-hover:text-brand-gold" />
-                  <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-brand-gold text-[8px] font-bold text-white">?</span>
-                </button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px] rounded-3xl">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={openNewForm}
+                className="hidden items-center justify-center rounded-xl bg-brand-midnight px-6 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-white shadow-md transition hover:bg-brand-charcoal md:flex"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                NOVA CATEGORIA
+              </button>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="group relative flex h-10 w-10 items-center justify-center rounded-full border border-brand-midnight/10 bg-white transition-all hover:border-brand-gold/50 hover:bg-brand-gold/5">
+                    <HelpCircle className="h-5 w-5 text-brand-midnight/40 transition-colors group-hover:text-brand-gold" />
+                    <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-brand-gold text-[8px] font-bold text-white">?</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px] rounded-3xl">
                 <DialogHeader>
                   <DialogTitle className="heading-luxury text-2xl font-light">Gestão de Categorias</DialogTitle>
                 </DialogHeader>
@@ -236,10 +245,11 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
               </DialogContent>
             </Dialog>
           </div>
+        </div>
 
-          <p className="mt-4 text-2xl font-light text-brand-midnight">
-            {categories.length} Categorias Principais
-          </p>
+        <p className="mt-4 text-2xl font-light text-brand-midnight">
+          {categories.length} Categorias Principais
+        </p>
         </div>
       </FadeUp>
 
