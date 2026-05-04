@@ -34,7 +34,18 @@ export async function getOrders(
     if (isUuid) {
       query = query.eq("id", search);
     } else {
-      query = query.or(`id.ilike.%${search}%,notes.ilike.%${search}%`);
+      // Fetch matching users first since we can't easily do cross-table ORs
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id")
+        .or(`full_name.ilike.%${search}%,display_name.ilike.%${search}%,phone.ilike.%${search}%`);
+
+      if (profiles && profiles.length > 0) {
+        const userIds = profiles.map((p) => p.id);
+        query = query.or(`notes.ilike.%${search}%,user_id.in.(${userIds.join(",")})`);
+      } else {
+        query = query.or(`notes.ilike.%${search}%`);
+      }
     }
   }
 
