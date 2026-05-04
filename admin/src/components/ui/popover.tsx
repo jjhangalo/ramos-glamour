@@ -9,6 +9,8 @@ type PopoverProps = {
   align?: "left" | "right";
   width?: string;
   className?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export function Popover({
@@ -17,8 +19,13 @@ export function Popover({
   align = "left",
   width = "w-[320px]",
   className,
+  open: controlledOpen,
+  onOpenChange,
 }: PopoverProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setIsOpen = onOpenChange !== undefined ? onOpenChange : setInternalOpen;
+  
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,7 +44,7 @@ export function Popover({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   return (
     <div className="relative inline-block text-left" ref={containerRef}>

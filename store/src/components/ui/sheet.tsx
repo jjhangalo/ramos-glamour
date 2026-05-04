@@ -92,11 +92,12 @@ export function SheetContent({ children, className }: SheetContentProps) {
         onClick={() => {
           onOpenChange(false);
         }}
-        className="absolute inset-0 bg-brand-charcoal/35 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-brand-charcoal/35 backdrop-blur-[2px] animate-in fade-in duration-300"
       />
       <div
         className={cn(
           "absolute right-0 top-0 flex h-full w-full max-w-xl flex-col overflow-y-auto bg-white p-6 shadow-[0_20px_60px_rgba(98,98,96,0.18)] sm:p-8",
+          "animate-in slide-in-from-right duration-300 ease-out",
           className,
         )}
       >

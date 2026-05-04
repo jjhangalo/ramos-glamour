@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 import { ProductCard } from "@/components/product/ProductCard";
 import { CatalogFilters } from "@/components/product/CatalogFilters";
@@ -75,8 +76,16 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
           {products.length > 0 ? (
             <>
               <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-3 xl:grid-cols-3">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                {products.map((product, index) => (
+                  <div 
+                    key={product.id}
+                    className={cn(
+                      "animate-in fade-in slide-in-from-bottom-4 fill-mode-both",
+                      index < 9 && `stagger-${(index % 5) + 1}`
+                    )}
+                  >
+                    <ProductCard product={product} />
+                  </div>
                 ))}
               </div>
 

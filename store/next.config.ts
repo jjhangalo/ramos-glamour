@@ -1,5 +1,11 @@
 import type { NextConfig } from "next";
 import path from "path";
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/sw.ts",
+  swDest: "public/sw.js",
+});
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
@@ -25,4 +31,4 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.resolve(process.cwd(), "../"),
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

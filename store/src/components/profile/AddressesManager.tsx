@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -107,9 +107,6 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
     [addresses],
   );
 
-  useEffect(() => {
-    setFormValues(toFormState(editingAddress));
-  }, [editingAddress]);
 
   return (
     <div className="space-y-6">
@@ -194,6 +191,7 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
                 type="button"
                 onClick={() => {
                   setEditingAddress(address);
+                  setFormValues(toFormState(address));
                   setIsSheetOpen(true);
                 }}
                 className="inline-flex items-center gap-2 rounded-full border border-brand-charcoal/15 px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
