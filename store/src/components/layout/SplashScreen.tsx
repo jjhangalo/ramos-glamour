@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store/app";
 
 export function SplashScreen() {
-  const { isInitialLoading } = useAppStore();
+  const { isInitialLoading, setIsInitialLoading } = useAppStore();
   const [isVisible, setIsVisible] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
@@ -22,11 +22,23 @@ export function SplashScreen() {
       setMinTimeElapsed(true);
     }, 2000);
 
+    // 3. Signal that initial layout is ready after a small delay to allow hydration to settle
+    const loadingTimeout = setTimeout(() => {
+      setIsInitialLoading(false);
+    }, 400);
+
+    // 4. Fail-safe: Force hide after 8 seconds in case of hydration/loading failure
+    const failSafeTimeout = setTimeout(() => {
+      setIsVisible(false);
+    }, 8000);
+
     return () => {
       clearTimeout(startTimeout);
       clearTimeout(minTimeTimeout);
+      clearTimeout(loadingTimeout);
+      clearTimeout(failSafeTimeout);
     };
-  }, []);
+  }, [setIsInitialLoading]);
 
   useEffect(() => {
     // Only fade out when BOTH the app is ready and minimum time has passed
