@@ -1,45 +1,55 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef, useTransition } from "react";
 import { Search, Loader2, X } from "lucide-react";
 
 export function OrderGlobalSearch() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("search") || "");
-  const [isPending, setIsPending] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (query !== (searchParams.get("search") || "")) {
-        setIsPending(true);
-        const params = new URLSearchParams(searchParams.toString());
-        if (query) {
-          params.set("search", query);
-        } else {
-          params.delete("search");
-        }
-        // Reset to page 1 on new search
-        params.set("pagina", "1");
-        router.push(`/encomendas?${params.toString()}`);
-        setIsPending(false);
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (query.trim()) {
+        params.set("search", query.trim());
+      } else {
+        params.delete("search");
       }
-    }, 350);
+      // Reset to page 1 on new search
+      params.set("pagina", "1");
+      router.push(`/encomendas?${params.toString()}`);
+    });
+  };
 
-    return () => clearTimeout(timer);
-  }, [query, router, searchParams]);
+  const handleClear = () => {
+    setQuery("");
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("search");
+      params.set("pagina", "1");
+      router.push(`/encomendas?${params.toString()}`);
+    });
+  };
 
   return (
-    <div className="relative w-full sm:max-w-sm">
-      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+    <form onSubmit={handleSearch} className="relative w-full sm:max-w-sm">
+      <button 
+        type="submit" 
+        className="absolute inset-y-0 left-0 flex items-center pl-4 disabled:opacity-50 transition-opacity hover:opacity-70"
+        disabled={isPending}
+      >
         {isPending ? (
-          <Loader2 className="h-4 w-4 animate-spin text-brand-midnight/30" />
+          <Loader2 className="h-4 w-4 animate-spin text-brand-midnight/50" />
         ) : (
-          <Search className="h-4 w-4 text-brand-midnight/30" />
+          <Search className="h-4 w-4 text-brand-midnight/50" />
         )}
-      </div>
+      </button>
       <input
         ref={inputRef}
         type="text"
@@ -50,12 +60,14 @@ export function OrderGlobalSearch() {
       />
       {query && (
         <button
-          onClick={() => setQuery("")}
-          className="absolute inset-y-0 right-0 flex items-center pr-3 text-brand-midnight/30 transition hover:text-brand-midnight"
+          type="button"
+          onClick={handleClear}
+          disabled={isPending}
+          className="absolute inset-y-0 right-0 flex items-center pr-3 text-brand-midnight/30 transition hover:text-brand-midnight disabled:opacity-50"
         >
           <X className="h-4 w-4" />
         </button>
       )}
-    </div>
+    </form>
   );
 }
