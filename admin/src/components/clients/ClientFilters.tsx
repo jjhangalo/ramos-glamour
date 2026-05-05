@@ -130,8 +130,8 @@ export function ClientFilters({ params }: ClientFiltersProps) {
 
       {/* Expandable Filter Panel */}
       {isOpen && (
-        <FadeUp className="rounded-3xl border border-brand-midnight/5 bg-brand-bg/10 p-8 shadow-inner">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <FadeUp className="rounded-3xl border border-brand-midnight/5 bg-brand-bg/10 p-4 md:p-8 shadow-inner">
+          <div className="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-4">
             {/* Status */}
             <div className="space-y-3">
               <label className="ml-1 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
@@ -192,16 +192,16 @@ export function ClientFilters({ params }: ClientFiltersProps) {
             </div>
           </div>
 
-          <div className="mt-10 flex items-center justify-between border-t border-brand-midnight/5 pt-8">
+          <div className="mt-8 flex flex-col gap-6 border-t border-brand-midnight/5 pt-8 md:mt-10 md:flex-row md:items-center md:justify-between">
             <button
               onClick={handleClear}
-              className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-brand-midnight/40 transition hover:text-red-500"
+              className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-brand-midnight/40 transition hover:text-red-500"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Limpar Tudo
             </button>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col-reverse gap-3 sm:flex-row md:items-center md:gap-4">
               <button
                 onClick={() => setIsOpen(false)}
                 className="rounded-xl px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-brand-midnight/60 transition hover:bg-white"
@@ -211,7 +211,7 @@ export function ClientFilters({ params }: ClientFiltersProps) {
               <button
                 onClick={handleApply}
                 disabled={isPending}
-                className="flex items-center gap-3 rounded-xl bg-brand-midnight px-10 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-white shadow-xl shadow-brand-midnight/20 transition active:scale-95 disabled:opacity-50"
+                className="flex items-center justify-center gap-3 rounded-xl bg-brand-midnight px-6 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-white shadow-xl shadow-brand-midnight/20 transition active:scale-95 disabled:opacity-50 md:px-10"
               >
                 {isPending ? "A processar..." : "Aplicar Filtros"}
                 <ArrowRight className="h-4 w-4" />
