@@ -94,3 +94,11 @@ body {
   mix-blend-mode: overlay;
   z-index: 10;
 }
+
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/sheet";
 
 import { FilterChipRow, type FilterChip } from "@/components/list/FilterChipRow";
-import { Popover } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 type Category = {
@@ -237,28 +238,25 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
           activeFilters={activeFilters}
           onRemoveFilter={removeFilter}
           trigger={
-            <Popover
-              open={isOpen}
-              onOpenChange={setIsOpen}
-              trigger={
-                <button
+            <Popover open={isOpen} onOpenChange={setIsOpen}>
+              <PopoverTrigger asChild>
+                <Button
                   type="button"
-                  className={cn(
-                    "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-midnight/10 bg-white text-brand-midnight shadow-sm transition hover:bg-brand-bg",
-                    hasFilters && "border-brand-midnight bg-brand-midnight text-brand-white"
-                  )}
+                  variant={hasFilters ? "default" : "outline"}
+                  size="icon"
+                  className="rounded-full"
                 >
                   <Filter className="h-4 w-4" />
-                </button>
-              }
-              className="mt-1"
-            >
-              <div className="flex flex-col gap-4">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-brand-midnight">
-                  Filtros
-                </h3>
-                {filterForm}
-              </div>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80" align="end">
+                <div className="flex flex-col gap-4">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-brand-midnight">
+                    Filtros
+                  </h3>
+                  {filterForm}
+                </div>
+              </PopoverContent>
             </Popover>
           }
         />
