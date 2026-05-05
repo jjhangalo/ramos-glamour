@@ -305,6 +305,7 @@ export function PromotionsClient({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [toggleConfirm, setToggleConfirm] = useState<{ id: string; current: boolean } | null>(null);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -414,30 +415,40 @@ export function PromotionsClient({
                           )}
                         </td>
                         <td className="px-5 py-4">
-                          <button
-                            type="button"
-                            disabled={isPending}
-                            onClick={() => handleToggle(promo.id, promo.is_active)}
-                            className="inline-flex items-center gap-2 transition disabled:opacity-50"
-                            title={promo.is_active ? "Desativar" : "Ativar"}
-                          >
-                            {promo.is_active ? (
-                              <ToggleRight className="h-6 w-6 text-emerald-500" />
-                            ) : (
-                              <ToggleLeft className="h-6 w-6 text-brand-midnight/20" />
+                          <span
+                            className={cn(
+                              "inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider",
+                              isExpired
+                                ? "bg-red-50 text-red-600"
+                                : promo.is_active
+                                ? "bg-emerald-50 text-emerald-600"
+                                : "bg-brand-midnight/5 text-brand-midnight/40"
                             )}
-                          </button>
+                          >
+                            {isExpired ? "Expirada" : promo.is_active ? "Ativa" : "Inativa"}
+                          </span>
                         </td>
                         <td className="px-5 py-4 text-right">
-                          <button
-                            type="button"
-                            disabled={isPending}
-                            onClick={() => setConfirmId(promo.id)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-500 transition hover:bg-red-50 hover:border-red-200 disabled:opacity-50"
-                            title="Remover"
-                          >
-                            {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              disabled={isPending || isExpired}
+                              onClick={() => setToggleConfirm({ id: promo.id, current: promo.is_active })}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-brand-midnight/10 text-brand-midnight/40 transition hover:bg-brand-bg/50 hover:text-brand-midnight disabled:opacity-50"
+                              title={promo.is_active ? "Desativar" : "Ativar"}
+                            >
+                              {promo.is_active ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isPending}
+                              onClick={() => setConfirmId(promo.id)}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-500 transition hover:bg-red-50 hover:border-red-200 disabled:opacity-50"
+                              title="Remover"
+                            >
+                              {isPending && confirmId === promo.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -495,29 +506,42 @@ export function PromotionsClient({
                             </span>
                           </div>
                         )}
+
+                        <div className="mt-3">
+                          <span
+                            className={cn(
+                              "inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                              isExpired
+                                ? "bg-red-50 text-red-600"
+                                : promo.is_active
+                                ? "bg-emerald-50 text-emerald-600"
+                                : "bg-brand-midnight/5 text-brand-midnight/40"
+                            )}
+                          >
+                            {isExpired ? "Expirada" : promo.is_active ? "Ativa" : "Inativa"}
+                          </span>
+                        </div>
                       </div>
 
                       {/* Actions Column */}
-                      <div className="flex flex-col items-end gap-3 shrink-0">
+                      <div className="flex flex-col items-end gap-2 shrink-0">
                          <button
                           type="button"
-                          disabled={isPending}
-                          onClick={() => handleToggle(promo.id, promo.is_active)}
-                          className="inline-flex items-center justify-center p-1 transition disabled:opacity-50"
+                          disabled={isPending || isExpired}
+                          onClick={() => setToggleConfirm({ id: promo.id, current: promo.is_active })}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-bg/50 text-brand-midnight/60 transition hover:bg-brand-bg hover:text-brand-midnight disabled:opacity-50"
+                          title={promo.is_active ? "Desativar" : "Ativar"}
                         >
-                          {promo.is_active ? (
-                            <ToggleRight className="h-8 w-8 text-emerald-500" />
-                          ) : (
-                            <ToggleLeft className="h-8 w-8 text-brand-midnight/20" />
-                          )}
+                          {promo.is_active ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
                         </button>
                         <button
                           type="button"
                           disabled={isPending}
                           onClick={() => setConfirmId(promo.id)}
                           className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 transition hover:bg-red-100 disabled:opacity-50"
+                          title="Remover"
                         >
-                          {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                          {isPending && confirmId === promo.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                         </button>
                       </div>
                     </div>
@@ -559,6 +583,23 @@ export function PromotionsClient({
         onConfirm={() => {
           if (confirmId) handleDelete(confirmId);
           setConfirmId(null);
+        }}
+      />
+
+      <ConfirmDialog
+        open={toggleConfirm !== null}
+        onOpenChange={(open) => {
+          if (!open) setToggleConfirm(null);
+        }}
+        title={toggleConfirm?.current ? "Desativar promoção" : "Ativar promoção"}
+        description={
+          toggleConfirm?.current
+            ? "Ao desativar, a promoção será imediatamente removida da loja e o produto voltará ao preço original."
+            : "Ao ativar, a promoção ficará imediatamente visível e aplicável na loja."
+        }
+        onConfirm={() => {
+          if (toggleConfirm) handleToggle(toggleConfirm.id, toggleConfirm.current);
+          setToggleConfirm(null);
         }}
       />
     </PageCanvas>
