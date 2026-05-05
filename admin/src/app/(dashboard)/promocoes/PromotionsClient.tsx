@@ -354,7 +354,7 @@ export function PromotionsClient({
         <StaggerContainer className="space-y-6">
           <StaggerItem>
             {/* Desktop Table */}
-            <div className="hidden overflow-hidden rounded-2xl border border-brand-midnight/5 bg-white shadow-sm md:block">
+            <div className="hidden rounded-2xl border border-brand-midnight/5 bg-white shadow-sm md:block overflow-visible">
               <table className="min-w-full text-left text-sm">
                 <thead className="bg-brand-bg/40 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-midnight/40">
                   <tr className="border-b border-brand-midnight/5">
@@ -416,14 +416,12 @@ export function PromotionsClient({
                           <span
                             className={cn(
                               "inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider",
-                              isExpired
-                                ? "bg-red-50 text-red-600"
-                                : promo.is_active
+                              promo.is_active
                                 ? "bg-emerald-50 text-emerald-600"
                                 : "bg-brand-midnight/5 text-brand-midnight/40"
                             )}
                           >
-                            {isExpired ? "Expirada" : promo.is_active ? "Ativa" : "Inativa"}
+                            {promo.is_active ? "Ativa" : "Inativa"}
                           </span>
                         </td>
                         <td className="px-5 py-4 text-right">
@@ -516,18 +514,16 @@ export function PromotionsClient({
                           </div>
                         )}
 
-                        <div className="mt-3">
+                        <div className="mt-3 flex items-center gap-2">
                           <span
                             className={cn(
                               "inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
-                              isExpired
-                                ? "bg-red-50 text-red-600"
-                                : promo.is_active
+                              promo.is_active
                                 ? "bg-emerald-50 text-emerald-600"
                                 : "bg-brand-midnight/5 text-brand-midnight/40"
                             )}
                           >
-                            {isExpired ? "Expirada" : promo.is_active ? "Ativa" : "Inativa"}
+                            {promo.is_active ? "Ativa" : "Inativa"}
                           </span>
                         </div>
                       </div>

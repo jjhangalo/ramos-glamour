@@ -72,19 +72,25 @@ type DropdownMenuItemProps = {
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
+  disabled?: boolean;
 };
 
 export function DropdownMenuItem({
   children,
   onClick,
   className,
+  disabled,
 }: DropdownMenuItemProps) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
       className={cn(
-        "flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-brand-midnight/70 transition hover:bg-brand-bg hover:text-brand-midnight",
+        "flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition",
+        disabled
+          ? "cursor-not-allowed text-brand-midnight/30"
+          : "text-brand-midnight/70 hover:bg-brand-bg hover:text-brand-midnight",
         className,
       )}
     >
