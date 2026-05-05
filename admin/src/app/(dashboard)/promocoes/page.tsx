@@ -7,10 +7,21 @@ export const metadata = {
   description: "Gestão de produtos em promoção.",
 };
 
-export default async function PromocoesPage() {
-  const [promotions, { products }] = await Promise.all([
-    getPromotedProducts(),
-    getProducts(),
+type PromocoesPageProps = {
+  searchParams?: Promise<{
+    pagina?: string;
+    limite?: string;
+  }>;
+};
+
+export default async function PromocoesPage({ searchParams }: PromocoesPageProps) {
+  const params = (await searchParams) ?? {};
+  const currentPage = Number(params.pagina || "1");
+  const pageSize = Number(params.limite || "20");
+
+  const [{ promotions, count }, { products }] = await Promise.all([
+    getPromotedProducts(currentPage, pageSize),
+    getProducts(), // We might need to paginate this later, but for now we'll keep it as is for the select dialog. Or maybe the dialog should have a proper search endpoint, but that's a different task.
   ]);
 
   const productOptions = products.map((p) => ({
@@ -19,5 +30,13 @@ export default async function PromocoesPage() {
     price: p.price,
   }));
 
-  return <PromotionsClient promotions={promotions} products={productOptions} />;
+  return (
+    <PromotionsClient
+      promotions={promotions}
+      products={productOptions}
+      totalCount={count}
+      currentPage={currentPage}
+      pageSize={pageSize}
+    />
+  );
 }

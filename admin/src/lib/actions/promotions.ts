@@ -27,14 +27,22 @@ type PromotionInput = {
   ends_at?: string | null;
 };
 
-export async function getPromotedProducts(): Promise<PromotionRecord[]> {
+export async function getPromotedProducts(
+  page = 1,
+  limit = 20,
+): Promise<{ promotions: PromotionRecord[]; count: number }> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data, error, count } = await supabase
     .from("promotions")
     .select(
       "id, product_id, promo_price, is_active, ends_at, created_at, updated_at, products(id, name, price, product_images(url, position))",
+      { count: "exact" }
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) {
     throw new Error(error.message);
@@ -42,10 +50,12 @@ export async function getPromotedProducts(): Promise<PromotionRecord[]> {
 
   const rawData = data || [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return rawData.map((promo: any) => ({
+  const promotions = rawData.map((promo: any) => ({
     ...promo,
     products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
   })) as PromotionRecord[];
+
+  return { promotions, count: count ?? 0 };
 }
 
 export async function getActivePromotions(): Promise<PromotionRecord[]> {

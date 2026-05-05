@@ -5,7 +5,8 @@ import { useTransition, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight, Info } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import {
   Dialog,
@@ -23,6 +24,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { PageCanvas } from "@/components/ui/page-canvas";
+import { PageHeader } from "@/components/list/PageHeader";
 import {
   createPromotion,
   deletePromotion,
@@ -31,6 +34,8 @@ import {
 import type { PromotionRecord } from "@/lib/actions/promotions";
 import { promotionSchema, type PromotionFormValues } from "@/lib/validations/promotion";
 import { formatPrice } from "@/lib/format";
+import { FadeUp, StaggerContainer, StaggerItem } from "@/components/shared/Animations";
+import { PromotionPaginationWrapper } from "@/components/promotions/PromotionPaginationWrapper";
 
 type ProductOption = {
   id: string;
@@ -98,22 +103,34 @@ function PromotionDialog({ products }: PromotionDialogProps) {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+          className="hidden items-center justify-center rounded-xl bg-brand-midnight px-6 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-white shadow-md transition hover:bg-brand-charcoal md:flex"
         >
-          <Plus className="h-4 w-4" />
-          Nova promoção
+          <Plus className="mr-2 h-5 w-5" />
+          Nova Promoção
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+      {/* Mobile FAB */}
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="fixed bottom-24 right-6 z-40 group flex h-14 items-center justify-center rounded-full bg-brand-midnight p-2 text-white shadow-[0_20px_50px_rgba(18,18,18,0.3)] transition-all hover:scale-105 active:scale-95 md:hidden w-14"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-gold text-white shadow-inner transition-transform group-active:scale-90">
+            <Plus className="h-6 w-6" />
+          </div>
+        </button>
+      </DialogTrigger>
+
+      <DialogContent className="max-w-lg rounded-3xl border border-brand-midnight/5 bg-white p-6 shadow-xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-slate-950">
-            Adicionar promoção
+          <DialogTitle className="heading-luxury text-2xl font-light">
+            Adicionar Promoção
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-4 space-y-4"
+            className="mt-4 space-y-5"
           >
             {/* Product search + select */}
             <FormField
@@ -121,52 +138,57 @@ function PromotionDialog({ products }: PromotionDialogProps) {
               name="product_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Produto</FormLabel>
-                  <div className="space-y-2">
+                  <FormLabel className="text-xs font-bold uppercase tracking-wider text-brand-midnight/60">Produto</FormLabel>
+                  <div className="space-y-3">
                     <input
                       type="search"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       placeholder="Pesquisar produto..."
-                      className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500"
+                      className="w-full rounded-xl border border-brand-midnight/10 px-4 py-3 text-sm text-brand-midnight outline-none transition focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20"
                     />
                     <FormControl>
-                      <div className="max-h-44 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50">
+                      <div className="max-h-44 overflow-y-auto rounded-xl border border-brand-midnight/10 bg-brand-bg/30">
                         {filteredProducts.length === 0 ? (
-                          <p className="px-4 py-3 text-sm text-slate-500">
+                          <p className="px-4 py-3 text-sm text-brand-midnight/50">
                             Nenhum produto encontrado.
                           </p>
                         ) : (
                           filteredProducts.map((product) => (
                             <label
                               key={product.id}
-                              className="flex cursor-pointer items-center justify-between gap-3 px-4 py-2.5 text-sm transition hover:bg-slate-100"
+                              className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm transition hover:bg-brand-bg/50"
                             >
-                              <span className="font-medium text-slate-800">
+                              <span className="font-medium text-brand-midnight">
                                 {product.name}
                               </span>
-                              <span className="text-slate-500">
-                                {formatPrice(product.price)}
-                              </span>
-                              <input
-                                type="radio"
-                                className="ml-2 h-4 w-4 cursor-pointer accent-slate-900"
-                                checked={field.value === product.id}
-                                onChange={() => {
-                                  field.onChange(product.id);
-                                  form.setValue("promo_price", 0);
-                                }}
-                              />
+                              <div className="flex items-center gap-3">
+                                <span className="text-brand-midnight/60 text-xs font-mono">
+                                  {formatPrice(product.price)}
+                                </span>
+                                <input
+                                  type="radio"
+                                  className="h-4 w-4 cursor-pointer accent-brand-midnight"
+                                  checked={field.value === product.id}
+                                  onChange={() => {
+                                    field.onChange(product.id);
+                                    form.setValue("promo_price", 0);
+                                  }}
+                                />
+                              </div>
                             </label>
                           ))
                         )}
                       </div>
                     </FormControl>
                     {selectedProduct && (
-                      <p className="text-xs text-slate-500">
-                        Preço original:{" "}
-                        <strong>{formatPrice(selectedProduct.price)}</strong>
-                      </p>
+                      <div className="flex items-center gap-2 rounded-lg bg-brand-gold/5 p-3 text-sm text-brand-midnight/70">
+                        <Info className="h-4 w-4 text-brand-gold" />
+                        <span>
+                          Preço original:{" "}
+                          <strong className="text-brand-midnight font-mono">{formatPrice(selectedProduct.price)}</strong>
+                        </span>
+                      </div>
                     )}
                   </div>
                   <FormMessage />
@@ -180,7 +202,7 @@ function PromotionDialog({ products }: PromotionDialogProps) {
               name="promo_price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Preço promocional (Kz)</FormLabel>
+                  <FormLabel className="text-xs font-bold uppercase tracking-wider text-brand-midnight/60">Preço promocional (Kz)</FormLabel>
                   <FormControl>
                     <input
                       {...field}
@@ -189,7 +211,7 @@ function PromotionDialog({ products }: PromotionDialogProps) {
                       step="0.01"
                       disabled={isPending}
                       placeholder="Ex: 19900"
-                      className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-50"
+                      className="w-full rounded-xl border border-brand-midnight/10 px-4 py-3 text-sm font-mono text-brand-midnight outline-none transition focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20 disabled:bg-brand-bg/50"
                     />
                   </FormControl>
                   <FormMessage />
@@ -203,14 +225,14 @@ function PromotionDialog({ products }: PromotionDialogProps) {
               name="ends_at"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Data de fim (opcional)</FormLabel>
+                  <FormLabel className="text-xs font-bold uppercase tracking-wider text-brand-midnight/60">Data de fim (opcional)</FormLabel>
                   <FormControl>
                     <input
                       {...field}
                       value={field.value ?? ""}
                       type="date"
                       disabled={isPending}
-                      className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 disabled:bg-slate-50"
+                      className="w-full rounded-xl border border-brand-midnight/10 px-4 py-3 text-sm text-brand-midnight outline-none transition focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20 disabled:bg-brand-bg/50"
                     />
                   </FormControl>
                   <FormMessage />
@@ -223,40 +245,38 @@ function PromotionDialog({ products }: PromotionDialogProps) {
               control={form.control}
               name="is_active"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                <FormItem className="flex flex-row items-center space-x-3 space-y-0 pt-2">
                   <FormControl>
                     <input
                       type="checkbox"
                       disabled={isPending}
                       checked={field.value}
                       onChange={field.onChange}
-                      className="h-4 w-4 cursor-pointer rounded border-slate-300"
+                      className="h-4 w-4 cursor-pointer rounded border-brand-midnight/20 accent-brand-midnight"
                     />
                   </FormControl>
-                  <FormLabel className="cursor-pointer">
+                  <FormLabel className="cursor-pointer text-sm font-medium text-brand-midnight">
                     Promoção ativa
                   </FormLabel>
                 </FormItem>
               )}
             />
 
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex justify-end gap-3 pt-4">
               <button
                 type="button"
                 disabled={isPending}
                 onClick={() => setOpen(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                className="rounded-xl border border-brand-midnight/10 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-brand-midnight/60 transition hover:bg-brand-bg/50 disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-brand-midnight px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white transition hover:bg-brand-charcoal disabled:opacity-50"
               >
-                {isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : null}
+                {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 Guardar
               </button>
             </div>
@@ -270,15 +290,23 @@ function PromotionDialog({ products }: PromotionDialogProps) {
 type PromotionsClientProps = {
   promotions: PromotionRecord[];
   products: ProductOption[];
+  totalCount: number;
+  currentPage: number;
+  pageSize: number;
 };
 
 export function PromotionsClient({
   promotions,
   products,
+  totalCount,
+  currentPage,
+  pageSize,
 }: PromotionsClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [confirmId, setConfirmId] = useState<string | null>(null);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   function handleDelete(id: string) {
     startTransition(async () => {
@@ -305,46 +333,126 @@ export function PromotionsClient({
   }
 
   return (
-    <div className="space-y-6">
+    <PageCanvas size="list" className="relative space-y-8 pb-32 pt-8">
       {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
-            Promoções
-          </p>
-          <h1 className="mt-1 text-3xl font-semibold text-slate-950">
-            Gestão de promoções
-          </h1>
-        </div>
-        <PromotionDialog products={products} />
-      </div>
+      <FadeUp>
+        <PageHeader
+          title="Promoções"
+          actions={<PromotionDialog products={products} />}
+        />
+      </FadeUp>
 
-      {/* Table */}
+      {/* Results summary */}
+      {totalCount > 0 && (
+        <FadeUp delay={0.05}>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
+            {totalCount} promoção{totalCount !== 1 ? "ões" : ""}
+          </p>
+        </FadeUp>
+      )}
+
       {promotions.length > 0 ? (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-          <table className="min-w-full text-left text-sm">
-            <thead className="text-slate-500">
-              <tr className="border-b border-slate-200">
-                <th className="px-5 py-3 font-medium">Produto</th>
-                <th className="px-5 py-3 font-medium">Preço original</th>
-                <th className="px-5 py-3 font-medium">Preço promo</th>
-                <th className="hidden px-5 py-3 font-medium md:table-cell">
-                  Desconto
-                </th>
-                <th className="hidden px-5 py-3 font-medium lg:table-cell">
-                  Validade
-                </th>
-                <th className="px-5 py-3 font-medium">Estado</th>
-                <th className="px-5 py-3 font-medium text-right">Acções</th>
-              </tr>
-            </thead>
-            <tbody>
+        <StaggerContainer className="space-y-6">
+          <StaggerItem>
+            {/* Desktop Table */}
+            <div className="hidden overflow-hidden rounded-2xl border border-brand-midnight/5 bg-white shadow-sm md:block">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-brand-bg/40 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-midnight/40">
+                  <tr className="border-b border-brand-midnight/5">
+                    <th className="px-5 py-4">Produto</th>
+                    <th className="px-5 py-4">Preço Original</th>
+                    <th className="px-5 py-4">Preço Promo</th>
+                    <th className="px-5 py-4">Desconto</th>
+                    <th className="px-5 py-4">Validade</th>
+                    <th className="px-5 py-4">Estado</th>
+                    <th className="px-5 py-4 text-right">Acções</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-brand-midnight/5">
+                  {promotions.map((promo) => {
+                    const originalPrice = promo.products?.price ?? 0;
+                    const rawDiscount =
+                      originalPrice > 0
+                        ? ((originalPrice - promo.promo_price) / originalPrice) * 100
+                        : 0;
+                    const discount = Number.isInteger(rawDiscount)
+                      ? rawDiscount
+                      : Number(rawDiscount.toFixed(2));
+                    const isExpired =
+                      promo.ends_at && new Date(promo.ends_at) < new Date();
+
+                    return (
+                      <tr key={promo.id} className="group transition-colors hover:bg-brand-bg/30">
+                        <td className="px-5 py-4">
+                          <div className="max-w-[200px] truncate font-medium text-brand-midnight" title={promo.products?.name}>
+                            {promo.products?.name ?? "—"}
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 font-mono text-brand-midnight/50">
+                          {originalPrice ? formatPrice(originalPrice) : "—"}
+                        </td>
+                        <td className="px-5 py-4 font-mono font-bold text-emerald-600">
+                          {formatPrice(promo.promo_price)}
+                        </td>
+                        <td className="px-5 py-4">
+                          {discount > 0 ? (
+                            <span className="rounded-full bg-brand-gold/10 px-2 py-0.5 text-[10px] font-bold text-brand-gold">
+                              -{discount}%
+                            </span>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                        <td className="px-5 py-4">
+                          {promo.ends_at ? (
+                            <span className={cn("text-xs font-medium", isExpired ? "text-red-500" : "text-brand-midnight/60")}>
+                              {new Date(promo.ends_at).toLocaleDateString("pt-AO")}
+                              {isExpired && " (exp.)"}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-brand-midnight/30">—</span>
+                          )}
+                        </td>
+                        <td className="px-5 py-4">
+                          <button
+                            type="button"
+                            disabled={isPending}
+                            onClick={() => handleToggle(promo.id, promo.is_active)}
+                            className="inline-flex items-center gap-2 transition disabled:opacity-50"
+                            title={promo.is_active ? "Desativar" : "Ativar"}
+                          >
+                            {promo.is_active ? (
+                              <ToggleRight className="h-6 w-6 text-emerald-500" />
+                            ) : (
+                              <ToggleLeft className="h-6 w-6 text-brand-midnight/20" />
+                            )}
+                          </button>
+                        </td>
+                        <td className="px-5 py-4 text-right">
+                          <button
+                            type="button"
+                            disabled={isPending}
+                            onClick={() => setConfirmId(promo.id)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-500 transition hover:bg-red-50 hover:border-red-200 disabled:opacity-50"
+                            title="Remover"
+                          >
+                            {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card List */}
+            <div className="space-y-4 md:hidden">
               {promotions.map((promo) => {
                 const originalPrice = promo.products?.price ?? 0;
                 const rawDiscount =
                   originalPrice > 0
-                    ? ((originalPrice - promo.promo_price) / originalPrice) *
-                      100
+                    ? ((originalPrice - promo.promo_price) / originalPrice) * 100
                     : 0;
                 const discount = Number.isInteger(rawDiscount)
                   ? rawDiscount
@@ -353,105 +461,92 @@ export function PromotionsClient({
                   promo.ends_at && new Date(promo.ends_at) < new Date();
 
                 return (
-                  <tr key={promo.id} className="border-b border-slate-100">
-                    <td className="px-5 py-4 font-medium text-slate-950">
-                      <div
-                        className="max-w-[180px] truncate"
-                        title={promo.products?.name}
-                      >
-                        {promo.products?.name ?? "—"}
+                  <div
+                    key={promo.id}
+                    className="relative overflow-hidden rounded-2xl border border-brand-midnight/5 bg-white p-5 shadow-sm transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        {discount > 0 && (
+                          <span className="mb-2 inline-block rounded-full bg-brand-gold/10 px-2 py-0.5 text-[10px] font-bold tracking-wider text-brand-gold">
+                            -{discount}% OFF
+                          </span>
+                        )}
+                        <h3 className="truncate text-sm font-semibold text-brand-midnight">
+                          {promo.products?.name ?? "—"}
+                        </h3>
+                        
+                        <div className="mt-3 flex items-end gap-3">
+                          <div>
+                            <p className="text-xs text-brand-midnight/40 line-through">
+                              {originalPrice ? formatPrice(originalPrice) : "—"}
+                            </p>
+                            <p className="text-lg font-bold text-emerald-600">
+                              {formatPrice(promo.promo_price)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {promo.ends_at && (
+                          <div className="mt-3 text-xs">
+                            <span className={cn("font-medium", isExpired ? "text-red-500" : "text-brand-midnight/60")}>
+                              {isExpired ? "Expirou a " : "Até "}
+                              {new Date(promo.ends_at).toLocaleDateString("pt-AO")}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    </td>
-                    <td className="px-5 py-4 text-slate-500">
-                      {originalPrice ? formatPrice(originalPrice) : "—"}
-                    </td>
-                    <td className="px-5 py-4 font-semibold text-emerald-700">
-                      {formatPrice(promo.promo_price)}
-                    </td>
-                    <td className="hidden px-5 py-4 text-slate-700 md:table-cell">
-                      {discount > 0 ? (
-                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                          -{discount}%
-                        </span>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td className="hidden px-5 py-4 text-slate-600 lg:table-cell">
-                      {promo.ends_at ? (
-                        <span
-                          className={
-                            isExpired ? "text-red-500" : "text-slate-600"
-                          }
+
+                      {/* Actions Column */}
+                      <div className="flex flex-col items-end gap-3 shrink-0">
+                         <button
+                          type="button"
+                          disabled={isPending}
+                          onClick={() => handleToggle(promo.id, promo.is_active)}
+                          className="inline-flex items-center justify-center p-1 transition disabled:opacity-50"
                         >
-                          {new Date(promo.ends_at).toLocaleDateString("pt-AO")}
-                          {isExpired ? " (expirada)" : ""}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400">Sem validade</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
-                      <button
-                        type="button"
-                        disabled={isPending}
-                        onClick={() =>
-                          handleToggle(promo.id, promo.is_active)
-                        }
-                        className="inline-flex items-center gap-1.5 text-sm transition disabled:opacity-50"
-                        title={
-                          promo.is_active
-                            ? "Desactivar promoção"
-                            : "Activar promoção"
-                        }
-                      >
-                        {promo.is_active ? (
-                          <ToggleRight className="h-5 w-5 text-emerald-600" />
-                        ) : (
-                          <ToggleLeft className="h-5 w-5 text-slate-400" />
-                        )}
-                        <span
-                          className={
-                            promo.is_active
-                              ? "text-emerald-700"
-                              : "text-slate-500"
-                          }
+                          {promo.is_active ? (
+                            <ToggleRight className="h-8 w-8 text-emerald-500" />
+                          ) : (
+                            <ToggleLeft className="h-8 w-8 text-brand-midnight/20" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isPending}
+                          onClick={() => setConfirmId(promo.id)}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 transition hover:bg-red-100 disabled:opacity-50"
                         >
-                          {promo.is_active ? "Ativa" : "Inativa"}
-                        </span>
-                      </button>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <button
-                        type="button"
-                        disabled={isPending}
-                        onClick={() => setConfirmId(promo.id)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-red-200 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-                        title="Remover promoção"
-                      >
-                        {isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </button>
-                    </td>
-                  </tr>
+                          {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </StaggerItem>
+
+          <StaggerItem>
+            <PromotionPaginationWrapper
+              totalCount={totalCount}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalPages={totalPages}
+            />
+          </StaggerItem>
+        </StaggerContainer>
       ) : (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-8 py-16 text-center">
-          <p className="text-base font-medium text-slate-700">
-            Nenhuma promoção criada.
-          </p>
-          <p className="mt-1 text-sm text-slate-500">
-            Clica em &quot;Nova promoção&quot; para adicionar um produto à lista de
-            promoções.
-          </p>
-        </div>
+        <FadeUp delay={0.1}>
+          <div className="rounded-3xl border border-dashed border-brand-midnight/10 bg-brand-bg/30 px-8 py-20 text-center">
+            <p className="font-semibold text-brand-midnight">
+              Nenhuma promoção ativa.
+            </p>
+            <p className="mt-2 text-sm text-brand-midnight/50">
+              Clica no botão &quot;Nova promoção&quot; para adicionar descontos ao catálogo.
+            </p>
+          </div>
+        </FadeUp>
       )}
 
       <ConfirmDialog
@@ -460,12 +555,12 @@ export function PromotionsClient({
           if (!open) setConfirmId(null);
         }}
         title="Remover promoção"
-        description="Tens a certeza que queres remover esta promoção? Esta acção não pode ser desfeita."
+        description="Tens a certeza que queres remover esta promoção? O preço original será restaurado na loja."
         onConfirm={() => {
           if (confirmId) handleDelete(confirmId);
           setConfirmId(null);
         }}
       />
-    </div>
+    </PageCanvas>
   );
 }
