@@ -44,6 +44,7 @@ export type ProductVariantRecord = {
   product_id: string;
   size: string | null;
   color: string | null;
+  sku: string | null;
   stock: number;
   is_available: boolean;
   price_override: number | null;

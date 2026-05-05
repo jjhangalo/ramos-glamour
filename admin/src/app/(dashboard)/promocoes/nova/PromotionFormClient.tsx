@@ -27,6 +27,7 @@ type VariantOption = {
   id: string;
   size: string | null;
   color: string | null;
+  sku: string | null;
   price_override: number | null;
 };
 
@@ -225,14 +226,18 @@ export function PromotionFormClient({ products, initialData }: PromotionFormClie
                             onChange={(e) => field.onChange(e.target.value || null)}
                           >
                             <option value="">Aplicar a todas as opções</option>
-                            {selectedProduct.variants.map((v) => (
-                              <option key={v.id} value={v.id}>
-                                {[v.size ? `Tamanho: ${v.size}` : "", v.color ? `Cor: ${v.color}` : ""]
-                                  .filter(Boolean)
-                                  .join(" | ")}
-                                {v.price_override && ` - ${formatPrice(v.price_override)}`}
-                              </option>
-                            ))}
+                            {selectedProduct.variants.map((v) => {
+                              const label = [v.size ? `Tam: ${v.size}` : "", v.color ? `Cor: ${v.color}` : ""]
+                                .filter(Boolean)
+                                .join(" | ") || v.sku || `Opção ${v.id.slice(0, 4)}`;
+
+                              return (
+                                <option key={v.id} value={v.id}>
+                                  {label}
+                                  {v.price_override && ` - ${formatPrice(v.price_override)}`}
+                                </option>
+                              );
+                            })}
                           </select>
                         )}
                       </div>
