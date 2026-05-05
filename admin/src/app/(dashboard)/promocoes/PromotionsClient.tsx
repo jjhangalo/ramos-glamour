@@ -17,7 +17,7 @@ import { PageCanvas } from "@/components/ui/page-canvas";
 import { PageHeader } from "@/components/list/PageHeader";
 import { FAB } from "@/components/list/FAB";
 import Link from "next/link";
-import type { PromotionRecord } from "@/lib/actions/promotions";
+import { deletePromotion, togglePromotion, type PromotionRecord } from "@/lib/actions/promotions";
 import { formatPrice } from "@/lib/format";
 import { FadeUp, StaggerContainer, StaggerItem } from "@/components/shared/Animations";
 import { PromotionPaginationWrapper } from "@/components/promotions/PromotionPaginationWrapper";
