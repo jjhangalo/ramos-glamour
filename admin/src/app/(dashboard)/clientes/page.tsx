@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Eye } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/format";
@@ -9,6 +8,7 @@ import { PageCanvas } from "@/components/ui/page-canvas";
 import { cn } from "@/lib/utils";
 
 import { ClientFilters } from "@/components/clients/ClientFilters";
+import { ClientActions } from "@/components/clients/ClientActions";
 
 type ClientsPageProps = {
   searchParams?: Promise<{
@@ -94,14 +94,9 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
                   <td className="hidden px-5 py-4 text-xs text-slate-400 lg:table-cell">
                     {formatDate(client.created_at)}
                   </td>
+
                   <td className="px-5 py-4 text-right whitespace-nowrap w-[1%]">
-                    <Link
-                      href={`/clientes/${client.id}`}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition hover:border-slate-900 hover:text-slate-900"
-                      title="Ver detalhes"
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                    </Link>
+                    <ClientActions clientId={client.id} isActive={client.is_active} />
                   </td>
                 </tr>
               ))}
