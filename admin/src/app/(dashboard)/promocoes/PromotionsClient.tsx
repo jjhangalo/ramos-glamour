@@ -116,7 +116,7 @@ function PromotionDialog({ products }: PromotionDialogProps) {
       </DialogTrigger>
       {/* Mobile FAB */}
       <DialogTrigger asChild>
-        <FAB />
+        <FAB label="Nova Promoção" />
       </DialogTrigger>
 
       <DialogContent aria-describedby={undefined} className="max-w-lg rounded-3xl border border-brand-midnight/5 bg-white p-6 shadow-xl">
