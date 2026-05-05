@@ -7,8 +7,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export type PromotionRecord = {
   id: string;
   product_id: string;
+  variant_id?: string | null;
   promo_price: number;
   is_active: boolean;
+  starts_at: string | null;
   ends_at: string | null;
   created_at: string;
   updated_at: string;
@@ -18,12 +20,20 @@ export type PromotionRecord = {
     price: number;
     product_images?: { url: string; position: number }[];
   } | null;
+  product_variants?: {
+    id: string;
+    size: string | null;
+    color: string | null;
+    price_override: number | null;
+  } | null;
 };
 
 type PromotionInput = {
   product_id: string;
+  variant_id?: string | null;
   promo_price: number;
   is_active: boolean;
+  starts_at?: string | null;
   ends_at?: string | null;
 };
 
@@ -64,7 +74,7 @@ export async function getActivePromotions(): Promise<PromotionRecord[]> {
   const { data, error } = await supabase
     .from("promotions")
     .select(
-      "id, product_id, promo_price, is_active, ends_at, created_at, updated_at, products(id, name, price, product_images(url, position))",
+      "id, product_id, variant_id, promo_price, is_active, ends_at, created_at, updated_at, products(id, name, price, product_images(url, position)), product_variants(id, size, color, price_override)",
     )
     .eq("is_active", true)
     .or(`ends_at.is.null,ends_at.gt.${now}`)
@@ -86,6 +96,7 @@ export async function createPromotion(input: PromotionInput) {
   const supabase = createAdminClient();
   const { error } = await supabase.from("promotions").insert({
     product_id: input.product_id,
+    variant_id: input.variant_id ?? null,
     promo_price: input.promo_price,
     is_active: input.is_active,
     ends_at: input.ends_at ?? null,
@@ -105,6 +116,7 @@ export async function updatePromotion(id: string, input: PromotionInput) {
     .from("promotions")
     .update({
       product_id: input.product_id,
+      variant_id: input.variant_id ?? null,
       promo_price: input.promo_price,
       is_active: input.is_active,
       ends_at: input.ends_at ?? null,
@@ -176,7 +188,8 @@ export async function upsertPromotion(input: PromotionInput) {
     const { error } = await supabase
       .from("promotions")
       .update({
-        promo_price: input.promo_price,
+        variant_id: input.variant_id ?? null,
+      promo_price: input.promo_price,
         is_active: true,
       })
       .eq("id", existing.id);
@@ -185,6 +198,7 @@ export async function upsertPromotion(input: PromotionInput) {
   } else {
     const { error } = await supabase.from("promotions").insert({
       product_id: input.product_id,
+      variant_id: input.variant_id ?? null,
       promo_price: input.promo_price,
       is_active: true,
     });

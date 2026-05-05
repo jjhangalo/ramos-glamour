@@ -28,6 +28,12 @@ export default async function PromocoesPage({ searchParams }: PromocoesPageProps
     id: p.id,
     name: p.name,
     price: p.price,
+    variants: p.product_variants?.map((v) => ({
+      id: v.id,
+      size: v.size,
+      color: v.color,
+      price_override: v.price_override,
+    })) || [],
   }));
 
   return (

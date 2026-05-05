@@ -9,21 +9,6 @@ import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight, Info, MoreVertical } fr
 import { cn } from "@/lib/utils";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
   DropdownMenu,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
@@ -31,13 +16,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PageCanvas } from "@/components/ui/page-canvas";
 import { PageHeader } from "@/components/list/PageHeader";
 import { FAB } from "@/components/list/FAB";
-import {
-  createPromotion,
-  deletePromotion,
-  togglePromotion,
-} from "@/lib/actions/promotions";
+import Link from "next/link";
 import type { PromotionRecord } from "@/lib/actions/promotions";
-import { promotionSchema, type PromotionFormValues } from "@/lib/validations/promotion";
 import { formatPrice } from "@/lib/format";
 import { FadeUp, StaggerContainer, StaggerItem } from "@/components/shared/Animations";
 import { PromotionPaginationWrapper } from "@/components/promotions/PromotionPaginationWrapper";
@@ -48,242 +28,6 @@ type ProductOption = {
   price: number;
 };
 
-type PromotionDialogProps = {
-  products: ProductOption[];
-};
-
-function PromotionDialog({ products }: PromotionDialogProps) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-
-  const form = useForm<PromotionFormValues>({
-    resolver: zodResolver(promotionSchema) as import("react-hook-form").Resolver<PromotionFormValues>,
-    defaultValues: {
-      product_id: "",
-      promo_price: 0,
-      is_active: true,
-      ends_at: "",
-    },
-  });
-
-  const selectedProductId = useWatch({
-    control: form.control,
-    name: "product_id",
-  });
-  const selectedProduct = products.find((p) => p.id === selectedProductId);
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  const onSubmit = (values: PromotionFormValues) => {
-    if (selectedProduct && values.promo_price >= selectedProduct.price) {
-      form.setError("promo_price", {
-        message: `O preço promocional deve ser inferior ao preço original (${formatPrice(selectedProduct.price)}).`,
-      });
-      return;
-    }
-
-    startTransition(async () => {
-      const result = await createPromotion({
-        ...values,
-        ends_at: values.ends_at || null,
-      });
-
-      if (!result.success) {
-        toast.error(result.error ?? "Erro ao criar a promoção.");
-        return;
-      }
-
-      toast.success("Promoção criada.");
-      form.reset();
-      setOpen(false);
-      router.refresh();
-    });
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          className="hidden items-center justify-center rounded-xl bg-brand-midnight px-6 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-white shadow-md transition hover:bg-brand-charcoal md:flex"
-        >
-          <Plus className="mr-2 h-5 w-5" />
-          Nova Promoção
-        </button>
-      </DialogTrigger>
-      {/* Mobile FAB */}
-      <DialogTrigger asChild>
-        <FAB label="Nova Promoção" />
-      </DialogTrigger>
-
-      <DialogContent aria-describedby={undefined} className="max-w-lg rounded-3xl border border-brand-midnight/5 bg-white p-6 shadow-xl">
-        <DialogHeader>
-          <DialogTitle className="heading-luxury text-2xl font-light">
-            Adicionar Promoção
-          </DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-4 space-y-5"
-          >
-            {/* Product search + select */}
-            <FormField
-              control={form.control}
-              name="product_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase tracking-wider text-brand-midnight/60">Produto</FormLabel>
-                  <div className="space-y-3">
-                    <input
-                      type="search"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Pesquisar produto..."
-                      className="w-full rounded-xl border border-brand-midnight/10 px-4 py-3 text-sm text-brand-midnight outline-none transition focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20"
-                    />
-                    <FormControl>
-                      <div className="max-h-44 overflow-y-auto rounded-xl border border-brand-midnight/10 bg-brand-bg/30">
-                        {filteredProducts.length === 0 ? (
-                          <p className="px-4 py-3 text-sm text-brand-midnight/50">
-                            Nenhum produto encontrado.
-                          </p>
-                        ) : (
-                          filteredProducts.map((product) => (
-                            <label
-                              key={product.id}
-                              className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm transition hover:bg-brand-bg/50"
-                            >
-                              <span className="font-medium text-brand-midnight">
-                                {product.name}
-                              </span>
-                              <div className="flex items-center gap-3">
-                                <span className="text-brand-midnight/60 text-xs font-mono">
-                                  {formatPrice(product.price)}
-                                </span>
-                                <input
-                                  type="radio"
-                                  className="h-4 w-4 cursor-pointer accent-brand-midnight"
-                                  checked={field.value === product.id}
-                                  onChange={() => {
-                                    field.onChange(product.id);
-                                    form.setValue("promo_price", 0);
-                                  }}
-                                />
-                              </div>
-                            </label>
-                          ))
-                        )}
-                      </div>
-                    </FormControl>
-                    {selectedProduct && (
-                      <div className="flex items-center gap-2 rounded-lg bg-brand-gold/5 p-3 text-sm text-brand-midnight/70">
-                        <Info className="h-4 w-4 text-brand-gold" />
-                        <span>
-                          Preço original:{" "}
-                          <strong className="text-brand-midnight font-mono">{formatPrice(selectedProduct.price)}</strong>
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Promo price */}
-            <FormField
-              control={form.control}
-              name="promo_price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase tracking-wider text-brand-midnight/60">Preço promocional (Kz)</FormLabel>
-                  <FormControl>
-                    <input
-                      {...field}
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      disabled={isPending}
-                      placeholder="Ex: 19900"
-                      className="w-full rounded-xl border border-brand-midnight/10 px-4 py-3 text-sm font-mono text-brand-midnight outline-none transition focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20 disabled:bg-brand-bg/50"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Ends at */}
-            <FormField
-              control={form.control}
-              name="ends_at"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase tracking-wider text-brand-midnight/60">Data de fim (opcional)</FormLabel>
-                  <FormControl>
-                    <input
-                      {...field}
-                      value={field.value ?? ""}
-                      type="date"
-                      disabled={isPending}
-                      className="w-full rounded-xl border border-brand-midnight/10 px-4 py-3 text-sm text-brand-midnight outline-none transition focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20 disabled:bg-brand-bg/50"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* is_active */}
-            <FormField
-              control={form.control}
-              name="is_active"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-3 space-y-0 pt-2">
-                  <FormControl>
-                    <input
-                      type="checkbox"
-                      disabled={isPending}
-                      checked={field.value}
-                      onChange={field.onChange}
-                      className="h-4 w-4 cursor-pointer rounded border-brand-midnight/20 accent-brand-midnight"
-                    />
-                  </FormControl>
-                  <FormLabel className="cursor-pointer text-sm font-medium text-brand-midnight">
-                    Promoção ativa
-                  </FormLabel>
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end gap-3 pt-4">
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={() => setOpen(false)}
-                className="rounded-xl border border-brand-midnight/10 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-brand-midnight/60 transition hover:bg-brand-bg/50 disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-midnight px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white transition hover:bg-brand-charcoal disabled:opacity-50"
-              >
-                {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                Guardar
-              </button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 type PromotionsClientProps = {
   promotions: PromotionRecord[];
@@ -333,11 +77,22 @@ export function PromotionsClient({
 
   return (
     <PageCanvas size="list" className="relative space-y-8 pb-32 pt-8">
+      {/* Mobile FAB */}
+      <FAB href="/promocoes/nova" label="Nova Promoção" />
+
       {/* Header */}
       <FadeUp>
         <PageHeader
           title="Promoções"
-          actions={<PromotionDialog products={products} />}
+          actions={
+            <Link
+              href="/promocoes/nova"
+              className="hidden items-center justify-center rounded-xl bg-brand-midnight px-6 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-white shadow-md transition hover:bg-brand-charcoal md:flex"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Nova Promoção
+            </Link>
+          }
         />
       </FadeUp>
 
@@ -369,7 +124,7 @@ export function PromotionsClient({
                 </thead>
                 <tbody className="divide-y divide-brand-midnight/5">
                   {promotions.map((promo) => {
-                    const originalPrice = promo.products?.price ?? 0;
+                    const originalPrice = promo.product_variants?.price_override ?? promo.products?.price ?? 0;
                     const rawDiscount =
                       originalPrice > 0
                         ? ((originalPrice - promo.promo_price) / originalPrice) * 100
@@ -379,12 +134,18 @@ export function PromotionsClient({
                       : Number(rawDiscount.toFixed(2));
                     const isExpired =
                       promo.ends_at && new Date(promo.ends_at) < new Date();
+                    const isScheduled =
+                      promo.starts_at && new Date(promo.starts_at) > new Date();
+                    const variantDetails = promo.product_variants
+                      ? [promo.product_variants.size ? `T: ${promo.product_variants.size}` : '', promo.product_variants.color ? `C: ${promo.product_variants.color}` : ''].filter(Boolean).join(', ')
+                      : null;
 
                     return (
                       <tr key={promo.id} className="group transition-colors hover:bg-brand-bg/30">
                         <td className="px-5 py-4">
                           <div className="max-w-[200px] truncate font-medium text-brand-midnight" title={promo.products?.name}>
                             {promo.products?.name ?? "—"}
+                            {variantDetails && <span className="ml-2 rounded bg-brand-midnight/5 px-1.5 py-0.5 text-[10px] font-bold text-brand-midnight/60">{variantDetails}</span>}
                           </div>
                         </td>
                         <td className="px-5 py-4 font-mono text-brand-midnight/50">
@@ -403,25 +164,34 @@ export function PromotionsClient({
                           )}
                         </td>
                         <td className="px-5 py-4">
-                          {promo.ends_at ? (
-                            <span className={cn("text-xs font-medium", isExpired ? "text-red-500" : "text-brand-midnight/60")}>
-                              {new Date(promo.ends_at).toLocaleDateString("pt-AO")}
-                              {isExpired && " (exp.)"}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-brand-midnight/30">—</span>
-                          )}
+                          <div className="flex flex-col gap-0.5">
+                            {promo.starts_at && (
+                              <span className="text-[10px] text-brand-midnight/40 font-bold uppercase tracking-wider">
+                                Início: {new Date(promo.starts_at).toLocaleDateString("pt-AO")}
+                              </span>
+                            )}
+                            {promo.ends_at ? (
+                              <span className={cn("text-xs font-medium", isExpired ? "text-red-500" : "text-brand-midnight/60")}>
+                                Fim: {new Date(promo.ends_at).toLocaleDateString("pt-AO")}
+                                {isExpired && " (exp.)"}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-brand-midnight/30">—</span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-5 py-4">
                           <span
                             className={cn(
                               "inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider",
-                              promo.is_active
-                                ? "bg-emerald-50 text-emerald-600"
-                                : "bg-brand-midnight/5 text-brand-midnight/40"
+                              !promo.is_active
+                                ? "bg-brand-midnight/5 text-brand-midnight/40"
+                                : isScheduled
+                                ? "bg-amber-50 text-amber-600"
+                                : "bg-emerald-50 text-emerald-600"
                             )}
                           >
-                            {promo.is_active ? "Ativa" : "Inativa"}
+                            {!promo.is_active ? "Inativa" : isScheduled ? "Agendada" : "Ativa"}
                           </span>
                         </td>
                         <td className="px-5 py-4 text-right">
@@ -467,7 +237,7 @@ export function PromotionsClient({
             {/* Mobile Card List */}
             <div className="space-y-4 md:hidden">
               {promotions.map((promo) => {
-                const originalPrice = promo.products?.price ?? 0;
+                const originalPrice = promo.product_variants?.price_override ?? promo.products?.price ?? 0;
                 const rawDiscount =
                   originalPrice > 0
                     ? ((originalPrice - promo.promo_price) / originalPrice) * 100
@@ -477,6 +247,11 @@ export function PromotionsClient({
                   : Number(rawDiscount.toFixed(2));
                 const isExpired =
                   promo.ends_at && new Date(promo.ends_at) < new Date();
+                const isScheduled =
+                  promo.starts_at && new Date(promo.starts_at) > new Date();
+                const variantDetails = promo.product_variants
+                  ? [promo.product_variants.size ? `T: ${promo.product_variants.size}` : '', promo.product_variants.color ? `C: ${promo.product_variants.color}` : ''].filter(Boolean).join(', ')
+                  : null;
 
                 return (
                   <div
@@ -493,6 +268,11 @@ export function PromotionsClient({
                         <h3 className="truncate text-sm font-semibold text-brand-midnight">
                           {promo.products?.name ?? "—"}
                         </h3>
+                        {variantDetails && (
+                          <p className="mt-1 text-xs font-bold text-brand-midnight/50">
+                            {variantDetails}
+                          </p>
+                        )}
                         
                         <div className="mt-3 flex items-end gap-3">
                           <div>
@@ -505,25 +285,36 @@ export function PromotionsClient({
                           </div>
                         </div>
 
-                        {promo.ends_at && (
-                          <div className="mt-3 text-xs">
-                            <span className={cn("font-medium", isExpired ? "text-red-500" : "text-brand-midnight/60")}>
-                              {isExpired ? "Expirou a " : "Até "}
-                              {new Date(promo.ends_at).toLocaleDateString("pt-AO")}
-                            </span>
-                          </div>
-                        )}
+                        <div className="mt-3 flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider text-brand-midnight/40">
+                          {promo.starts_at && (
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-12">Início:</span>
+                              <span className="text-brand-midnight/60">{new Date(promo.starts_at).toLocaleDateString("pt-AO")}</span>
+                            </div>
+                          )}
+                          {promo.ends_at && (
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-12">Fim:</span>
+                              <span className={cn("text-brand-midnight/60", isExpired && "text-red-500")}>
+                                {new Date(promo.ends_at).toLocaleDateString("pt-AO")}
+                                {isExpired && " (EXP.)"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
 
                         <div className="mt-3 flex items-center gap-2">
                           <span
                             className={cn(
                               "inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
-                              promo.is_active
-                                ? "bg-emerald-50 text-emerald-600"
-                                : "bg-brand-midnight/5 text-brand-midnight/40"
+                              !promo.is_active
+                                ? "bg-brand-midnight/5 text-brand-midnight/40"
+                                : isScheduled
+                                ? "bg-amber-50 text-amber-600"
+                                : "bg-emerald-50 text-emerald-600"
                             )}
                           >
-                            {promo.is_active ? "Ativa" : "Inativa"}
+                            {!promo.is_active ? "Inativa" : isScheduled ? "Agendada" : "Ativa"}
                           </span>
                         </div>
                       </div>
