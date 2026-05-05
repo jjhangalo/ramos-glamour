@@ -5,7 +5,7 @@ import { useTransition, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight, Info } from "lucide-react";
+import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight, Info, MoreVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import {
@@ -23,6 +23,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PageCanvas } from "@/components/ui/page-canvas";
 import { PageHeader } from "@/components/list/PageHeader";
@@ -429,26 +435,38 @@ export function PromotionsClient({
                           </span>
                         </td>
                         <td className="px-5 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              type="button"
-                              disabled={isPending || isExpired}
-                              onClick={() => setToggleConfirm({ id: promo.id, current: promo.is_active })}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-brand-midnight/10 text-brand-midnight/40 transition hover:bg-brand-bg/50 hover:text-brand-midnight disabled:opacity-50"
-                              title={promo.is_active ? "Desativar" : "Ativar"}
-                            >
-                              {promo.is_active ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
-                            </button>
-                            <button
-                              type="button"
-                              disabled={isPending}
-                              onClick={() => setConfirmId(promo.id)}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-500 transition hover:bg-red-50 hover:border-red-200 disabled:opacity-50"
-                              title="Remover"
-                            >
-                              {isPending && confirmId === promo.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                            </button>
-                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                type="button"
+                                disabled={isPending}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-brand-midnight/10 text-brand-midnight/40 transition hover:bg-brand-bg/50 hover:text-brand-midnight disabled:opacity-50"
+                              >
+                                {isPending && (toggleConfirm?.id === promo.id || confirmId === promo.id) ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <MoreVertical className="h-4 w-4" />
+                                )}
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40 rounded-xl">
+                              <DropdownMenuItem
+                                onClick={() => setToggleConfirm({ id: promo.id, current: promo.is_active })}
+                                disabled={isExpired}
+                                className="cursor-pointer gap-2"
+                              >
+                                {promo.is_active ? <ToggleRight className="h-4 w-4 text-brand-midnight/50" /> : <ToggleLeft className="h-4 w-4 text-brand-midnight/50" />}
+                                <span>{promo.is_active ? "Desativar" : "Ativar"}</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => setConfirmId(promo.id)}
+                                className="cursor-pointer gap-2 text-red-600 focus:bg-red-50 focus:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                <span>Remover</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </td>
                       </tr>
                     );
@@ -524,25 +542,39 @@ export function PromotionsClient({
                       </div>
 
                       {/* Actions Column */}
-                      <div className="flex flex-col items-end gap-2 shrink-0">
-                         <button
-                          type="button"
-                          disabled={isPending || isExpired}
-                          onClick={() => setToggleConfirm({ id: promo.id, current: promo.is_active })}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-bg/50 text-brand-midnight/60 transition hover:bg-brand-bg hover:text-brand-midnight disabled:opacity-50"
-                          title={promo.is_active ? "Desativar" : "Ativar"}
-                        >
-                          {promo.is_active ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={isPending}
-                          onClick={() => setConfirmId(promo.id)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 transition hover:bg-red-100 disabled:opacity-50"
-                          title="Remover"
-                        >
-                          {isPending && confirmId === promo.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                        </button>
+                      <div className="absolute right-4 top-4">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              type="button"
+                              disabled={isPending}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-brand-midnight/40 transition hover:bg-brand-bg/50 hover:text-brand-midnight disabled:opacity-50"
+                            >
+                              {isPending && (toggleConfirm?.id === promo.id || confirmId === promo.id) ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <MoreVertical className="h-4 w-4" />
+                              )}
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40 rounded-xl">
+                            <DropdownMenuItem
+                              onClick={() => setToggleConfirm({ id: promo.id, current: promo.is_active })}
+                              disabled={isExpired}
+                              className="cursor-pointer gap-2"
+                            >
+                              {promo.is_active ? <ToggleRight className="h-4 w-4 text-brand-midnight/50" /> : <ToggleLeft className="h-4 w-4 text-brand-midnight/50" />}
+                              <span>{promo.is_active ? "Desativar" : "Ativar"}</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setConfirmId(promo.id)}
+                              className="cursor-pointer gap-2 text-red-600 focus:bg-red-50 focus:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span>Remover</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </div>
