@@ -10,6 +10,7 @@ import { promotionSchema, type PromotionFormValues } from "@/lib/validations/pro
 import { upsertPromotion } from "@/lib/actions/promotions";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 import {
   Form,
@@ -202,11 +203,12 @@ export function PromotionFormClient({ products, initialData }: PromotionFormClie
                       <FormLabel className="text-xs font-bold uppercase tracking-wider text-brand-midnight/60">
                         Variante (Opcional)
                       </FormLabel>
+
                       <div className="relative">
                         {selectedVariant ? (
                           <div className="flex w-full items-center justify-between rounded-xl border border-brand-midnight/10 bg-brand-bg/50 px-4 py-3 text-sm">
                             <span className="font-medium text-brand-midnight">
-                              {selectedVariant.size && `Tamanho: ${selectedVariant.size}`}
+                              {selectedVariant.size && `Tam: ${selectedVariant.size}`}
                               {selectedVariant.size && selectedVariant.color && " | "}
                               {selectedVariant.color && `Cor: ${selectedVariant.color}`}
                             </span>
@@ -219,25 +221,18 @@ export function PromotionFormClient({ products, initialData }: PromotionFormClie
                             </button>
                           </div>
                         ) : (
-                          <select
-                            className="w-full rounded-xl border border-brand-midnight/10 px-4 py-3 text-sm text-brand-midnight outline-none transition focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20"
+                          <CustomSelect
                             value={field.value || ""}
-                            onChange={(e) => field.onChange(e.target.value || null)}
-                          >
-                            <option value="">Aplicar a todas as opções</option>
-                            {selectedProduct.variants.map((v) => {
-                              const label = [v.size ? `Tam: ${v.size}` : "", v.color ? `Cor: ${v.color}` : ""]
+                            onChange={(val) => field.onChange(val)}
+                            placeholder="Aplicar a todas as opções"
+                            options={selectedProduct.variants.map((v) => ({
+                              value: v.id,
+                              label: [v.size ? `Tam: ${v.size}` : "", v.color ? `Cor: ${v.color}` : ""]
                                 .filter(Boolean)
-                                .join(" | ") || `Opção ${v.id.slice(0, 4)}`;
-
-                              return (
-                                <option key={v.id} value={v.id}>
-                                  {label}
-                                  {v.price_override && ` - ${formatPrice(v.price_override)}`}
-                                </option>
-                              );
-                            })}
-                          </select>
+                                .join(" | ") || `Opção ${v.id.slice(0, 4)}`,
+                              price: v.price_override ? formatPrice(v.price_override) : undefined,
+                            }))}
+                          />
                         )}
                       </div>
                       <FormMessage />
