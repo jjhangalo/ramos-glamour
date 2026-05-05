@@ -79,7 +79,7 @@ export function MobileDashboardNav({ user }: MobileDashboardNavProps) {
         </button>
       </SheetTrigger>
 
-      <SheetContent side="left" className="flex flex-col px-0 py-6 border-r border-brand-midnight/5 bg-brand-bg/95 backdrop-blur-xl">
+      <SheetContent aria-describedby={undefined} side="left" className="flex flex-col px-0 py-6 border-r border-brand-midnight/5 bg-brand-bg/95 backdrop-blur-xl">
         <SheetHeader className="px-6">
           <Link href="/" onClick={() => setOpen(false)}>
             <Image

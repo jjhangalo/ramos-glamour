@@ -30,6 +30,7 @@ import {
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PageCanvas } from "@/components/ui/page-canvas";
 import { PageHeader } from "@/components/list/PageHeader";
+import { FAB } from "@/components/list/FAB";
 import {
   createPromotion,
   deletePromotion,
@@ -115,14 +116,7 @@ function PromotionDialog({ products }: PromotionDialogProps) {
       </DialogTrigger>
       {/* Mobile FAB */}
       <DialogTrigger asChild>
-        <button
-          type="button"
-          className="fixed bottom-24 right-6 z-40 group flex h-14 items-center justify-center rounded-full bg-brand-midnight p-2 text-white shadow-[0_20px_50px_rgba(18,18,18,0.3)] transition-all hover:scale-105 active:scale-95 md:hidden w-14"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-gold text-white shadow-inner transition-transform group-active:scale-90">
-            <Plus className="h-6 w-6" />
-          </div>
-        </button>
+        <FAB />
       </DialogTrigger>
 
       <DialogContent aria-describedby={undefined} className="max-w-lg rounded-3xl border border-brand-midnight/5 bg-white p-6 shadow-xl">
