@@ -125,7 +125,7 @@ function PromotionDialog({ products }: PromotionDialogProps) {
         </button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-lg rounded-3xl border border-brand-midnight/5 bg-white p-6 shadow-xl">
+      <DialogContent aria-describedby={undefined} className="max-w-lg rounded-3xl border border-brand-midnight/5 bg-white p-6 shadow-xl">
         <DialogHeader>
           <DialogTitle className="heading-luxury text-2xl font-light">
             Adicionar Promoção

@@ -35,6 +35,7 @@ export default function RootLayout({
       lang="pt" 
       className={`${cormorantGaramond.variable} ${outfit.variable} h-full antialiased`}
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
     >
       <head>
         <meta name="apple-mobile-web-app-title" content="Ramos Glamour | Administração" />
