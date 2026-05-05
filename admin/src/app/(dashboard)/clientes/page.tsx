@@ -57,86 +57,81 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
       )}
 
       {clients.length ? (
-        <StaggerContainer className="overflow-hidden rounded-2xl border border-brand-midnight/5 bg-white shadow-sm">
-          <div className="overflow-x-auto overflow-y-visible">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-brand-bg/40 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-midnight/40">
-                <tr className="border-b border-brand-midnight/5">
-                  <th className="hidden px-6 py-4 md:table-cell">Avatar</th>
-                  <th className="px-6 py-4">Nome & Perfil</th>
-                  <th className="hidden px-6 py-4 lg:table-cell">Contacto</th>
-                  <th className="px-6 py-4">Estado</th>
-                  <th className="hidden px-6 py-4 lg:table-cell">Registo</th>
-                  <th className="px-6 py-4 text-right">Acções</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-brand-midnight/5">
-                {clients.map((client) => (
-                  <StaggerItem
-                    key={client.id}
-                    as="tr"
-                    className="group transition-colors hover:bg-brand-bg/30"
-                  >
-                    <td className="hidden px-6 py-4 md:table-cell">
-                      <div className="relative h-12 w-12 overflow-hidden rounded-2xl bg-brand-bg/50 border border-brand-midnight/5 shadow-inner transition-transform group-hover:scale-105">
-                        {client.avatar_url ? (
-                          <Image
-                            src={client.avatar_url}
-                            alt={client.full_name || client.display_name || "Avatar"}
-                            fill
-                            className="object-cover"
-                            sizes="48px"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-brand-midnight/20">
-                            {client.full_name?.charAt(0) || client.display_name?.charAt(0) || "?"}
-                          </div>
-                        )}
+        <StaggerContainer className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {clients.map((client) => (
+            <StaggerItem
+              key={client.id}
+              className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-brand-midnight/5 bg-white p-6 shadow-sm transition-all hover:border-brand-gold/30 hover:shadow-xl hover:shadow-brand-midnight/5"
+            >
+              {/* Card Header: Avatar & Actions */}
+              <div className="flex items-start justify-between">
+                <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-brand-bg/50 border border-brand-midnight/5 shadow-inner transition-transform group-hover:scale-105">
+                  {client.avatar_url ? (
+                    <Image
+                      src={client.avatar_url}
+                      alt={client.full_name || client.display_name || "Avatar"}
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xl font-bold text-brand-midnight/20">
+                      {client.full_name?.charAt(0) || client.display_name?.charAt(0) || "?"}
+                    </div>
+                  )}
+                </div>
+                <ClientActions clientId={client.id} isActive={client.is_active} />
+              </div>
+
+              {/* Card Body: Info */}
+              <div className="mt-6 space-y-4">
+                <div>
+                  <h3 className="text-lg font-bold text-brand-midnight group-hover:text-brand-gold transition-colors truncate">
+                    {client.full_name || client.display_name || "Sem nome"}
+                  </h3>
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-brand-midnight/30 mt-1">
+                    ID: {client.id.slice(0, 8)}
+                  </p>
+                </div>
+
+                <div className="space-y-2 border-t border-brand-midnight/5 pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/50 text-brand-midnight/40">
+                      <span className="text-[10px] font-bold">@</span>
+                    </div>
+                    <span className="text-sm font-medium text-brand-midnight/70 truncate">
+                      {client.email || "Sem email"}
+                    </span>
+                  </div>
+                  {client.phone && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/50 text-brand-midnight/40 text-[10px]">
+                        ☏
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-brand-midnight group-hover:text-brand-gold transition-colors">
-                          {client.full_name || client.display_name || "Sem nome"}
-                        </span>
-                        <span className="text-[10px] font-mono text-brand-midnight/40">
-                          ID: {client.id.slice(0, 8)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="hidden px-6 py-4 lg:table-cell">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-xs font-medium text-brand-midnight/70">
-                          {client.email || "Sem email"}
-                        </span>
-                        {client.phone && (
-                          <span className="text-[10px] text-brand-midnight/40">
-                            {client.phone}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={cn(
-                        "inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider",
-                        client.is_active 
-                          ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
-                          : "bg-brand-midnight/5 text-brand-midnight/30 border border-brand-midnight/5"
-                      )}>
-                        {client.is_active ? "Activo" : "Inactivo"}
+                      <span className="text-sm font-medium text-brand-midnight/70">
+                        {client.phone}
                       </span>
-                    </td>
-                    <td className="hidden px-6 py-4 lg:table-cell text-[10px] font-bold uppercase tracking-wider text-brand-midnight/30">
-                      {formatDate(client.created_at)}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <ClientActions clientId={client.id} isActive={client.is_active} />
-                    </td>
-                  </StaggerItem>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Card Footer: Status & Date */}
+              <div className="mt-8 flex items-center justify-between border-t border-brand-midnight/5 pt-4">
+                <span className={cn(
+                  "inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest",
+                  client.is_active 
+                    ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
+                    : "bg-brand-midnight/5 text-brand-midnight/30 border border-brand-midnight/5"
+                )}>
+                  {client.is_active ? "Activo" : "Inactivo"}
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-tighter text-brand-midnight/20">
+                  {formatDate(client.created_at)}
+                </span>
+              </div>
+            </StaggerItem>
+          ))}
         </StaggerContainer>
       ) : (
         <FadeUp delay={0.2}>
