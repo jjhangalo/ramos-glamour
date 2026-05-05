@@ -5,10 +5,10 @@ export const promotionSchema = z.object({
     .string({ message: "Selecciona um produto." })
     .uuid("ID de produto inválido."),
   variant_id: z.string().uuid("ID de variante inválido.").optional().nullable(),
-  promo_price: z.coerce
+  promo_price: z
     .number({ message: "O preço promocional deve ser um número válido." })
     .positive("O preço promocional deve ser positivo."),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(),
   starts_at: z
     .string()
     .optional()

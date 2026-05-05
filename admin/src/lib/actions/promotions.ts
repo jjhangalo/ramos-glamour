@@ -29,6 +29,7 @@ export type PromotionRecord = {
 };
 
 type PromotionInput = {
+  id?: string;
   product_id: string;
   variant_id?: string | null;
   promo_price: number;

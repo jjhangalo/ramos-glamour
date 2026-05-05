@@ -261,6 +261,7 @@ export function PromotionFormClient({ products, initialData }: PromotionFormClie
                         step="0.01"
                         disabled={isPending}
                         placeholder="Ex: 19900"
+                        onChange={(e) => field.onChange(e.target.value === "" ? 0 : Number(e.target.value))}
                         className="w-full rounded-xl border border-brand-midnight/10 px-4 py-3 text-sm font-mono text-brand-midnight outline-none transition focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20 disabled:bg-brand-bg/50"
                       />
                     </FormControl>
