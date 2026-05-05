@@ -11,9 +11,10 @@ type AdminsPageProps = {
 
 export default async function AdminsPage({ searchParams }: AdminsPageProps) {
   const params = (await searchParams) ?? {};
-  const admins = await getClients({
+  const { clients: admins } = await getClients({
     search: params.pesquisa,
     role: "admin",
+    pageSize: 100, // Show all admins by default or a large number
   });
 
   return (

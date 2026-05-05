@@ -33,12 +33,13 @@ export function AddAdminDialog() {
       if (search.length >= 2) {
         startSearchTransition(async () => {
           try {
-            const data = await getClients({
+            const { clients } = await getClients({
               search,
               role: "client",
               status: "active",
+              pageSize: 50, // Limit results in search dialog
             });
-            setResults(data);
+            setResults(clients);
           } catch (error) {
             console.error(error);
             toast.error("Erro ao pesquisar clientes.");

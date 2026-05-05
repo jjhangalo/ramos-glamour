@@ -12,6 +12,8 @@ type ClientFilters = {
   date?: string;
   dateFrom?: string;
   dateTo?: string;
+  page?: number;
+  pageSize?: number;
 };
 
 async function getEmailMap() {
@@ -32,9 +34,14 @@ async function getEmailMap() {
 
 export async function getClients(filters: ClientFilters = {}) {
   const supabase = createAdminClient();
+  const page = filters.page ?? 1;
+  const pageSize = filters.pageSize ?? 12;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
   let query = supabase
     .from("profiles")
-    .select("*")
+    .select("*", { count: "exact" })
     .order("created_at", { ascending: false });
 
   // Status Filter
@@ -70,7 +77,7 @@ export async function getClients(filters: ClientFilters = {}) {
     }
   }
 
-  // Search Logic
+  // Search Logic (Initial DB filter)
   if (filters.search) {
     const s = `%${filters.search}%`;
     query = query.or(
@@ -78,7 +85,16 @@ export async function getClients(filters: ClientFilters = {}) {
     );
   }
 
-  const { data, error } = await query;
+  // Apply Pagination Range (only if no client-side search is needed)
+  // NOTE: If we search by email (which is not in profiles), we MUST fetch all profiles that match the rest, 
+  // then filter by email client-side, then paginate. This is a limitation of the current split auth/profile schema.
+  const needsClientSideFilter = !!filters.search;
+  
+  if (!needsClientSideFilter) {
+    query = query.range(from, to);
+  }
+
+  const { data, error, count } = await query;
 
   if (error) {
     throw new Error(error.message);
@@ -90,7 +106,9 @@ export async function getClients(filters: ClientFilters = {}) {
     email: emailMap.get(client.id) ?? null,
   }));
 
-  // Client-side search for email (since it's in auth.users and not in profiles directly in this schema)
+  let totalCount = count ?? 0;
+
+  // Client-side search for email
   if (filters.search) {
     const normalizedSearch = filters.search.toLowerCase();
     clients = clients.filter((client) =>
@@ -98,9 +116,20 @@ export async function getClients(filters: ClientFilters = {}) {
         .filter(Boolean)
         .some((value) => value!.toLowerCase().includes(normalizedSearch)),
     );
+    
+    // Update total count after manual filter
+    totalCount = clients.length;
+    
+    // Manual pagination if we filtered client-side
+    clients = clients.slice(from, to + 1);
   }
 
-  return clients;
+  return {
+    clients,
+    totalCount,
+    page,
+    pageSize,
+  };
 }
 
 export async function getClient(id: string) {
