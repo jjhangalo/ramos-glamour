@@ -17,7 +17,6 @@ export default async function NovaPromocaoPage() {
       id: v.id,
       size: v.size,
       color: v.color,
-      sku: v.sku,
       price_override: v.price_override,
     })) || [],
   }));

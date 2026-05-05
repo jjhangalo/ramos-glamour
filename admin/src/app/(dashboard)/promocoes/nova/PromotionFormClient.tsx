@@ -27,7 +27,6 @@ type VariantOption = {
   id: string;
   size: string | null;
   color: string | null;
-  sku: string | null;
   price_override: number | null;
 };
 
@@ -229,7 +228,7 @@ export function PromotionFormClient({ products, initialData }: PromotionFormClie
                             {selectedProduct.variants.map((v) => {
                               const label = [v.size ? `Tam: ${v.size}` : "", v.color ? `Cor: ${v.color}` : ""]
                                 .filter(Boolean)
-                                .join(" | ") || v.sku || `Opção ${v.id.slice(0, 4)}`;
+                                .join(" | ") || `Opção ${v.id.slice(0, 4)}`;
 
                               return (
                                 <option key={v.id} value={v.id}>
