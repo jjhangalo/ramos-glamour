@@ -15,6 +15,7 @@ import {
 import { FilterChipRow, type FilterChip } from "@/components/list/FilterChipRow";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 type Category = {
@@ -144,15 +145,15 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
           <label className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/40">
             Estado
           </label>
-          <select
+          <CustomSelect
             value={draft.estado}
-            onChange={(e) => setDraft(prev => ({ ...prev, estado: e.target.value }))}
-            className="w-full rounded-xl border border-brand-midnight/5 bg-white px-3 py-3 text-sm outline-none focus:border-brand-gold/50 transition-colors appearance-none"
-          >
-            <option value="all">Todos</option>
-            <option value="active">Activos</option>
-            <option value="inactive">Inactivos</option>
-          </select>
+            onChange={(val) => setDraft(prev => ({ ...prev, estado: val || "all" }))}
+            options={[
+              { value: "all", label: "Todos" },
+              { value: "active", label: "Activos" },
+              { value: "inactive", label: "Inactivos" },
+            ]}
+          />
         </div>
 
         {/* Featured */}
@@ -160,15 +161,15 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
           <label className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/40">
             Destaque
           </label>
-          <select
+          <CustomSelect
             value={draft.destaque}
-            onChange={(e) => setDraft(prev => ({ ...prev, destaque: e.target.value }))}
-            className="w-full rounded-xl border border-brand-midnight/5 bg-white px-3 py-3 text-sm outline-none focus:border-brand-gold/50 transition-colors appearance-none"
-          >
-            <option value="all">Todos</option>
-            <option value="true">Destacados</option>
-            <option value="false">Não destacados</option>
-          </select>
+            onChange={(val) => setDraft(prev => ({ ...prev, destaque: val || "all" }))}
+            options={[
+              { value: "all", label: "Todos" },
+              { value: "true", label: "Destacados" },
+              { value: "false", label: "Não destacados" },
+            ]}
+          />
         </div>
       </div>
 

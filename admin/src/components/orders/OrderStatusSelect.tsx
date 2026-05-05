@@ -11,6 +11,8 @@ type OrderStatusSelectProps = {
   value: OrderRecord["status"];
 };
 
+import { CustomSelect } from "@/components/ui/custom-select";
+
 const options = [
   { value: "pending", label: "Pendente" },
   { value: "delivering", label: "Em entrega" },
@@ -25,14 +27,15 @@ export function OrderStatusSelect({
   const [isPending, startTransition] = useTransition();
 
   return (
-    <select
-      defaultValue={value}
+    <CustomSelect
+      value={value}
       disabled={isPending}
-      onChange={(event) =>
+      onChange={(val) =>
         startTransition(async () => {
+          if (!val) return;
           const result = await updateOrderStatus(
             orderId,
-            event.target.value as OrderRecord["status"],
+            val as OrderRecord["status"],
           );
 
           if (!result.success) {
@@ -43,13 +46,7 @@ export function OrderStatusSelect({
           toast.success("Estado da encomenda actualizado.");
         })
       }
-      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-500"
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+      options={options.map(opt => ({ value: opt.value, label: opt.label }))}
+    />
   );
 }

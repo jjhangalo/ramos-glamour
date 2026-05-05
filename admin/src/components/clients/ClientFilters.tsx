@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 type ClientFiltersProps = {
   params: {
@@ -48,15 +49,26 @@ export function ClientFilters({ params }: ClientFiltersProps) {
             placeholder="Pesquisar por nome ou email"
             className="w-full rounded-md border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500"
           />
-          <select
-            name="estado"
-            defaultValue={params.estado ?? "all"}
-            className="w-full rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-slate-500"
-          >
-            <option value="all">Todos os estados</option>
-            <option value="active">Activos</option>
-            <option value="inactive">Inactivos</option>
-          </select>
+          <div className="w-full">
+            <CustomSelect
+              value={params.estado ?? "all"}
+              onChange={(val) => {
+                const url = new URL(window.location.href);
+                if (val && val !== "all") {
+                  url.searchParams.set("estado", val);
+                } else {
+                  url.searchParams.delete("estado");
+                }
+                window.location.href = url.pathname + url.search;
+              }}
+              options={[
+                { value: "all", label: "Todos os estados" },
+                { value: "active", label: "Activos" },
+                { value: "inactive", label: "Inactivos" },
+              ]}
+              className="border-slate-300 rounded-md py-2.5"
+            />
+          </div>
           <button
             type="submit"
             className="rounded-md bg-slate-900 px-6 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-slate-800"

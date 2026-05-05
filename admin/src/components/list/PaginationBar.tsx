@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 type PaginationBarProps = {
   currentPage: number;
@@ -32,18 +33,16 @@ export function PaginationBar({
       </p>
 
       <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-2 shadow-sm md:justify-end">
-        <div className="flex items-center">
-          <select
-            value={pageSize}
-            onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="h-11 rounded-md bg-transparent px-3 text-xs font-bold uppercase tracking-wider text-slate-700 outline-none focus:ring-0"
-          >
-            {[10, 20, 30, 50].map((size) => (
-              <option key={size} value={size}>
-                {size} / página
-              </option>
-            ))}
-          </select>
+        <div className="flex items-center min-w-[120px]">
+          <CustomSelect
+            value={pageSize.toString()}
+            onChange={(val) => onPageSizeChange(Number(val))}
+            options={[10, 20, 30, 50].map((size) => ({
+              value: size.toString(),
+              label: `${size} / pág`,
+            }))}
+            className="h-11 border-none shadow-none bg-transparent hover:bg-slate-50 rounded-md"
+          />
         </div>
 
         <div className="h-6 w-px bg-slate-200 md:mx-1" />

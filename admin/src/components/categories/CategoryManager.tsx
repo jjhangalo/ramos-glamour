@@ -26,6 +26,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { StickySaveBar } from "@/components/ui/StickySaveBar";
 import { StaggerContainer, StaggerItem, FadeUp } from "@/components/shared/Animations";
 import { cn } from "@/lib/utils";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { FAB } from "@/components/list/FAB";
 import { 
   Sheet, 
@@ -362,25 +363,17 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
                       <FormItem>
                         <FormLabel className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40 ml-1">Posicionamento</FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <select
-                              {...field}
-                              value={field.value ?? ""}
-                              className="w-full rounded-2xl border border-brand-midnight/10 bg-brand-bg/20 px-5 py-4 text-sm outline-none transition focus:border-brand-gold/50 focus:bg-white focus:ring-1 focus:ring-brand-gold/50 appearance-none cursor-pointer"
-                            >
-                              <option value="">Categoria Raiz (Menu Principal)</option>
-                              {flatCategories
-                                .filter((c) => c.id !== formId)
-                                .map((c) => (
-                                  <option key={c.id} value={c.id}>
-                                    {"\u00A0".repeat(c.level * 4)}
-                                    {c.level > 0 ? "└─ " : ""}
-                                    {c.name}
-                                  </option>
-                                ))}
-                            </select>
-                            <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-midnight/30 pointer-events-none" />
-                          </div>
+                          <CustomSelect
+                            value={field.value || ""}
+                            onChange={(val) => field.onChange(val)}
+                            placeholder="Categoria Raiz (Menu Principal)"
+                            options={flatCategories
+                              .filter((c) => c.id !== formId)
+                              .map((c) => ({
+                                value: c.id,
+                                label: `${"\u00A0".repeat(c.level * 4)}${c.level > 0 ? "└─ " : ""}${c.name}`,
+                              }))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
