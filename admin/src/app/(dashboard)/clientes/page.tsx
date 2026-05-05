@@ -13,6 +13,9 @@ type ClientsPageProps = {
   searchParams?: Promise<{
     estado?: "all" | "active" | "inactive";
     pesquisa?: string;
+    data?: string;
+    dataInicio?: string;
+    dataFim?: string;
   }>;
 };
 
@@ -21,6 +24,9 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
   const clients = await getClients({
     status: params.estado,
     search: params.pesquisa,
+    date: params.data,
+    dateFrom: params.dataInicio,
+    dateTo: params.dataFim,
     role: "client",
   });
 

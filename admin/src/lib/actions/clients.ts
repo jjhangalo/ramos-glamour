@@ -9,6 +9,9 @@ type ClientFilters = {
   search?: string;
   status?: "all" | "active" | "inactive";
   role?: "client" | "admin";
+  date?: string;
+  dateFrom?: string;
+  dateTo?: string;
 };
 
 async function getEmailMap() {
@@ -34,21 +37,44 @@ export async function getClients(filters: ClientFilters = {}) {
     .select("*")
     .order("created_at", { ascending: false });
 
+  // Status Filter
   if (filters.status === "active") {
     query = query.eq("is_active", true);
-  }
-
-  if (filters.status === "inactive") {
+  } else if (filters.status === "inactive") {
     query = query.eq("is_active", false);
   }
 
+  // Role Filter
   if (filters.role) {
     query = query.eq("role", filters.role);
   }
 
+  // Date Filters
+  if (filters.date) {
+    const startOfDay = new Date(filters.date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(filters.date);
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    query = query
+      .gte("created_at", startOfDay.toISOString())
+      .lte("created_at", endOfDay.toISOString());
+  } else {
+    if (filters.dateFrom) {
+      query = query.gte("created_at", new Date(filters.dateFrom).toISOString());
+    }
+    if (filters.dateTo) {
+      const endTo = new Date(filters.dateTo);
+      endTo.setHours(23, 59, 59, 999);
+      query = query.lte("created_at", endTo.toISOString());
+    }
+  }
+
+  // Search Logic
   if (filters.search) {
+    const s = `%${filters.search}%`;
     query = query.or(
-      `full_name.ilike.%${filters.search}%,display_name.ilike.%${filters.search}%`,
+      `full_name.ilike.${s},display_name.ilike.${s},admin_notes.ilike.${s}`
     );
   }
 
@@ -64,10 +90,11 @@ export async function getClients(filters: ClientFilters = {}) {
     email: emailMap.get(client.id) ?? null,
   }));
 
+  // Client-side search for email (since it's in auth.users and not in profiles directly in this schema)
   if (filters.search) {
     const normalizedSearch = filters.search.toLowerCase();
     clients = clients.filter((client) =>
-      [client.full_name, client.display_name, client.email]
+      [client.full_name, client.display_name, client.email, client.admin_notes]
         .filter(Boolean)
         .some((value) => value!.toLowerCase().includes(normalizedSearch)),
     );
