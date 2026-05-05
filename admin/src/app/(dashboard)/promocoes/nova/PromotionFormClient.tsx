@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,6 +47,17 @@ export function PromotionFormClient({ products, initialData }: PromotionFormClie
   const [isPending, startTransition] = useTransition();
   const [productSearch, setProductSearch] = useState("");
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
+  const productDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (productDropdownRef.current && !productDropdownRef.current.contains(event.target as Node)) {
+        setIsProductDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const form = useForm<PromotionFormValues>({
     resolver: zodResolver(promotionSchema),
@@ -118,7 +129,7 @@ export function PromotionFormClient({ products, initialData }: PromotionFormClie
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="text-xs font-bold uppercase tracking-wider text-brand-midnight/60">Produto Base</FormLabel>
-                    <div className="relative">
+                    <div className="relative" ref={productDropdownRef}>
                       {selectedProduct ? (
                         <div className="flex w-full items-center justify-between rounded-xl border border-brand-midnight/10 bg-brand-bg/50 px-4 py-3 text-sm">
                           <span className="font-medium text-brand-midnight">{selectedProduct.name}</span>
