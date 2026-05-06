@@ -20,14 +20,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate, formatPrice, shortId } from "@/lib/format";
 import type { OrderRecord } from "@/lib/types";
 import { StaggerContainer, StaggerItem } from "@/components/shared/Animations";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 type OrderListClientProps = {
   initialOrders: OrderRecord[];
@@ -68,7 +61,6 @@ export function OrderListClient({ initialOrders }: OrderListClientProps) {
       {/* Desktop Table */}
       <div className="hidden overflow-visible rounded-2xl border border-brand-midnight/5 bg-white shadow-sm md:block">
         <table className="min-w-full text-left text-sm">
-          {/* ... (thead stays the same) */}
           <thead className="bg-brand-bg/40 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-midnight/40">
             <tr className="border-b border-brand-midnight/5">
               <th className="px-5 py-4 pl-8">Encomenda</th>
@@ -112,51 +104,48 @@ export function OrderListClient({ initialOrders }: OrderListClientProps) {
                     {formatDate(order.created_at)}
                   </td>
                   <td className="px-5 py-4 text-right pr-8">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                    <DropdownMenu 
+                      trigger={
                         <button 
                           disabled={isPending}
                           className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-brand-midnight/10 text-brand-midnight/40 transition hover:border-brand-midnight hover:text-brand-midnight disabled:opacity-50"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56 rounded-xl border-brand-midnight/5 shadow-xl">
-                        <DropdownMenuLabel className="text-[9px] font-bold uppercase tracking-widest text-brand-midnight/30 px-3 py-2">
-                          Acções
-                        </DropdownMenuLabel>
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/encomendas/${order.id}`}
-                            className="flex cursor-pointer items-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-wider text-brand-midnight"
-                          >
-                            <Eye className="h-4 w-4 opacity-40" />
-                            Ver Detalhes
-                          </Link>
-                        </DropdownMenuItem>
-                        
-                        {transitions.length > 0 && (
-                          <>
-                            <DropdownMenuSeparator className="bg-brand-midnight/5" />
-                            <DropdownMenuLabel className="text-[9px] font-bold uppercase tracking-widest text-brand-midnight/30 px-3 py-2">
-                              Alterar Estado
-                            </DropdownMenuLabel>
-                            {transitions.map((t) => (
-                              <DropdownMenuItem
-                                key={t.value}
-                                onClick={() => handleStatusUpdate(order.id, t.value)}
-                                className={cn(
-                                  "flex cursor-pointer items-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-wider",
-                                  t.value === "cancelled" || t.value === "refused" ? "text-red-600 hover:bg-red-50" : "text-brand-midnight/70"
-                                )}
-                              >
-                                <t.icon className="h-4 w-4 opacity-40" />
-                                {t.label}
-                              </DropdownMenuItem>
-                            ))}
-                          </>
-                        )}
-                      </DropdownMenuContent>
+                      }
+                    >
+                      <div className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-brand-midnight/30">
+                        Acções
+                      </div>
+                      <Link
+                        href={`/encomendas/${order.id}`}
+                        className="flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-brand-midnight hover:bg-brand-bg rounded-xl transition"
+                      >
+                        <Eye className="h-4 w-4 opacity-40" />
+                        Ver Detalhes
+                      </Link>
+                      
+                      {transitions.length > 0 && (
+                        <>
+                          <div className="my-1 h-px bg-brand-midnight/5" />
+                          <div className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-brand-midnight/30">
+                            Alterar Estado
+                          </div>
+                          {transitions.map((t) => (
+                            <DropdownMenuItem
+                              key={t.value}
+                              onClick={() => handleStatusUpdate(order.id, t.value)}
+                              className={cn(
+                                "text-[10px] font-bold uppercase tracking-wider",
+                                t.value === "cancelled" || t.value === "refused" ? "text-red-600 hover:bg-red-50" : "text-brand-midnight/70"
+                              )}
+                            >
+                              <t.icon className="h-4 w-4 opacity-40" />
+                              {t.label}
+                            </DropdownMenuItem>
+                          ))}
+                        </>
+                      )}
                     </DropdownMenu>
                   </td>
                 </StaggerItem>
@@ -181,45 +170,42 @@ export function OrderListClient({ initialOrders }: OrderListClientProps) {
                     <StatusBadge status={order.status} />
                   </div>
                   
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                  <DropdownMenu
+                    trigger={
                       <button 
                         disabled={isPending}
                         className="h-8 w-8 flex items-center justify-center rounded-full bg-brand-bg text-brand-midnight/40 disabled:opacity-50"
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56 rounded-xl border-brand-midnight/5 shadow-xl">
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href={`/encomendas/${order.id}`}
-                          className="flex cursor-pointer items-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-wider text-brand-midnight"
-                        >
-                          <Eye className="h-4 w-4 opacity-40" />
-                          Ver Detalhes
-                        </Link>
-                      </DropdownMenuItem>
-                      
-                      {transitions.length > 0 && (
-                        <>
-                          <DropdownMenuSeparator className="bg-brand-midnight/5" />
-                          {transitions.map((t) => (
-                            <DropdownMenuItem
-                              key={t.value}
-                              onClick={() => handleStatusUpdate(order.id, t.value)}
-                              className={cn(
-                                "flex cursor-pointer items-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-wider",
-                                t.value === "cancelled" || t.value === "refused" ? "text-red-600" : "text-brand-midnight/70"
-                              )}
-                            >
-                              <t.icon className="h-4 w-4 opacity-40" />
-                              {t.label}
-                            </DropdownMenuItem>
-                          ))}
-                        </>
-                      )}
-                    </DropdownMenuContent>
+                    }
+                  >
+                    <Link
+                      href={`/encomendas/${order.id}`}
+                      className="flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-brand-midnight hover:bg-brand-bg rounded-xl transition"
+                    >
+                      <Eye className="h-4 w-4 opacity-40" />
+                      Ver Detalhes
+                    </Link>
+                    
+                    {transitions.length > 0 && (
+                      <>
+                        <div className="my-1 h-px bg-brand-midnight/5" />
+                        {transitions.map((t) => (
+                          <DropdownMenuItem
+                            key={t.value}
+                            onClick={() => handleStatusUpdate(order.id, t.value)}
+                            className={cn(
+                              "text-[10px] font-bold uppercase tracking-wider",
+                              t.value === "cancelled" || t.value === "refused" ? "text-red-600" : "text-brand-midnight/70"
+                            )}
+                          >
+                            <t.icon className="h-4 w-4 opacity-40" />
+                            {t.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </>
+                    )}
                   </DropdownMenu>
                 </div>
 
