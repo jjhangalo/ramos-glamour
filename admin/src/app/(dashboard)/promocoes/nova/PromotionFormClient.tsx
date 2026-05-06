@@ -61,6 +61,7 @@ export function PromotionFormClient({ products, initialData }: PromotionFormClie
   }, []);
 
   const form = useForm<PromotionFormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(promotionSchema) as any,
     defaultValues: initialData || {
       product_id: "",
