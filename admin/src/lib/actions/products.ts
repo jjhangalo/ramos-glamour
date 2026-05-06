@@ -123,7 +123,7 @@ export async function getProducts(filters: ProductFilters = {}) {
   let query = supabase
     .from("products")
     .select(
-      "id, name, description, price, stock, is_active, is_featured, created_at, updated_at, product_images(id, product_id, url, position), product_variants(id)",
+      "id, name, description, price, stock, is_active, is_featured, created_at, updated_at, product_images(id, product_id, url, position), product_variants(id, product_id, size, color, stock, is_available, price_override, created_at, updated_at)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false });
@@ -240,7 +240,6 @@ export async function updateProduct(id: string, input: ProductInput) {
     description: input.description.trim() || null,
     price: input.price,
     stock: input.stock,
-    category_id: input.category_ids[0] ?? null,
     is_active: input.is_active,
     is_featured: input.is_featured,
   };

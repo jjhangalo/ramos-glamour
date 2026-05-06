@@ -6,42 +6,56 @@ import { buildWhatsAppUrl } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { OrderRecord } from "@/lib/types";
 
-export async function getOrders(status?: string, search?: string) {
+export async function getOrders(
+  status?: string,
+  search?: string,
+  page = 1,
+  limit = 20,
+) {
   const supabase = createAdminClient();
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
   let query = supabase
     .from("orders")
     .select(
       "id, user_id, address_id, status, notes, total, created_at, updated_at, profiles(id, full_name, display_name, phone, whatsapp), addresses(id, label, city), order_items(id, quantity)",
+      { count: "exact" },
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (status && status !== "all") {
     query = query.eq("status", status);
   }
 
   if (search) {
-    // Priority: ID (exact), then name/phone/email (ilike)
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(search);
     if (isUuid) {
       query = query.eq("id", search);
     } else {
-      // Fuzzy search across multiple related tables is limited in simple select, 
-      // but we can use or filter if the fields were in the same table.
-      // Since they are in joined tables, we'll use a text search if configured, 
-      // or filter in the profiles join.
-      // For simplicity and speed in this operational context, we search by ID (partial if not UUID) or Name
-      query = query.or(`id.ilike.%${search}%,notes.ilike.%${search}%`);
-      // Note: Full cross-table fuzzy search usually requires a more complex query or RPC.
+      // Fetch matching users first since we can't easily do cross-table ORs
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id")
+        .or(`full_name.ilike.%${search}%,display_name.ilike.%${search}%,phone.ilike.%${search}%`);
+
+      if (profiles && profiles.length > 0) {
+        const userIds = profiles.map((p) => p.id);
+        query = query.or(`notes.ilike.%${search}%,user_id.in.(${userIds.join(",")})`);
+      } else {
+        query = query.or(`notes.ilike.%${search}%`);
+      }
     }
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return (data ?? []).map((order: unknown) => {
+  const orders = (data ?? []).map((order: unknown) => {
     const o = order as OrderRecord;
     return {
       ...o,
@@ -49,6 +63,8 @@ export async function getOrders(status?: string, search?: string) {
       addresses: Array.isArray(o.addresses) ? (o.addresses as unknown as unknown[])[0] : o.addresses,
     };
   }) as OrderRecord[];
+
+  return { orders, count: count ?? 0 };
 }
 
 export async function getOrder(id: string) {
@@ -56,7 +72,20 @@ export async function getOrder(id: string) {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, user_id, address_id, status, notes, total, created_at, updated_at, profiles(id, full_name, display_name, phone, whatsapp), addresses(*), order_items(*)",
+      `
+      id, user_id, address_id, status, notes, total, created_at, updated_at, 
+      profiles(id, full_name, display_name, phone, whatsapp), 
+      addresses(*), 
+      order_items(
+        *,
+        products(
+          product_images(url, position)
+        ),
+        product_variants(
+          variant_images(url, position)
+        )
+      )
+      `,
     )
     .eq("id", id)
     .single();

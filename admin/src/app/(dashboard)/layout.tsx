@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { DesktopDashboardNav, MobileDashboardNav } from "@/components/dashboard/DashboardNav";
 import { SidebarUser } from "@/components/dashboard/SidebarUser";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { PageTransition } from "@/components/shared/PageTransition";
 import { getUnreadNotifications } from "@/lib/actions/notifications";
 import { createClient } from "@/lib/supabase/server";
 
@@ -39,16 +40,17 @@ export default async function DashboardLayout({
     "Administrador";
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950">
-      <aside className="fixed inset-y-0 left-0 hidden w-56 border-r border-slate-200 bg-white px-5 py-6 lg:flex lg:flex-col">
+    <div className="min-h-screen bg-brand-bg text-brand-midnight font-sans">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-brand-midnight/5 bg-white/50 backdrop-blur-md px-6 py-8 lg:flex lg:flex-col">
         <div className="flex items-center justify-between gap-4">
           <Link href="/" className="flex min-w-0 items-center">
             <Image
-              src="/icon1.png"
+              src="/logo-gold.png"
               alt="Ramos Glamour"
-              width={140}
-              height={35}
-              className="h-9 w-auto object-contain"
+              width={160}
+              height={40}
+              className="h-10 w-auto object-contain"
+              style={{ width: "auto", height: "100%" }}
               priority
             />
           </Link>
@@ -68,9 +70,9 @@ export default async function DashboardLayout({
         />
       </aside>
 
-      <div className="flex min-h-screen flex-col lg:pl-56">
+      <div className="flex min-h-screen flex-col lg:pl-64">
         {/* Mobile Header */}
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-30 border-b border-brand-midnight/5 bg-brand-bg/80 px-4 py-3 backdrop-blur-md lg:hidden">
           <div className="flex items-center justify-between gap-4">
             {/* Menu trigger (Sheet) */}
             <MobileDashboardNav
@@ -86,11 +88,12 @@ export default async function DashboardLayout({
             {/* Logo centred */}
             <Link href="/" className="flex min-w-0 items-center">
               <Image
-                src="/icon1.png"
+                src="/logo-gold.png"
                 alt="Ramos Glamour"
                 width={120}
                 height={30}
-                className="h-8 w-auto object-contain"
+                className="h-8 w-auto object-contain brightness-0"
+                style={{ width: "auto", height: "100%" }}
                 priority
               />
             </Link>
@@ -101,7 +104,9 @@ export default async function DashboardLayout({
         </header>
 
         <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </main>
       </div>
     </div>

@@ -4,10 +4,22 @@ export const promotionSchema = z.object({
   product_id: z
     .string({ message: "Selecciona um produto." })
     .uuid("ID de produto inválido."),
-  promo_price: z.coerce
+  variant_id: z.string().uuid("ID de variante inválido.").optional().nullable(),
+  promo_price: z
     .number({ message: "O preço promocional deve ser um número válido." })
     .positive("O preço promocional deve ser positivo."),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(),
+  starts_at: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (value) => {
+        if (!value) return true;
+        return !Number.isNaN(Date.parse(value));
+      },
+      { message: "Data de início inválida." },
+    ),
   ends_at: z
     .string()
     .optional()

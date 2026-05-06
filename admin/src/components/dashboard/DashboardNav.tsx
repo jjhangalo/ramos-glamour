@@ -45,13 +45,13 @@ export function DesktopDashboardNav() {
             className={cn(
               "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200",
               active 
-                ? "bg-slate-900 text-white shadow-sm" 
-                : "text-slate-500 hover:bg-slate-100 hover:text-slate-950"
+                ? "bg-brand-midnight text-brand-white shadow-sm" 
+                : "text-brand-midnight/60 hover:bg-brand-midnight/5 hover:text-brand-midnight"
             )}
           >
             <Icon className={cn(
               "h-4 w-4 transition-colors",
-              active ? "text-white" : "text-slate-400 group-hover:text-slate-950"
+              active ? "text-brand-white" : "text-brand-midnight/40 group-hover:text-brand-midnight"
             )} />
             <span className={cn(active ? "font-medium" : "font-normal")}>
               {item.label}
@@ -73,13 +73,13 @@ export function MobileDashboardNav({ user }: MobileDashboardNavProps) {
         <button
           type="button"
           aria-label="Abrir menu de navegação"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-brand-midnight/10 text-brand-midnight/60 transition hover:bg-brand-midnight/5 hover:text-brand-midnight"
         >
           <Menu className="h-5 w-5" />
         </button>
       </SheetTrigger>
 
-      <SheetContent side="left" className="flex flex-col px-0 py-6">
+      <SheetContent aria-describedby={undefined} side="left" className="flex flex-col px-0 py-6 border-r border-brand-midnight/5 bg-brand-bg/95 backdrop-blur-xl">
         <SheetHeader className="px-6">
           <Link href="/" onClick={() => setOpen(false)}>
             <Image
@@ -107,13 +107,13 @@ export function MobileDashboardNav({ user }: MobileDashboardNavProps) {
                 className={cn(
                   "group flex items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200",
                   active 
-                    ? "bg-slate-900 text-white shadow-sm" 
-                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-950"
+                    ? "bg-brand-midnight text-brand-white shadow-sm" 
+                    : "text-brand-midnight/60 hover:bg-brand-midnight/5 hover:text-brand-midnight"
                 )}
               >
                 <Icon className={cn(
                   "h-4 w-4 shrink-0 transition-colors",
-                  active ? "text-white" : "text-slate-400 group-hover:text-slate-950"
+                  active ? "text-brand-white" : "text-brand-midnight/40 group-hover:text-brand-midnight"
                 )} />
                 <span className={cn(active ? "font-medium" : "font-normal")}>
                   {item.label}

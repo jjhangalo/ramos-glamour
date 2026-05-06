@@ -1,69 +1,31 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import * as React from "react";
+import * as PopoverPrimitive from "@radix-ui/react-popover";
+
 import { cn } from "@/lib/utils";
 
-type PopoverProps = {
-  trigger: React.ReactNode;
-  children: React.ReactNode;
-  align?: "left" | "right";
-  width?: string;
-  className?: string;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-};
+const Popover = PopoverPrimitive.Root;
 
-export function Popover({
-  trigger,
-  children,
-  align = "left",
-  width = "w-[320px]",
-  className,
-  open: controlledOpen,
-  onOpenChange,
-}: PopoverProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
-  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const setIsOpen = onOpenChange !== undefined ? onOpenChange : setInternalOpen;
-  
-  const containerRef = useRef<HTMLDivElement>(null);
+const PopoverTrigger = PopoverPrimitive.Trigger;
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, setIsOpen]);
-
-  return (
-    <div className="relative inline-block text-left" ref={containerRef}>
-      <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer">
-        {trigger}
-      </div>
-
-      {isOpen && (
-        <div
-          className={cn(
-            "absolute z-50 mt-2 origin-top rounded-xl border border-slate-200 bg-white p-4 shadow-2xl ring-1 ring-slate-900/5 outline-none",
-            width,
-            align === "right" ? "right-0" : "left-0",
-            className
-          )}
-        >
-          {children}
-        </div>
+const PopoverContent = React.forwardRef<
+  React.ElementRef<typeof PopoverPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
+>(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
+  <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Content
+      ref={ref}
+      align={align}
+      sideOffset={sideOffset}
+      className={cn(
+        "z-50 w-[calc(100vw-32px)] sm:w-auto min-w-[280px] rounded-xl border border-brand-midnight/10 bg-white p-4 text-brand-midnight shadow-2xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        className
       )}
-    </div>
-  );
-}
+      {...props}
+    />
+  </PopoverPrimitive.Portal>
+));
+PopoverContent.displayName = PopoverPrimitive.Content.displayName;
+
+export { Popover, PopoverTrigger, PopoverContent };

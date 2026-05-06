@@ -24,16 +24,25 @@ export function VariantEditor({
 }: VariantEditorProps) {
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="bottom" className="h-[90vh] rounded-t-[2rem] px-6 pb-10 pt-8 sm:h-auto sm:max-w-xl sm:rounded-l-[2rem] sm:side-right md:hidden">
-        <SheetHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
-          <SheetTitle>{variant ? "Editar Variante" : "Nova Variante"}</SheetTitle>
-        </SheetHeader>
+      <SheetContent 
+        side="right" 
+        className="w-full sm:max-w-xl border-l border-brand-midnight/5 p-0 sm:rounded-l-[2rem] overflow-hidden"
+      >
+        <div className="relative h-full flex flex-col bg-brand-bg grain-overlay">
+          <SheetHeader className="flex flex-row items-center justify-between space-y-0 px-8 py-6 border-b border-brand-midnight/5 bg-white/50 backdrop-blur-md">
+            <SheetTitle className="heading-luxury text-2xl font-light text-brand-midnight">
+              {variant ? "Editar Variante" : "Nova Variante"}
+            </SheetTitle>
+          </SheetHeader>
 
-        <VariantForm 
-          productId={productId} 
-          variant={variant} 
-          onClose={onClose} 
-        />
+          <div className="flex-1 overflow-y-auto px-8 py-10">
+            <VariantForm 
+              productId={productId} 
+              variant={variant} 
+              onClose={onClose} 
+            />
+          </div>
+        </div>
       </SheetContent>
     </Sheet>
   );

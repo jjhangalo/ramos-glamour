@@ -51,7 +51,7 @@ export function ProductRowActions({
       trigger={
         <button
           type="button"
-          className="flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition hover:border-slate-900 hover:text-slate-900 shadow-sm"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-brand-midnight/10 text-brand-midnight/50 transition hover:border-brand-midnight hover:text-brand-midnight shadow-sm bg-white"
         >
           <MoreHorizontal className="h-4 w-4" />
         </button>
@@ -68,7 +68,7 @@ export function ProductRowActions({
         onClick={handleToggleActive}
         className="min-h-[44px]"
       >
-        <Power className={cn("h-4 w-4", isActive ? "text-red-500" : "text-emerald-500")} />
+        <Power className={cn("h-4 w-4", isActive ? "text-red-500" : "text-brand-olive")} />
         <span>{isActive ? "Desativar" : "Ativar"}</span>
       </DropdownMenuItem>
 
@@ -79,7 +79,7 @@ export function ProductRowActions({
           !isActive && "opacity-50 grayscale cursor-not-allowed pointer-events-none"
         )}
       >
-        <Star className={cn("h-4 w-4", isFeatured ? "text-slate-400" : "text-amber-500")} />
+        <Star className={cn("h-4 w-4", isFeatured ? "text-brand-midnight/20" : "text-brand-gold")} />
         <span>{isFeatured ? "Remover Destaque" : "Destacar"}</span>
       </DropdownMenuItem>
     </DropdownMenu>

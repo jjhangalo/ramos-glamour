@@ -7,8 +7,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export type PromotionRecord = {
   id: string;
   product_id: string;
+  variant_id?: string | null;
   promo_price: number;
   is_active: boolean;
+  starts_at: string | null;
   ends_at: string | null;
   created_at: string;
   updated_at: string;
@@ -18,34 +20,53 @@ export type PromotionRecord = {
     price: number;
     product_images?: { url: string; position: number }[];
   } | null;
+  product_variants?: {
+    id: string;
+    size: string | null;
+    color: string | null;
+    price_override: number | null;
+  } | null;
 };
 
 type PromotionInput = {
+  id?: string;
   product_id: string;
+  variant_id?: string | null;
   promo_price: number;
   is_active: boolean;
+  starts_at?: string | null;
   ends_at?: string | null;
 };
 
-export async function getPromotedProducts(): Promise<PromotionRecord[]> {
+export async function getPromotedProducts(
+  page = 1,
+  limit = 20,
+): Promise<{ promotions: PromotionRecord[]; count: number }> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+    const { data, error, count } = await supabase
     .from("promotions")
     .select(
-      "id, product_id, promo_price, is_active, ends_at, created_at, updated_at, products(id, name, price, product_images(url, position))",
+      "id, product_id, variant_id, promo_price, is_active, ends_at, created_at, updated_at, products(id, name, price, product_images(url, position)), product_variants(id, size, color, price_override)",
+      { count: "exact" }
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) {
     throw new Error(error.message);
   }
 
   const rawData = data || [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return rawData.map((promo: any) => ({
+  const promotions = rawData.map((promo) => ({
     ...promo,
     products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
-  })) as PromotionRecord[];
+    product_variants: Array.isArray(promo.product_variants) ? promo.product_variants[0] : promo.product_variants || null,
+  })) as unknown as PromotionRecord[];
+
+  return { promotions, count: count ?? 0 };
 }
 
 export async function getActivePromotions(): Promise<PromotionRecord[]> {
@@ -54,7 +75,7 @@ export async function getActivePromotions(): Promise<PromotionRecord[]> {
   const { data, error } = await supabase
     .from("promotions")
     .select(
-      "id, product_id, promo_price, is_active, ends_at, created_at, updated_at, products(id, name, price, product_images(url, position))",
+      "id, product_id, variant_id, promo_price, is_active, ends_at, created_at, updated_at, products(id, name, price, product_images(url, position)), product_variants(id, size, color, price_override)",
     )
     .eq("is_active", true)
     .or(`ends_at.is.null,ends_at.gt.${now}`)
@@ -65,17 +86,17 @@ export async function getActivePromotions(): Promise<PromotionRecord[]> {
   }
 
   const rawData = data || [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return rawData.map((promo: any) => ({
+  return rawData.map((promo) => ({
     ...promo,
     products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
-  })) as PromotionRecord[];
+  })) as unknown as PromotionRecord[];
 }
 
 export async function createPromotion(input: PromotionInput) {
   const supabase = createAdminClient();
   const { error } = await supabase.from("promotions").insert({
     product_id: input.product_id,
+    variant_id: input.variant_id ?? null,
     promo_price: input.promo_price,
     is_active: input.is_active,
     ends_at: input.ends_at ?? null,
@@ -95,6 +116,7 @@ export async function updatePromotion(id: string, input: PromotionInput) {
     .from("promotions")
     .update({
       product_id: input.product_id,
+      variant_id: input.variant_id ?? null,
       promo_price: input.promo_price,
       is_active: input.is_active,
       ends_at: input.ends_at ?? null,
@@ -156,11 +178,18 @@ export async function getPromotionByProductId(productId: string): Promise<Promot
 export async function upsertPromotion(input: PromotionInput) {
   const supabase = createAdminClient();
   
-  const { data: existing } = await supabase
+  let query = supabase
     .from("promotions")
     .select("id")
-    .eq("product_id", input.product_id)
-    .maybeSingle();
+    .eq("product_id", input.product_id);
+
+  if (input.variant_id) {
+    query = query.eq("variant_id", input.variant_id);
+  } else {
+    query = query.is("variant_id", null);
+  }
+
+  const { data: existing } = await query.maybeSingle();
 
   if (existing) {
     const { error } = await supabase
@@ -175,6 +204,7 @@ export async function upsertPromotion(input: PromotionInput) {
   } else {
     const { error } = await supabase.from("promotions").insert({
       product_id: input.product_id,
+      variant_id: input.variant_id ?? null,
       promo_price: input.promo_price,
       is_active: true,
     });

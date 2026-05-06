@@ -3,7 +3,8 @@
 import { useState, useMemo } from "react";
 import { Check, X, Search, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Popover } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 type Category = {
   id: string;
@@ -24,6 +25,7 @@ export function CategoryCombobox({
   onChange,
   disabled,
 }: CategoryComboboxProps) {
+  const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const flatCategories = useMemo(() => {
@@ -62,58 +64,73 @@ export function CategoryCombobox({
 
   return (
     <div className="space-y-3">
-      <Popover
-        trigger={
-          <div className={cn(
-            "flex min-h-[44px] w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm transition focus-within:border-slate-400 focus-within:ring-1 focus-within:ring-slate-400",
-            disabled && "opacity-50 cursor-not-allowed"
-          )}>
-            <span className="text-slate-500">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            disabled={disabled}
+            className={cn(
+              "w-full h-12 justify-between rounded-xl border-brand-midnight/5 bg-white/50 font-normal transition hover:bg-white hover:border-brand-gold/30",
+              disabled && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            <span className="text-brand-midnight/60 text-xs">
               {selectedIds.length === 0 ? "Seleccionar categorias..." : `${selectedIds.length} seleccionadas`}
             </span>
-            <ChevronDown className="h-4 w-4 text-slate-400" />
+            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-20" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[calc(100vw-32px)] sm:w-[400px] p-0 rounded-2xl shadow-2xl border-brand-midnight/10" align="start">
+          <div className="flex flex-col">
+            <div className="flex items-center border-b border-brand-midnight/5 px-4 py-3">
+              <Search className="h-4 w-4 text-brand-midnight/20" />
+              <input
+                type="text"
+                placeholder="Procurar categoria..."
+                className="w-full bg-transparent px-3 py-1 text-sm outline-none placeholder:text-brand-midnight/20"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div className="max-h-[280px] overflow-y-auto p-2">
+              {filteredCategories.map((category) => {
+                const isSelected = selectedIds.includes(category.id);
+                return (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => toggleCategory(category.id)}
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs transition active:scale-[0.98]",
+                      isSelected 
+                        ? "bg-brand-midnight text-white font-bold" 
+                        : "text-brand-midnight/60 hover:bg-brand-midnight/5"
+                    )}
+                  >
+                    <span className="truncate">{category.displayName}</span>
+                    {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
+                  </button>
+                );
+              })}
+              {filteredCategories.length === 0 && (
+                <p className="px-3 py-8 text-center text-xs text-brand-midnight/40 italic">
+                  Nenhuma categoria encontrada.
+                </p>
+              )}
+            </div>
+            <div className="border-t border-brand-midnight/5 p-2 bg-brand-bg/10">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="w-full rounded-xl bg-brand-midnight py-3 text-[10px] font-bold uppercase tracking-widest text-white transition hover:bg-brand-charcoal"
+              >
+                Concluir
+              </button>
+            </div>
           </div>
-        }
-        width="w-full"
-        className="p-0 overflow-hidden"
-      >
-        <div className="flex flex-col">
-          <div className="flex items-center border-b border-slate-100 px-3 py-2">
-            <Search className="h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Procurar categoria..."
-              className="w-full bg-transparent px-2 py-1 text-sm outline-none"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              autoFocus
-            />
-          </div>
-          <div className="max-h-[300px] overflow-y-auto p-1">
-            {filteredCategories.map((category) => {
-              const isSelected = selectedIds.includes(category.id);
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  onClick={() => toggleCategory(category.id)}
-                  className={cn(
-                    "flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition hover:bg-slate-50",
-                    isSelected && "bg-slate-50 text-slate-950 font-medium"
-                  )}
-                >
-                  <span>{category.displayName}</span>
-                  {isSelected && <Check className="h-4 w-4 text-emerald-600" />}
-                </button>
-              );
-            })}
-            {filteredCategories.length === 0 && (
-              <p className="px-3 py-4 text-center text-xs text-slate-500">
-                Nenhuma categoria encontrada.
-              </p>
-            )}
-          </div>
-        </div>
+        </PopoverContent>
       </Popover>
 
       {selectedCategories.length > 0 && (
@@ -121,16 +138,16 @@ export function CategoryCombobox({
           {selectedCategories.map((cat) => (
             <div
               key={cat.id}
-              className="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700"
+              className="flex items-center gap-1.5 rounded-full border border-brand-midnight/5 bg-brand-midnight/5 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-brand-midnight/60"
             >
               <span>{cat.displayName}</span>
               <button
                 type="button"
                 onClick={() => toggleCategory(cat.id)}
-                className="ml-1 -my-2 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 active:bg-slate-200"
+                className="ml-1 -my-1 flex h-6 w-6 items-center justify-center rounded-full text-brand-midnight/20 transition hover:bg-brand-midnight/10 hover:text-brand-midnight/40"
                 aria-label={`Remover ${cat.displayName}`}
               >
-                <X className="h-3 w-3" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
           ))}

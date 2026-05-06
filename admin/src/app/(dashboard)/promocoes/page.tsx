@@ -1,5 +1,4 @@
 import { getPromotedProducts } from "@/lib/actions/promotions";
-import { getProducts } from "@/lib/actions/products";
 import { PromotionsClient } from "./PromotionsClient";
 
 export const metadata = {
@@ -7,17 +6,27 @@ export const metadata = {
   description: "Gestão de produtos em promoção.",
 };
 
-export default async function PromocoesPage() {
-  const [promotions, { products }] = await Promise.all([
-    getPromotedProducts(),
-    getProducts(),
-  ]);
+type PromocoesPageProps = {
+  searchParams?: Promise<{
+    pagina?: string;
+    limite?: string;
+  }>;
+};
 
-  const productOptions = products.map((p) => ({
-    id: p.id,
-    name: p.name,
-    price: p.price,
-  }));
+export default async function PromocoesPage({ searchParams }: PromocoesPageProps) {
+  const params = (await searchParams) ?? {};
+  const currentPage = Number(params.pagina || "1");
+  const pageSize = Number(params.limite || "20");
 
-  return <PromotionsClient promotions={promotions} products={productOptions} />;
+  const { promotions, count } = await getPromotedProducts(currentPage, pageSize);
+
+
+  return (
+    <PromotionsClient
+      promotions={promotions}
+      totalCount={count}
+      currentPage={currentPage}
+      pageSize={pageSize}
+    />
+  );
 }

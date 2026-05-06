@@ -96,6 +96,18 @@ export type OrderItemRecord = {
   product_name: string;
   product_price: number;
   quantity: number;
+  products?: {
+    product_images?: {
+      url: string;
+      position: number;
+    }[];
+  } | null;
+  product_variants?: {
+    variant_images?: {
+      url: string;
+      position: number;
+    }[];
+  } | null;
 };
 
 export type OrderRecord = {
@@ -118,6 +130,30 @@ export type OrderRecord = {
   order_items?: OrderItemRecord[];
 };
 
+export type PromotionVoteRecord = {
+  id: string;
+  request_id: string;
+  voter_id: string;
+  decision: "approve" | "reject";
+  created_at: string;
+  voter?: {
+    full_name: string | null;
+    display_name: string | null;
+  };
+};
+
+export type PromotionRequestRecord = {
+  id: string;
+  candidate_id: string;
+  requester_id: string;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+  updated_at: string;
+  candidate?: ClientRecord;
+  requester?: ClientRecord;
+  votes?: PromotionVoteRecord[];
+};
+
 export type ClientRecord = {
   id: string;
   full_name: string | null;
@@ -131,4 +167,5 @@ export type ClientRecord = {
   updated_at: string;
   email?: string | null;
   role: "client" | "admin";
+  promotion_request?: PromotionRequestRecord | null;
 };

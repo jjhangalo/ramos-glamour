@@ -121,16 +121,12 @@ export async function updateCategory(id: string, input: CategoryInput) {
 export async function deleteCategory(id: string) {
   const supabase = createAdminClient();
 
-  const [{ count: childCount, error: childError }, { count: deprecatedCount, error: deprecatedError }, { count: relationCount, error: relationError }] =
+  const [{ count: childCount, error: childError }, { count: relationCount, error: relationError }] =
     await Promise.all([
       supabase
         .from("categories")
         .select("id", { count: "exact", head: true })
         .eq("parent_id", id),
-      supabase
-        .from("products")
-        .select("id", { count: "exact", head: true })
-        .eq("category_id", id),
       supabase
         .from("product_categories")
         .select("product_id", { count: "exact", head: true })
@@ -149,15 +145,11 @@ export async function deleteCategory(id: string) {
     };
   }
 
-  if (deprecatedError) {
-    return { success: false, error: deprecatedError.message };
-  }
-
   if (relationError) {
     return { success: false, error: relationError.message };
   }
 
-  if ((deprecatedCount ?? 0) > 0 || (relationCount ?? 0) > 0) {
+  if ((relationCount ?? 0) > 0) {
     return {
       success: false,
       error: "Não é possível remover uma categoria com produtos associados.",
