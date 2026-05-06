@@ -81,7 +81,7 @@ export async function getClients(filters: ClientFilters = {}) {
   if (filters.search) {
     const s = `%${filters.search}%`;
     query = query.or(
-      `full_name.ilike.${s},display_name.ilike.${s},admin_notes.ilike.${s}`
+      `full_name.ilike.${s},display_name.ilike.${s},admin_notes.ilike.${s},phone.ilike.${s},whatsapp.ilike.${s}`
     );
   }
 
@@ -108,11 +108,18 @@ export async function getClients(filters: ClientFilters = {}) {
 
   let totalCount = count ?? 0;
 
-  // Client-side search for email
+  // Client-side search for email & other fields (to ensure consistency after manual email join)
   if (filters.search) {
     const normalizedSearch = filters.search.toLowerCase();
     clients = clients.filter((client) =>
-      [client.full_name, client.display_name, client.email, client.admin_notes]
+      [
+        client.full_name, 
+        client.display_name, 
+        client.email, 
+        client.admin_notes, 
+        client.phone, 
+        client.whatsapp
+      ]
         .filter(Boolean)
         .some((value) => value!.toLowerCase().includes(normalizedSearch)),
     );
