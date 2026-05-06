@@ -156,15 +156,26 @@ export async function requestPromotion(candidateId: string) {
 
   if (existing) throw new Error("Já existe um pedido de promoção pendente para este cliente");
 
-  const { error } = await supabase
+  const { data: request, error } = await supabase
     .from("promotion_requests")
     .insert({
       candidate_id: candidateId,
       requester_id: user.id,
       status: "pending"
-    });
+    })
+    .select()
+    .single();
 
   if (error) throw new Error(error.message);
+
+  // Voto automático do solicitante (quem pede, aprova implicitamente)
+  await supabase
+    .from("promotion_votes")
+    .insert({
+      request_id: request.id,
+      voter_id: user.id,
+      decision: "approve"
+    });
 
   revalidatePath(`/clientes/${candidateId}`);
   revalidatePath("/administradores");

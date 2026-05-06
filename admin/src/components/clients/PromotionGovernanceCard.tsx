@@ -133,34 +133,44 @@ export function PromotionGovernanceCard({
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30 px-1">
                       Estado da Votação
                     </p>
-                    <div className="grid grid-cols-2 gap-4">
-                      <button
-                        onClick={() => handleVote("approve")}
-                        disabled={isPending || hasAlreadyVoted}
-                        className={cn(
-                          "flex items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold transition-all border",
-                          hasAlreadyVoted ? "bg-brand-bg text-brand-midnight/20 border-transparent" : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 active:scale-95"
+                    {currentUserId === request.requester_id ? (
+                      <div className="rounded-xl bg-brand-bg/50 p-4 border border-brand-midnight/5 text-center">
+                        <p className="text-xs font-medium text-brand-midnight/60 italic">
+                          Você solicitou esta promoção. Aguarde a decisão final dos restantes administradores.
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <button
+                            onClick={() => handleVote("approve")}
+                            disabled={isPending || hasAlreadyVoted}
+                            className={cn(
+                              "flex items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold transition-all border",
+                              hasAlreadyVoted ? "bg-brand-bg text-brand-midnight/20 border-transparent" : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 active:scale-95"
+                            )}
+                          >
+                            <CheckCircle2 className="h-4 w-4" />
+                            {hasAlreadyVoted ? "Já Votou" : "Aprovar"}
+                          </button>
+                          <button
+                            onClick={() => handleVote("reject")}
+                            disabled={isPending || hasAlreadyVoted}
+                            className={cn(
+                              "flex items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold transition-all border",
+                              hasAlreadyVoted ? "bg-brand-bg text-brand-midnight/20 border-transparent" : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 active:scale-95"
+                            )}
+                          >
+                            <XCircle className="h-4 w-4" />
+                            Recusar
+                          </button>
+                        </div>
+                        {hasAlreadyVoted && (
+                          <p className="text-center text-[10px] font-medium text-brand-midnight/30">
+                            O seu voto foi registado. Aguarde a decisão final dos restantes administradores.
+                          </p>
                         )}
-                      >
-                        <CheckCircle2 className="h-4 w-4" />
-                        {hasAlreadyVoted ? "Já Votou" : "Aprovar"}
-                      </button>
-                      <button
-                        onClick={() => handleVote("reject")}
-                        disabled={isPending || hasAlreadyVoted}
-                        className={cn(
-                          "flex items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold transition-all border",
-                          hasAlreadyVoted ? "bg-brand-bg text-brand-midnight/20 border-transparent" : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 active:scale-95"
-                        )}
-                      >
-                        <XCircle className="h-4 w-4" />
-                        Recusar
-                      </button>
-                    </div>
-                    {hasAlreadyVoted && (
-                      <p className="text-center text-[10px] font-medium text-brand-midnight/30">
-                        O seu voto foi registado. Aguarde a decisão final dos restantes administradores.
-                      </p>
+                      </>
                     )}
                   </div>
 

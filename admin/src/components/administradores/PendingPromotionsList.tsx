@@ -91,30 +91,38 @@ export function PendingPromotionsList({
                   </div>
                 </div>
 
-                <div className="mt-6 flex gap-2">
-                  <button
-                    onClick={() => handleVote(request.id, "approve")}
-                    disabled={isPending || hasAlreadyVoted}
-                    className={cn(
-                      "flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all border",
-                      hasAlreadyVoted ? "bg-brand-bg text-brand-midnight/20 border-transparent" : "bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100 active:scale-95"
-                    )}
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    {hasAlreadyVoted ? "Votado" : "Aprovar"}
-                  </button>
-                  <button
-                    onClick={() => handleVote(request.id, "reject")}
-                    disabled={isPending || hasAlreadyVoted}
-                    className={cn(
-                      "flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all border",
-                      hasAlreadyVoted ? "bg-brand-bg text-brand-midnight/20 border-transparent" : "bg-red-50 text-red-700 border-red-100 hover:bg-red-100 active:scale-95"
-                    )}
-                  >
-                    <XCircle className="h-3.5 w-3.5" />
-                    Recusar
-                  </button>
-                </div>
+                {currentUserId === request.requester_id ? (
+                  <div className="mt-6 rounded-xl bg-brand-bg/50 py-3 text-center border border-brand-midnight/5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/30">
+                      Aguardando outros admins
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-6 flex gap-2">
+                    <button
+                      onClick={() => handleVote(request.id, "approve")}
+                      disabled={isPending || hasAlreadyVoted}
+                      className={cn(
+                        "flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all border",
+                        hasAlreadyVoted ? "bg-brand-bg text-brand-midnight/20 border-transparent" : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 active:scale-95"
+                      )}
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      {hasAlreadyVoted ? "Votado" : "Aprovar"}
+                    </button>
+                    <button
+                      onClick={() => handleVote(request.id, "reject")}
+                      disabled={isPending || hasAlreadyVoted}
+                      className={cn(
+                        "flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all border",
+                        hasAlreadyVoted ? "bg-brand-bg text-brand-midnight/20 border-transparent" : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 active:scale-95"
+                      )}
+                    >
+                      <XCircle className="h-3.5 w-3.5" />
+                      Recusar
+                    </button>
+                  </div>
+                )}
 
                 <div className="mt-4 pt-4 border-t border-brand-midnight/5">
                   <Link

@@ -144,9 +144,6 @@ export default async function ClientDetailPage({
             </article>
           </FadeUp>
 
-          {/* Governance Section */}
-          <PromotionGovernanceCard client={client} currentUserId={user?.id} />
-
           {/* Addresses Section */}
           <section className="space-y-6">
             <FadeUp delay={0.2} className="flex items-center gap-4">
@@ -257,6 +254,9 @@ export default async function ClientDetailPage({
             initialNotes={client.admin_notes || ""}
             isActive={client.is_active}
           />
+          
+          {/* Governance Section */}
+          <PromotionGovernanceCard client={client} currentUserId={user?.id} />
         </aside>
       </div>
     </PageCanvas>
