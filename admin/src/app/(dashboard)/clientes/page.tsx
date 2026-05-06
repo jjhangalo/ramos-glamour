@@ -112,34 +112,39 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/20 text-brand-midnight/40">
                         <Mail className="h-3.5 w-3.5" />
                       </div>
-                      <span className="text-xs font-medium text-brand-midnight/70 truncate">
-                        {client.email || "Sem email"}
+                      <span className={cn(
+                        "text-xs font-medium truncate",
+                        client.email ? "text-brand-midnight/70" : "text-brand-midnight/30 italic"
+                      )}>
+                        {client.email || "Email N/D"}
                       </span>
                     </div>
 
                     {/* Phone */}
-                    {client.phone && (
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/20 text-brand-midnight/40">
-                          <Phone className="h-3.5 w-3.5" />
-                        </div>
-                        <span className="text-xs font-medium text-brand-midnight/70">
-                          {client.phone}
-                        </span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/20 text-brand-midnight/40">
+                        <Phone className="h-3.5 w-3.5" />
                       </div>
-                    )}
+                      <span className={cn(
+                        "text-xs font-medium",
+                        client.phone ? "text-brand-midnight/70" : "text-brand-midnight/30 italic"
+                      )}>
+                        {client.phone || "Telefone N/D"}
+                      </span>
+                    </div>
 
                     {/* WhatsApp */}
-                    {client.whatsapp && (
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/20 text-brand-midnight/40">
-                          <MessageCircle className="h-3.5 w-3.5" />
-                        </div>
-                        <span className="text-xs font-medium text-brand-midnight/70">
-                          {client.whatsapp}
-                        </span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/20 text-brand-midnight/40">
+                        <MessageCircle className="h-3.5 w-3.5" />
                       </div>
-                    )}
+                      <span className={cn(
+                        "text-xs font-medium",
+                        client.whatsapp ? "text-brand-midnight/70" : "text-brand-midnight/30 italic"
+                      )}>
+                        {client.whatsapp || "WhatsApp N/D"}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
