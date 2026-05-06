@@ -45,7 +45,7 @@ export default async function ClientDetailPage({
               Perfil do Cliente
             </p>
             <h1 className="mt-1 text-3xl font-bold text-brand-midnight">
-              {client.full_name || client.display_name || "Cliente sem nome"}
+              Gestão de Cliente
             </h1>
           </div>
         </div>
