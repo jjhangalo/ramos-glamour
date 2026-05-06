@@ -176,7 +176,7 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
 
   // Form
   const productForm = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productSchema) as any,
     defaultValues: {
       name: product?.name ?? "",
       description: product?.description ?? "",
