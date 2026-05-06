@@ -31,7 +31,6 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Ramos Glamour | Administração",
   description: "Painel administrativo Ramos Glamour",
-  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
