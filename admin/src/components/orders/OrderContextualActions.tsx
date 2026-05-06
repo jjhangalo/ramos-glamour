@@ -36,7 +36,7 @@ export function OrderContextualActions({
   }
 
   // Primary Action Mapping
-  const primaryActions: Record<string, { label: string; icon: any; target: OrderRecord["status"]; color: string }> = {
+  const primaryActions: Record<string, { label: string; icon: React.ElementType; target: OrderRecord["status"]; color: string }> = {
     pending: {
       label: "Confirmar Encomenda",
       icon: CheckCircle,

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import toast from "react-hot-toast";
 import { ShieldCheck, UserPlus, AlertCircle, CheckCircle2, XCircle, Info } from "lucide-react";
 
 import { requestPromotion, submitPromotionVote } from "@/lib/actions/clients";
 import { cn } from "@/lib/utils";
-import type { ClientRecord, PromotionRequestRecord } from "@/lib/types";
+import type { ClientRecord } from "@/lib/types";
 import { FadeUp } from "@/components/shared/Animations";
 
 type PromotionGovernanceCardProps = {
@@ -28,8 +28,8 @@ export function PromotionGovernanceCard({
         if (result.success) {
           toast.success("Pedido de promoção iniciado com sucesso.");
         }
-      } catch (error: any) {
-        toast.error(error.message);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Erro desconhecido");
       }
     });
   };
@@ -43,8 +43,8 @@ export function PromotionGovernanceCard({
         if (result.success) {
           toast.success(decision === "approve" ? "Voto de aprovação registado." : "Voto de rejeição registado.");
         }
-      } catch (error: any) {
-        toast.error(error.message);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Erro desconhecido");
       }
     });
   };

@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Filter, Check, RotateCcw } from "lucide-react";
+import { Filter, RotateCcw } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,

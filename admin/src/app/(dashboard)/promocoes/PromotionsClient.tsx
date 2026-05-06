@@ -2,10 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight, Info, MoreVertical } from "lucide-react";
+import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight, MoreVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import {
@@ -22,16 +20,11 @@ import { formatPrice } from "@/lib/format";
 import { FadeUp, StaggerContainer, StaggerItem } from "@/components/shared/Animations";
 import { PromotionPaginationWrapper } from "@/components/promotions/PromotionPaginationWrapper";
 
-type ProductOption = {
-  id: string;
-  name: string;
-  price: number;
-};
+
 
 
 type PromotionsClientProps = {
   promotions: PromotionRecord[];
-  products: ProductOption[];
   totalCount: number;
   currentPage: number;
   pageSize: number;
@@ -39,7 +32,6 @@ type PromotionsClientProps = {
 
 export function PromotionsClient({
   promotions,
-  products,
   totalCount,
   currentPage,
   pageSize,

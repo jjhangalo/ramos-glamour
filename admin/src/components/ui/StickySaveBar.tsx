@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Save, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageCanvas } from "@/components/ui/page-canvas";
@@ -19,15 +19,7 @@ export function StickySaveBar({
   onSave,
   onReset,
 }: StickySaveBarProps) {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    if (isDirty || isSaving) {
-      setShow(true);
-    } else {
-      setShow(false);
-    }
-  }, [isDirty, isSaving]);
+  const show = isDirty || isSaving;
 
   // Navigation blocking
   useEffect(() => {

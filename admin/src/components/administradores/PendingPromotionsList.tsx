@@ -4,12 +4,12 @@ import { useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { CheckCircle2, XCircle, UserCheck, ArrowRight, UserPlus } from "lucide-react";
+import { CheckCircle2, XCircle, UserCheck, ArrowRight } from "lucide-react";
 
 import { submitPromotionVote } from "@/lib/actions/clients";
 import { cn } from "@/lib/utils";
 import type { PromotionRequestRecord } from "@/lib/types";
-import { FadeUp, StaggerContainer, StaggerItem } from "@/components/shared/Animations";
+import { StaggerContainer, StaggerItem } from "@/components/shared/Animations";
 
 type PendingPromotionsListProps = {
   requests: PromotionRequestRecord[];
@@ -29,8 +29,8 @@ export function PendingPromotionsList({
         if (result.success) {
           toast.success(decision === "approve" ? "Voto de aprovação registado." : "Voto de rejeição registado.");
         }
-      } catch (error: any) {
-        toast.error(error.message);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Erro desconhecido");
       }
     });
   };

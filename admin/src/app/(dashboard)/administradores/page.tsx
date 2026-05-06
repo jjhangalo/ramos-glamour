@@ -6,7 +6,7 @@ import { AddAdminDialog } from "@/components/administradores/AddAdminDialog";
 import { PendingPromotionsList } from "@/components/administradores/PendingPromotionsList";
 import { PageCanvas } from "@/components/ui/page-canvas";
 import { FadeUp, StaggerContainer, StaggerItem } from "@/components/shared/Animations";
-import { Mail, Phone, Shield, Search, UserCheck } from "lucide-react";
+import { Mail, Phone, Shield, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type AdminsPageProps = {

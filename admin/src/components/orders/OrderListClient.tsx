@@ -44,7 +44,7 @@ export function OrderListClient({ initialOrders }: OrderListClientProps) {
     const terminalStates = ["delivered", "cancelled", "refused"];
     if (terminalStates.includes(currentStatus)) return [];
 
-    const allStatuses: { value: OrderRecord["status"]; label: string; icon: any }[] = [
+    const allStatuses: { value: OrderRecord["status"]; label: string; icon: React.ElementType }[] = [
       { value: "pending", label: "Pendente", icon: Package },
       { value: "confirmed", label: "Confirmar", icon: CheckCircle },
       { value: "out_for_delivery", label: "Em Entrega", icon: Truck },

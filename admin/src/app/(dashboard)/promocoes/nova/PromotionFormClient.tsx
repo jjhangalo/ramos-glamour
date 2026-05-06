@@ -110,7 +110,7 @@ export function PromotionFormClient({ products, initialData }: PromotionFormClie
         } else {
           toast.error(result.error || "Erro ao guardar promoção");
         }
-      } catch (error) {
+      } catch {
         toast.error("Ocorreu um erro inesperado");
       }
     });

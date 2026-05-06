@@ -60,11 +60,11 @@ export async function getPromotedProducts(
   }
 
   const rawData = data || [];
-  const promotions = rawData.map((promo: any) => ({
+  const promotions = rawData.map((promo) => ({
     ...promo,
     products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
     product_variants: Array.isArray(promo.product_variants) ? promo.product_variants[0] : promo.product_variants || null,
-  })) as PromotionRecord[];
+  })) as unknown as PromotionRecord[];
 
   return { promotions, count: count ?? 0 };
 }
@@ -86,11 +86,10 @@ export async function getActivePromotions(): Promise<PromotionRecord[]> {
   }
 
   const rawData = data || [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return rawData.map((promo: any) => ({
+  return rawData.map((promo) => ({
     ...promo,
     products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
-  })) as PromotionRecord[];
+  })) as unknown as PromotionRecord[];
 }
 
 export async function createPromotion(input: PromotionInput) {

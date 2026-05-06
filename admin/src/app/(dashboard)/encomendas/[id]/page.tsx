@@ -7,18 +7,15 @@ import {
   User, 
   MapPin, 
   CreditCard, 
-  Truck, 
   MessageCircle, 
   Calendar, 
   Hash,
-  ChevronRight,
   Info
 } from "lucide-react";
 
 import { OrderContextualActions } from "@/components/orders/OrderContextualActions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PageCanvas } from "@/components/ui/page-canvas";
-import { cn } from "@/lib/utils";
 import { formatDate, formatPrice, shortId } from "@/lib/format";
 import { getOrder, getOrderWhatsappLink } from "@/lib/actions/orders";
 import { FadeUp, StaggerContainer, StaggerItem } from "@/components/shared/Animations";
@@ -112,7 +109,7 @@ export default async function OrderDetailPage({
                       <Info className="h-3 w-3" /> Notas do Cliente
                     </p>
                     <p className="text-sm text-brand-midnight/60 leading-relaxed italic">
-                      "{order.notes}"
+                      &quot;{order.notes}&quot;
                     </p>
                   </div>
                 )}
@@ -274,7 +271,7 @@ export default async function OrderDetailPage({
                     </p>
                     {order.addresses?.reference && (
                       <p className="mt-2 text-[10px] italic text-brand-midnight/40 leading-relaxed border-l-2 border-brand-midnight/5 pl-3">
-                        "{order.addresses.reference}"
+                        &quot;{order.addresses.reference}&quot;
                       </p>
                     )}
                   </div>

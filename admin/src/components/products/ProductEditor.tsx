@@ -176,7 +176,7 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
 
   // Form
   const productForm = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema) as any,
+    resolver: zodResolver(productSchema),
     defaultValues: {
       name: product?.name ?? "",
       description: product?.description ?? "",
@@ -590,7 +590,7 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
       <StickySaveBar
         isDirty={isDirty}
         isSaving={isPending}
-        onSave={productForm.handleSubmit(onProductSubmit as any)}
+        onSave={productForm.handleSubmit(onProductSubmit)}
         onReset={() => {
           productForm.reset();
           setPromoPrice(initialPromotion?.is_active ? initialPromotion.promo_price.toString() : "");

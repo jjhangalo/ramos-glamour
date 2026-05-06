@@ -58,8 +58,8 @@ export function AddAdminDialog() {
           toast.success("Pedido de promoção iniciado com sucesso.");
           closeAndReset();
         }
-      } catch (error: any) {
-        toast.error(error.message);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Erro desconhecido");
       }
     });
   }
