@@ -39,11 +39,11 @@ export function AdminActions({ userId }: AdminActionsProps) {
       <button
         onClick={() => setIsConfirmOpen(true)}
         disabled={isPending}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-red-200 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-brand-midnight/5 bg-white text-red-600 shadow-sm transition-all hover:bg-red-50 hover:border-red-100 disabled:opacity-50 active:scale-95"
         title="Despromover a cliente"
       >
         {isPending ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="h-4 w-4 animate-spin text-brand-gold" />
         ) : (
           <UserMinus className="h-4 w-4" />
         )}

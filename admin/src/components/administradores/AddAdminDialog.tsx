@@ -1,23 +1,20 @@
 "use client";
 
-import { Search, UserPlus, X, Loader2 } from "lucide-react";
+import { Search, UserPlus, X, Loader2, ShieldCheck, Info } from "lucide-react";
 import { useState, useTransition, useEffect } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 
-import { getClients, toggleAdminRole } from "@/lib/actions/clients";
+import { getClients, requestPromotion } from "@/lib/actions/clients";
 import type { ClientRecord } from "@/lib/types";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { cn } from "@/lib/utils";
+import { FadeUp } from "@/components/shared/Animations";
 
 export function AddAdminDialog() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<ClientRecord[]>([]);
   const [isSearching, startSearchTransition] = useTransition();
-  const [isPromoting, startPromoteTransition] = useTransition();
-  const router = useRouter();
+  const [isRequesting, startRequestTransition] = useTransition();
 
   // Helper to close and reset
   const closeAndReset = () => {
@@ -37,7 +34,7 @@ export function AddAdminDialog() {
               search,
               role: "client",
               status: "active",
-              pageSize: 50, // Limit results in search dialog
+              pageSize: 10,
             });
             setResults(clients);
           } catch (error) {
@@ -53,123 +50,132 @@ export function AddAdminDialog() {
     return () => clearTimeout(timer);
   }, [search, isOpen]);
 
-  async function handlePromote() {
-    if (!selectedUserId) return;
-
-    startPromoteTransition(async () => {
-      const result = await toggleAdminRole(selectedUserId, "admin");
-      if (!result.success) {
-        toast.error(result.error ?? "Erro ao promover utilizador.");
-        return;
+  async function handleInitiatePromotion(candidateId: string) {
+    startRequestTransition(async () => {
+      try {
+        const result = await requestPromotion(candidateId);
+        if (result.success) {
+          toast.success("Pedido de promoção iniciado com sucesso.");
+          closeAndReset();
+        }
+      } catch (error: any) {
+        toast.error(error.message);
       }
-      toast.success("Utilizador promovido a administrador.");
-      closeAndReset();
-      router.refresh();
     });
-  }
-
-  function triggerConfirm(userId: string) {
-    setSelectedUserId(userId);
-    setIsConfirmOpen(true);
   }
 
   if (!isOpen) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+        className="group flex items-center gap-3 rounded-2xl bg-brand-midnight px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:bg-brand-midnight/90 active:scale-95 shadow-lg shadow-brand-midnight/10"
       >
-        <UserPlus className="h-4 w-4" />
+        <UserPlus className="h-4 w-4 transition-transform group-hover:scale-110" />
         Novo Administrador
       </button>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-        <div className="flex items-center justify-between">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-brand-midnight/40 backdrop-blur-md animate-in fade-in duration-500" 
+        onClick={closeAndReset}
+      />
+      
+      {/* Dialog Content */}
+      <FadeUp className="relative w-full max-w-xl overflow-hidden rounded-[2.5rem] border border-brand-midnight/5 bg-white p-8 md:p-12 shadow-2xl">
+        <div className="flex items-center justify-between mb-10">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">
-              Promover Administrador
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Pesquisa um cliente activo para lhe dar acesso administrativo.
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-midnight/30 mb-1">
+              Governança de Acesso
             </p>
+            <h2 className="heading-luxury text-3xl font-medium text-brand-midnight">
+              Solicitar Promoção
+            </h2>
           </div>
           <button
             onClick={closeAndReset}
-            className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-bg text-brand-midnight/40 transition-all hover:bg-brand-midnight hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="mt-6">
+        <div className="space-y-8">
+          <div className="rounded-2xl bg-brand-bg/50 p-6 border border-brand-midnight/5 flex gap-4">
+            <Info className="h-5 w-5 text-brand-midnight/30 shrink-0 mt-0.5" />
+            <p className="text-xs text-brand-midnight/60 leading-relaxed">
+              Pesquise um cliente ativo para iniciar o processo de promoção. 
+              <span className="block mt-2 font-bold text-brand-midnight">
+                Lembre-se: a promoção requer aprovação unânime de todos os administradores atuais.
+              </span>
+            </p>
+          </div>
+
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-midnight/20" />
             <input
               autoFocus
               type="text"
               placeholder="Nome ou email do cliente..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              className="w-full rounded-2xl border border-brand-midnight/5 bg-white py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-brand-gold/30 focus:ring-8 focus:ring-brand-gold/5"
             />
           </div>
 
-          <div className="mt-4 min-h-[200px] max-h-[350px] overflow-y-auto rounded-xl border border-slate-100 bg-slate-50/50 p-2">
+          <div className={cn(
+            "min-h-[200px] max-h-[350px] overflow-y-auto rounded-3xl border border-brand-midnight/5 bg-brand-bg/30 p-3 transition-all",
+            results.length > 0 && "bg-brand-bg/50"
+          )}>
             {isSearching ? (
               <div className="flex h-[200px] items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-brand-gold" />
               </div>
             ) : results.length > 0 ? (
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {results.map((client) => (
                   <div
                     key={client.id}
-                    className="flex items-center justify-between rounded-lg bg-white p-3 border border-slate-100 shadow-sm"
+                    className="flex items-center justify-between rounded-2xl bg-white p-4 border border-brand-midnight/5 shadow-sm transition-all hover:border-brand-gold/20"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-900">
+                      <p className="truncate text-sm font-bold text-brand-midnight">
                         {client.full_name || client.display_name}
                       </p>
-                      <p className="truncate text-xs text-slate-500">
+                      <p className="truncate text-[10px] font-bold uppercase tracking-widest text-brand-midnight/30">
                         {client.email}
                       </p>
                     </div>
                     <button
-                      onClick={() => triggerConfirm(client.id)}
-                      disabled={isPromoting}
-                      className="ml-4 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
+                      onClick={() => handleInitiatePromotion(client.id)}
+                      disabled={isRequesting}
+                      className="group flex items-center gap-2 rounded-xl bg-brand-midnight px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:bg-brand-midnight/90 disabled:opacity-50"
                     >
-                      Promover
+                      {isRequesting ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <ShieldCheck className="h-3 w-3" />
+                      )}
+                      Solicitar
                     </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex h-[200px] flex-col items-center justify-center text-center">
-                <p className="text-sm text-slate-400">
+              <div className="flex h-[200px] flex-col items-center justify-center text-center p-8">
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-midnight/20 leading-relaxed">
                   {search.length < 2
-                    ? "Digita pelo menos 2 caracteres"
-                    : "Nenhum cliente activo encontrado"}
+                    ? "Digita pelo menos 2 caracteres para pesquisar"
+                    : "Nenhum cliente ativo encontrado"}
                 </p>
               </div>
             )}
           </div>
         </div>
-
-        <ConfirmDialog
-          open={isConfirmOpen}
-          onOpenChange={setIsConfirmOpen}
-          title="Promover administrador"
-          description="Aviso: Ao promover este cliente a administrador, estás a conceder acesso total à gestão de produtos, categorias, encomendas e dados de outros clientes. Tens a certeza que pretendes continuar?"
-          confirmLabel="Sim, promover"
-          variant="default"
-          onConfirm={handlePromote}
-        />
-      </div>
+      </FadeUp>
     </div>
   );
 }

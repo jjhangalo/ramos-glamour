@@ -96,6 +96,18 @@ export type OrderItemRecord = {
   product_name: string;
   product_price: number;
   quantity: number;
+  products?: {
+    product_images?: {
+      url: string;
+      position: number;
+    }[];
+  } | null;
+  product_variants?: {
+    variant_images?: {
+      url: string;
+      position: number;
+    }[];
+  } | null;
 };
 
 export type OrderRecord = {

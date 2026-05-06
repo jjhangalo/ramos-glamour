@@ -15,17 +15,17 @@ export const ORDER_STATUSES: OrderStatusConfig[] = [
   {
     value: "confirmed",
     label: "Confirmada",
-    colorClass: "bg-blue-50 text-blue-600",
+    colorClass: "bg-brand-midnight/10 text-brand-midnight",
   },
   {
     value: "out_for_delivery",
     label: "Em entrega",
-    colorClass: "bg-indigo-50 text-indigo-600",
+    colorClass: "bg-brand-gold/20 text-brand-gold",
   },
   {
     value: "delivered",
     label: "Entregue",
-    colorClass: "bg-emerald-50 text-emerald-600",
+    colorClass: "bg-emerald-50 text-emerald-700", // Keep emerald for success but more muted
   },
   {
     value: "cancelled",
@@ -35,7 +35,7 @@ export const ORDER_STATUSES: OrderStatusConfig[] = [
   {
     value: "refused",
     label: "Recusada",
-    colorClass: "bg-red-50 text-red-600",
+    colorClass: "bg-red-50 text-red-700", // Keep red for error but more muted
   },
 ] as const;
 

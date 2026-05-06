@@ -42,19 +42,19 @@ export function OrderContextualActions({
       label: "Confirmar Encomenda",
       icon: CheckCircle,
       target: "confirmed",
-      color: "bg-slate-950 hover:bg-slate-800 text-white",
+      color: "bg-brand-midnight hover:bg-brand-midnight/90 text-white",
     },
     confirmed: {
       label: "Despachar para Entrega",
       icon: Truck,
       target: "out_for_delivery",
-      color: "bg-slate-950 hover:bg-slate-800 text-white",
+      color: "bg-brand-midnight hover:bg-brand-midnight/90 text-white",
     },
     out_for_delivery: {
       label: "Marcar como Entregue",
-      icon: Package,
+      icon: CheckCircle,
       target: "delivered",
-      color: "bg-green-600 hover:bg-green-700 text-white",
+      color: "bg-emerald-600 hover:bg-emerald-700 text-white",
     },
   };
 
@@ -67,7 +67,7 @@ export function OrderContextualActions({
           disabled={isPending}
           onClick={() => handleUpdate(primaryAction.target)}
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50",
+            "flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-sm font-bold transition-all active:scale-[0.98] disabled:opacity-50",
             primaryAction.color
           )}
         >
@@ -81,9 +81,9 @@ export function OrderContextualActions({
           <button
             disabled={isPending}
             onClick={() => handleUpdate("cancelled")}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-brand-midnight/5 bg-white px-4 py-3 text-xs font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
           >
-            <Ban className="h-3.5 w-3.5" />
+            <Ban className="h-4 w-4" />
             Cancelar
           </button>
         )}
@@ -92,9 +92,9 @@ export function OrderContextualActions({
           <button
             disabled={isPending}
             onClick={() => handleUpdate("refused")}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-medium text-orange-600 transition hover:bg-orange-50 disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-brand-midnight/5 bg-white px-4 py-3 text-xs font-bold text-amber-600 transition hover:bg-amber-50 disabled:opacity-50"
           >
-            <XCircle className="h-3.5 w-3.5" />
+            <XCircle className="h-4 w-4" />
             Recusada
           </button>
         )}

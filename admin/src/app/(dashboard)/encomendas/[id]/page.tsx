@@ -1,11 +1,27 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { 
+  ArrowLeft, 
+  ShoppingBag, 
+  User, 
+  MapPin, 
+  CreditCard, 
+  Truck, 
+  MessageCircle, 
+  Calendar, 
+  Hash,
+  ChevronRight,
+  Info
+} from "lucide-react";
 
 import { OrderContextualActions } from "@/components/orders/OrderContextualActions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PageCanvas } from "@/components/ui/page-canvas";
+import { cn } from "@/lib/utils";
 import { formatDate, formatPrice, shortId } from "@/lib/format";
 import { getOrder, getOrderWhatsappLink } from "@/lib/actions/orders";
+import { FadeUp, StaggerContainer, StaggerItem } from "@/components/shared/Animations";
 
 type OrderDetailPageProps = {
   params: Promise<{
@@ -30,162 +46,251 @@ export default async function OrderDetailPage({
     "Cliente sem nome";
 
   return (
-    <PageCanvas size="list" className="space-y-8 py-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Encomendas
-          </p>
-          <h1 className="mt-1 text-3xl font-semibold text-slate-950">
-            Encomenda #{shortId(order.id)}
-          </h1>
+    <PageCanvas size="list" className="space-y-12 py-12 pb-32 overflow-x-hidden">
+      {/* Header & Back Button */}
+      <FadeUp className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-6">
+          <Link
+            href="/encomendas"
+            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-brand-midnight/5 bg-white shadow-sm transition-all hover:bg-brand-bg/50 active:scale-95"
+          >
+            <ArrowLeft className="h-5 w-5 text-brand-midnight" />
+          </Link>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-midnight/30">
+              Operações de Venda
+            </p>
+            <h1 className="heading-luxury mt-1 text-4xl font-light text-brand-midnight">
+              Gestão de Encomenda
+            </h1>
+          </div>
         </div>
-        <Link
-          href="/encomendas"
-          className="inline-flex rounded-md border border-slate-200 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-700 transition hover:bg-slate-50 shadow-sm"
-        >
-          Voltar
-        </Link>
-      </div>
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-brand-midnight/20">
+            #{shortId(order.id)}
+          </span>
+          <StatusBadge status={order.status} />
+        </div>
+      </FadeUp>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
-        <section className="space-y-6">
-          <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Dados da encomenda
+      <div className="grid gap-8 xl:grid-cols-[1fr_380px] w-full max-w-full">
+        {/* Main Column */}
+        <div className="space-y-10 min-w-0">
+          {/* Order Summary Card */}
+          <FadeUp delay={0.1}>
+            <article className="rounded-[2.5rem] border border-brand-midnight/5 bg-white p-6 md:p-10 shadow-sm overflow-hidden">
+              <div className="grid gap-8 sm:grid-cols-3">
+                <div className="space-y-1">
+                  <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
+                    <Calendar className="h-3 w-3" /> Data da Compra
+                  </p>
+                  <p className="text-sm font-bold text-brand-midnight">
+                    {formatDate(order.created_at)}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
+                    <Hash className="h-3 w-3" /> Identificador
+                  </p>
+                  <p className="font-mono text-[10px] font-bold text-brand-midnight/60 truncate">
+                    {order.id}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
+                    <CreditCard className="h-3 w-3" /> Valor Total
+                  </p>
+                  <p className="text-xl font-bold text-brand-midnight">
+                    {formatPrice(order.total)}
+                  </p>
+                </div>
+                {order.notes && (
+                  <div className="sm:col-span-3 space-y-1 pt-6 border-t border-brand-midnight/5">
+                    <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
+                      <Info className="h-3 w-3" /> Notas do Cliente
+                    </p>
+                    <p className="text-sm text-brand-midnight/60 leading-relaxed italic">
+                      "{order.notes}"
+                    </p>
+                  </div>
+                )}
+              </div>
+            </article>
+          </FadeUp>
+
+          {/* Items Section */}
+          <section className="space-y-6">
+            <FadeUp delay={0.2} className="flex items-center gap-4">
+              <ShoppingBag className="h-5 w-5 text-brand-midnight/30" />
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.3em] text-brand-midnight/40">
+                Artigos na Encomenda
               </h2>
-              <StatusBadge status={order.status} />
-            </div>
-            <dl className="mt-6 grid gap-6 md:grid-cols-3">
-              <div>
-                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Cliente
-                </dt>
-                <dd className="mt-1 text-sm font-semibold text-slate-900">{customerName}</dd>
-              </div>
-              <div>
-                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Data
-                </dt>
-                <dd className="mt-1 text-sm font-semibold text-slate-900">
-                  {formatDate(order.created_at)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Total
-                </dt>
-                <dd className="mt-1 text-lg font-bold text-slate-950">
-                  {formatPrice(order.total)}
-                </dd>
-              </div>
-              <div className="md:col-span-3">
-                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Notas
-                </dt>
-                <dd className="mt-1 text-sm text-slate-600">
-                  {order.notes || "Sem notas do cliente"}
-                </dd>
-              </div>
-            </dl>
-          </article>
+            </FadeUp>
 
-          <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-4 border-b border-slate-100 pb-3">
-              Morada de entrega
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1 text-sm text-slate-700">
-                <p className="font-bold text-slate-900">{order.addresses?.recipient_name || "Sem destinatário"}</p>
-                <p className="text-xs text-slate-500">{order.addresses?.phone || "Sem telefone"}</p>
-                <p className="mt-2">
-                  {[order.addresses?.street, order.addresses?.neighborhood]
-                    .filter(Boolean)
-                    .join(", ")}
-                </p>
-                <p>
-                  {[order.addresses?.city, order.addresses?.province]
-                    .filter(Boolean)
-                    .join(", ")}
-                </p>
-              </div>
-              <div className="rounded-lg bg-slate-50 p-4 text-xs text-slate-600">
-                <p className="font-bold text-slate-900 uppercase tracking-wider text-[9px] mb-1">Referência / Notas</p>
-                <p>{order.addresses?.reference || "Nenhum ponto de referência fornecido."}</p>
-                <p className="mt-2 italic opacity-60">Etiqueta: {order.addresses?.label || "Padrão"}</p>
-              </div>
-            </div>
-          </article>
+            <StaggerContainer className="space-y-4">
+              {order.order_items?.map((item) => {
+                const variantImages = item.product_variants?.variant_images || [];
+                const productImages = item.products?.product_images || [];
+                
+                const firstVariantImage = [...variantImages].sort((a, b) => a.position - b.position)[0]?.url;
+                const firstProductImage = [...productImages].sort((a, b) => a.position - b.position)[0]?.url;
+                
+                const finalImage = firstVariantImage || firstProductImage;
 
-          <article className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-6 py-4 border-b border-slate-100 bg-slate-50">
-              Itens da encomenda
-            </h2>
-            <div className="divide-y divide-slate-100">
-              {order.order_items?.map((item) => (
-                <div
-                  key={item.id}
-                  className="px-6 py-4 transition-colors hover:bg-slate-50/50"
-                >
-                  <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <p className="font-bold text-slate-950">
-                        {item.product_name}
-                      </p>
-                      <p className="text-xs text-slate-500">
+                return (
+                  <StaggerItem
+                    key={item.id}
+                    className="group flex flex-col lg:flex-row lg:items-center justify-between gap-6 overflow-hidden rounded-[2rem] border border-brand-midnight/5 bg-white p-6 md:p-8 transition-all hover:border-brand-gold/30 hover:shadow-xl hover:shadow-brand-midnight/5"
+                  >
+                    <div className="flex items-center gap-4 md:gap-6 min-w-0">
+                      <div className="relative flex h-14 w-14 md:h-20 md:w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-brand-bg/50 transition-transform group-hover:scale-105">
+                        {finalImage ? (
+                          <Image
+                            src={finalImage}
+                            alt={item.product_name}
+                            fill
+                            sizes="(max-width: 768px) 56px, 80px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <ShoppingBag className="h-6 w-6 md:h-8 md:w-8 text-brand-midnight/20" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-sm md:text-base font-bold text-brand-midnight">
+                          {item.product_name}
+                        </h3>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/30 mt-1">
                         {[item.variant_size, item.variant_color]
                           .filter(Boolean)
-                          .join(" · ") || "Opção única"}
+                          .join(" · ") || "Edição Única"}
                       </p>
                     </div>
-                    <div className="text-sm font-semibold text-slate-700">
-                      <span className="text-xs text-slate-400 font-normal">{item.quantity} × </span>
-                      {formatPrice(item.product_price)}
+                  </div>
+
+                  <div className="flex items-center justify-between lg:justify-end gap-6 md:gap-8 border-t lg:border-0 border-brand-midnight/5 pt-4 lg:pt-0 shrink-0">
+                    <div className="text-right">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-brand-midnight/20 mb-1">
+                        Preço
+                      </p>
+                      <p className="text-xs font-bold text-brand-midnight/60">
+                        {formatPrice(item.product_price)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-brand-midnight/20 mb-1">
+                        Qtd
+                      </p>
+                      <p className="text-xs font-bold text-brand-midnight">
+                        {item.quantity}
+                      </p>
+                    </div>
+                    <div className="text-right min-w-[80px]">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-brand-midnight/20 mb-1">
+                        Sub-total
+                      </p>
+                      <p className="text-base font-bold text-brand-midnight">
+                        {formatPrice(item.product_price * item.quantity)}
+                      </p>
                     </div>
                   </div>
+                  </StaggerItem>
+                );
+              })}
+            </StaggerContainer>
+          </section>
+        </div>
+
+        {/* Sidebar */}
+        <aside className="space-y-8">
+          {/* Operations Card */}
+          <FadeUp delay={0.3}>
+            <section className="rounded-[2.5rem] border border-brand-midnight/5 bg-white p-8 shadow-sm">
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30 mb-8 px-1">
+                Ações de Operação
+              </h2>
+              <div className="space-y-4">
+                <OrderContextualActions orderId={order.id} status={order.status} />
+                {whatsappUrl && (
+                  <Link
+                    href={whatsappUrl}
+                    target="_blank"
+                    className="group flex w-full items-center justify-center gap-3 rounded-2xl border border-brand-midnight/5 bg-white py-4 text-sm font-bold text-brand-midnight transition-all hover:bg-brand-bg hover:border-brand-midnight/20 active:scale-[0.98]"
+                  >
+                    <MessageCircle className="h-4 w-4 text-[#25D366] transition-transform group-hover:scale-110" />
+                    Contactar Cliente
+                  </Link>
+                )}
+              </div>
+            </section>
+          </FadeUp>
+
+          {/* Customer Card */}
+          <FadeUp delay={0.4}>
+            <section className="rounded-[2.5rem] border border-brand-midnight/5 bg-white p-8 shadow-sm">
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30 mb-8 px-1">
+                Informação do Cliente
+              </h2>
+              <Link 
+                href={`/clientes/${order.user_id}`}
+                className="group flex items-center gap-4 rounded-2xl bg-brand-bg/50 p-4 transition-all hover:bg-brand-midnight hover:text-white"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-brand-midnight shadow-sm group-hover:bg-brand-midnight/20 group-hover:text-white">
+                  <User className="h-6 w-6" />
                 </div>
-              ))}
-            </div>
-          </article>
-        </section>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold leading-tight">
+                    {customerName}
+                  </p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">
+                    Ver Perfil Completo
+                  </p>
+                </div>
+              </Link>
+            </section>
+          </FadeUp>
 
-        <aside className="space-y-6">
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-4 border-b border-slate-100 pb-3">
-              Acções de Operação
-            </h2>
-            <div className="mt-4">
-              <OrderContextualActions orderId={order.id} status={order.status} />
-            </div>
-            {whatsappUrl && (
-              <div className="mt-6 border-t border-slate-100 pt-6">
-                <Link
-                  href={whatsappUrl}
-                  target="_blank"
-                  className="inline-flex w-full justify-center rounded-md border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-700 shadow-sm transition hover:bg-slate-50"
-                >
-                  Contactar via WhatsApp
-                </Link>
-              </div>
-            )}
-          </section>
+          {/* Logistics Card */}
+          <FadeUp delay={0.5}>
+            <section className="rounded-[2.5rem] border border-brand-midnight/5 bg-white p-8 shadow-sm">
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30 mb-8 px-1">
+                Logística & Entrega
+              </h2>
+              <div className="space-y-8">
+                <div className="flex gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-bg/50 text-brand-midnight/40">
+                    <MapPin className="h-5 w-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/30">Destino</p>
+                    <p className="text-sm font-bold text-brand-midnight leading-relaxed">
+                      {order.addresses?.recipient_name || "N/D"}<br />
+                      <span className="text-xs font-medium text-brand-midnight/50">
+                        {order.addresses?.street}, {order.addresses?.neighborhood}<br />
+                        {order.addresses?.city}, {order.addresses?.province}
+                      </span>
+                    </p>
+                    {order.addresses?.reference && (
+                      <p className="mt-2 text-[10px] italic text-brand-midnight/40 leading-relaxed border-l-2 border-brand-midnight/5 pl-3">
+                        "{order.addresses.reference}"
+                      </p>
+                    )}
+                  </div>
+                </div>
 
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-4 border-b border-slate-100 pb-3">
-              Logística & Pagamento
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Canal de Venda</dt>
-                <dd className="mt-1 text-sm font-semibold text-slate-900">Loja Online (Direct)</dd>
+                <div className="flex gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-bg/50 text-brand-midnight/40">
+                    <CreditCard className="h-5 w-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/30">Pagamento</p>
+                    <p className="text-sm font-bold text-brand-midnight">Pagamento na Entrega</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/20">Canal: Loja Online</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Método de Pagamento</dt>
-                <dd className="mt-1 text-sm font-semibold text-slate-900">Pagamento na Entrega</dd>
-              </div>
-            </div>
-          </section>
+            </section>
+          </FadeUp>
         </aside>
       </div>
     </PageCanvas>

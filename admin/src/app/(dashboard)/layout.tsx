@@ -50,6 +50,7 @@ export default async function DashboardLayout({
               width={160}
               height={40}
               className="h-10 w-auto object-contain"
+              style={{ width: "auto", height: "100%" }}
               priority
             />
           </Link>
@@ -92,6 +93,7 @@ export default async function DashboardLayout({
                 width={120}
                 height={30}
                 className="h-8 w-auto object-contain brightness-0"
+                style={{ width: "auto", height: "100%" }}
                 priority
               />
             </Link>
