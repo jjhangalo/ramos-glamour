@@ -57,19 +57,29 @@ export default async function ClientDetailPage({
           <FadeUp delay={0.1}>
             <article className="rounded-[2.5rem] border border-brand-midnight/5 bg-white p-8 md:p-10 shadow-sm overflow-hidden">
               <div className="flex flex-col gap-10 md:flex-row md:items-start">
-                <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-[2rem] border border-brand-midnight/5 bg-brand-bg/50 shadow-inner">
-                  {client.avatar_url ? (
-                    <Image
-                      src={client.avatar_url}
-                      alt={client.full_name || client.display_name || "Avatar"}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-3xl font-bold text-brand-midnight/20">
-                      {client.full_name?.charAt(0) || client.display_name?.charAt(0) || "?"}
-                    </div>
-                  )}
+                <div className="flex flex-col gap-8 sm:flex-row sm:items-center">
+                  <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-[2rem] border border-brand-midnight/5 bg-brand-bg/50 shadow-inner transition-transform hover:scale-105">
+                    {client.avatar_url ? (
+                      <Image
+                        src={client.avatar_url}
+                        alt={client.full_name || client.display_name || "Avatar"}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-3xl font-bold text-brand-midnight/20">
+                        {client.full_name?.charAt(0) || client.display_name?.charAt(0) || "?"}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <h2 className="text-2xl font-bold text-brand-midnight leading-tight">
+                      {client.full_name || "Nome Legal não registado"}
+                    </h2>
+                    <p className="text-sm font-medium text-brand-midnight/40 tracking-wide">
+                      @{client.display_name || "username_indisponivel"}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="grid flex-1 gap-y-8 gap-x-12 sm:grid-cols-2">
