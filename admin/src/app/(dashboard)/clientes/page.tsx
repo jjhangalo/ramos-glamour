@@ -53,9 +53,7 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
 
       {/* Filters Section */}
       <FadeUp delay={0.1}>
-        <div className="rounded-2xl border border-brand-midnight/5 bg-white p-6 shadow-sm">
-          <ClientFilters params={params} />
-        </div>
+        <ClientFilters params={params} />
       </FadeUp>
 
       {/* Results Count */}

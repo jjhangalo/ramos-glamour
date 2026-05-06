@@ -59,39 +59,34 @@ export async function getClients(filters: ClientFilters = {}) {
   // Date Filters
   if (filters.date) {
     const startOfDay = new Date(filters.date);
-    startOfDay.setHours(0, 0, 0, 0);
+    startOfDay.setUTCHours(0, 0, 0, 0);
     const endOfDay = new Date(filters.date);
-    endOfDay.setHours(23, 59, 59, 999);
+    endOfDay.setUTCHours(23, 59, 59, 999);
     
     query = query
       .gte("created_at", startOfDay.toISOString())
       .lte("created_at", endOfDay.toISOString());
   } else {
     if (filters.dateFrom) {
-      query = query.gte("created_at", new Date(filters.dateFrom).toISOString());
+      const start = new Date(filters.dateFrom);
+      start.setUTCHours(0, 0, 0, 0);
+      query = query.gte("created_at", start.toISOString());
     }
     if (filters.dateTo) {
-      const endTo = new Date(filters.dateTo);
-      endTo.setHours(23, 59, 59, 999);
-      query = query.lte("created_at", endTo.toISOString());
+      const end = new Date(filters.dateTo);
+      end.setUTCHours(23, 59, 59, 999);
+      query = query.lte("created_at", end.toISOString());
     }
   }
 
-  // Search Logic (Initial DB filter)
-  if (filters.search) {
-    const s = `%${filters.search}%`;
-    query = query.or(
-      `full_name.ilike.${s},display_name.ilike.${s},admin_notes.ilike.${s},phone.ilike.${s},whatsapp.ilike.${s}`
-    );
-  }
-
-  // Apply Pagination Range (only if no client-side search is needed)
-  // NOTE: If we search by email (which is not in profiles), we MUST fetch all profiles that match the rest, 
-  // then filter by email client-side, then paginate. This is a limitation of the current split auth/profile schema.
-  const needsClientSideFilter = !!filters.search;
-  
-  if (!needsClientSideFilter) {
+  // Search Logic (DB optimization)
+  // If we have a search term, we fetch a larger batch and filter in memory 
+  // because emails are not in the profiles table.
+  if (!filters.search) {
     query = query.range(from, to);
+  } else {
+    // If searching, we fetch more to allow client-side filtering to have enough data
+    query = query.limit(500); 
   }
 
   const { data, error, count } = await query;
@@ -108,7 +103,7 @@ export async function getClients(filters: ClientFilters = {}) {
 
   let totalCount = count ?? 0;
 
-  // Client-side search for email & other fields (to ensure consistency after manual email join)
+  // Search filter (email & other fields)
   if (filters.search) {
     const normalizedSearch = filters.search.toLowerCase();
     clients = clients.filter((client) =>
@@ -127,7 +122,7 @@ export async function getClients(filters: ClientFilters = {}) {
     // Update total count after manual filter
     totalCount = clients.length;
     
-    // Manual pagination if we filtered client-side
+    // Manual pagination after search filter
     clients = clients.slice(from, to + 1);
   }
 

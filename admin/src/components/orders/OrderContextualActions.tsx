@@ -36,8 +36,7 @@ export function OrderContextualActions({
   }
 
   // Primary Action Mapping
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const actions: Record<string, { label: string; icon: any; target: OrderRecord["status"]; color: string }> = {
+  const primaryActions: Record<string, { label: string; icon: any; target: OrderRecord["status"]; color: string }> = {
     pending: {
       label: "Confirmar Encomenda",
       icon: CheckCircle,
@@ -48,7 +47,7 @@ export function OrderContextualActions({
       label: "Despachar para Entrega",
       icon: Truck,
       target: "out_for_delivery",
-      color: "bg-brand-midnight hover:bg-brand-midnight/90 text-white",
+      color: "bg-brand-gold hover:bg-brand-gold/90 text-brand-midnight",
     },
     out_for_delivery: {
       label: "Marcar como Entregue",
@@ -58,16 +57,32 @@ export function OrderContextualActions({
     },
   };
 
-  const primaryAction = actions[status];
+  const primaryAction = primaryActions[status];
+
+  // Secondary/Alternative Actions
+  const allStatuses: OrderRecord["status"][] = [
+    "pending",
+    "confirmed",
+    "out_for_delivery",
+    "delivered",
+    "cancelled",
+    "refused",
+  ];
+
+  const secondaryActions = allStatuses.filter(s => 
+    s !== status && // Not current
+    s !== primaryAction?.target && // Not the primary next step
+    !terminalStates.includes(status) // Not if already terminal
+  );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="space-y-6">
       {primaryAction && (
         <button
           disabled={isPending}
           onClick={() => handleUpdate(primaryAction.target)}
           className={cn(
-            "flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-sm font-bold transition-all active:scale-[0.98] disabled:opacity-50",
+            "flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-sm font-bold shadow-lg shadow-brand-midnight/5 transition-all active:scale-[0.98] disabled:opacity-50",
             primaryAction.color
           )}
         >
@@ -76,28 +91,33 @@ export function OrderContextualActions({
         </button>
       )}
 
-      <div className="flex gap-2">
-        {(status === "pending" || status === "confirmed") && (
-          <button
-            disabled={isPending}
-            onClick={() => handleUpdate("cancelled")}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-brand-midnight/5 bg-white px-4 py-3 text-xs font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
-          >
-            <Ban className="h-4 w-4" />
-            Cancelar
-          </button>
-        )}
-
-        {status === "out_for_delivery" && (
-          <button
-            disabled={isPending}
-            onClick={() => handleUpdate("refused")}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-brand-midnight/5 bg-white px-4 py-3 text-xs font-bold text-amber-600 transition hover:bg-amber-50 disabled:opacity-50"
-          >
-            <XCircle className="h-4 w-4" />
-            Recusada
-          </button>
-        )}
+      <div className="grid grid-cols-2 gap-2">
+        {secondaryActions.map((s) => {
+          const isDestructive = s === "cancelled" || s === "refused";
+          return (
+            <button
+              key={s}
+              disabled={isPending}
+              onClick={() => handleUpdate(s)}
+              className={cn(
+                "flex items-center justify-center gap-2 rounded-xl border border-brand-midnight/5 bg-white px-3 py-3 text-[10px] font-bold uppercase tracking-wider transition-all hover:bg-brand-bg disabled:opacity-50",
+                isDestructive ? "text-red-600 hover:bg-red-50" : "text-brand-midnight/60"
+              )}
+            >
+              {s === "cancelled" && <Ban className="h-3 w-3" />}
+              {s === "refused" && <XCircle className="h-3 w-3" />}
+              {s === "confirmed" && <CheckCircle className="h-3 w-3" />}
+              {s === "out_for_delivery" && <Truck className="h-3 w-3" />}
+              {s === "delivered" && <Package className="h-3 w-3" />}
+              {s === "pending" && <Package className="h-3 w-3" />}
+              {s === "pending" ? "Mover para Pendente" : 
+               s === "confirmed" ? "Confirmar" :
+               s === "out_for_delivery" ? "Em Entrega" :
+               s === "delivered" ? "Entregue" :
+               s === "cancelled" ? "Cancelar" : "Recusar"}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

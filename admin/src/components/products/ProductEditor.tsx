@@ -10,6 +10,7 @@ import {
   ChevronRight,
   RefreshCcw,
   Images,
+  ArrowLeft,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { StickySaveBar } from "@/components/ui/StickySaveBar";
@@ -19,6 +20,7 @@ import { useMemo, useState, useTransition, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import {
   DndContext,
   closestCenter,
@@ -127,7 +129,6 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
 
   // Helper for error toasts
   const showErrorToast = (rawError: string, retryAction?: () => void) => {
-    // Basic error categorization for user-friendliness
     let friendlyMessage = "Ocorreu um erro ao processar o seu pedido.";
     let errorCode = "ERR_GENERIC";
 
@@ -175,7 +176,6 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
 
   // Form
   const productForm = useForm<ProductFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(productSchema) as any,
     defaultValues: {
       name: product?.name ?? "",
@@ -197,7 +197,6 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
   const isPromoDirty = promoPrice !== (initialPromotion?.is_active ? initialPromotion.promo_price.toString() : "");
   const isDirty = isFormDirty || isImagesDirty || isPromoDirty;
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const isActive = productForm.watch("is_active");
 
   // Submit
@@ -239,6 +238,10 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
         duration: 3000,
         position: isDesktop ? "top-right" : "top-center"
       });
+
+      // Reset form state to clear isDirty and sync with new values
+      productForm.reset(values);
+
       if (!product && pid) { 
         router.push(`/produtos/${pid}`); 
       }
@@ -279,16 +282,26 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
     <PageCanvas size="form" className="pb-40 pt-8">
       {/* Header */}
       <FadeUp>
-        <div className="flex items-center justify-between pb-6">
-          <div>
-            <h1 className="heading-luxury text-4xl font-light text-brand-midnight">{product ? "Editar Produto" : "Novo Produto"}</h1>
-            <p className="text-sm text-brand-midnight/50">Gere os detalhes e visibilidade do teu produto.</p>
+        <div className="flex flex-col gap-4 pb-8">
+          <Link
+            href="/produtos"
+            className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40 transition hover:text-brand-midnight"
+          >
+            <ArrowLeft className="h-3 w-3 transition-transform group-hover:-translate-x-1" />
+            Voltar para a lista
+          </Link>
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="heading-luxury text-4xl font-light text-brand-midnight">{product ? "Editar Produto" : "Novo Produto"}</h1>
+              <p className="text-sm text-brand-midnight/50">Gere os detalhes e visibilidade do teu produto.</p>
+            </div>
+            {product && (
+              <button onClick={() => setIsDeleteConfirmOpen(true)} className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-midnight/10 bg-white text-red-500 shadow-sm transition hover:bg-red-50 hover:text-red-600">
+                <Trash2 className="h-5 w-5" />
+              </button>
+            )}
           </div>
-          {product && (
-            <button onClick={() => setIsDeleteConfirmOpen(true)} className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-midnight/10 bg-white text-red-500 shadow-sm transition hover:bg-red-50 hover:text-red-600">
-              <Trash2 className="h-5 w-5" />
-            </button>
-          )}
         </div>
       </FadeUp>
 
@@ -574,11 +587,9 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
         )}
       </AnimatePresence>
 
-      {/* Save Bar — monitors both tabs */}
       <StickySaveBar
         isDirty={isDirty}
         isSaving={isPending}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onSave={productForm.handleSubmit(onProductSubmit as any)}
         onReset={() => {
           productForm.reset();
@@ -587,12 +598,10 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
         }}
       />
 
-      {/* Mobile variant drawer */}
       {product && (
         <VariantEditor productId={product.id} variant={activeVariant} isOpen={isVariantEditorOpen} onClose={() => setIsVariantEditorOpen(false)} />
       )}
 
-      {/* Delete dialog */}
       <ConfirmDialog
         open={isDeleteConfirmOpen}
         onOpenChange={setIsDeleteConfirmOpen}

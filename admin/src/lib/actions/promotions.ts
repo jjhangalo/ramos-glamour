@@ -46,10 +46,10 @@ export async function getPromotedProducts(
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  const { data, error, count } = await supabase
+    const { data, error, count } = await supabase
     .from("promotions")
     .select(
-      "id, product_id, promo_price, is_active, ends_at, created_at, updated_at, products(id, name, price, product_images(url, position))",
+      "id, product_id, variant_id, promo_price, is_active, ends_at, created_at, updated_at, products(id, name, price, product_images(url, position)), product_variants(id, size, color, price_override)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -60,10 +60,10 @@ export async function getPromotedProducts(
   }
 
   const rawData = data || [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const promotions = rawData.map((promo: any) => ({
     ...promo,
     products: Array.isArray(promo.products) ? promo.products[0] : promo.products || null,
+    product_variants: Array.isArray(promo.product_variants) ? promo.product_variants[0] : promo.product_variants || null,
   })) as PromotionRecord[];
 
   return { promotions, count: count ?? 0 };
@@ -179,18 +179,24 @@ export async function getPromotionByProductId(productId: string): Promise<Promot
 export async function upsertPromotion(input: PromotionInput) {
   const supabase = createAdminClient();
   
-  const { data: existing } = await supabase
+  let query = supabase
     .from("promotions")
     .select("id")
-    .eq("product_id", input.product_id)
-    .maybeSingle();
+    .eq("product_id", input.product_id);
+
+  if (input.variant_id) {
+    query = query.eq("variant_id", input.variant_id);
+  } else {
+    query = query.is("variant_id", null);
+  }
+
+  const { data: existing } = await query.maybeSingle();
 
   if (existing) {
     const { error } = await supabase
       .from("promotions")
       .update({
-        variant_id: input.variant_id ?? null,
-      promo_price: input.promo_price,
+        promo_price: input.promo_price,
         is_active: true,
       })
       .eq("id", existing.id);

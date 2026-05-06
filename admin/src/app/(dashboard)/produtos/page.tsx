@@ -81,9 +81,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
       {products.length ? (
         <StaggerContainer>
-          <div className="rounded-xl border border-brand-midnight/5 bg-white shadow-sm overflow-hidden">
+          <div className="rounded-xl border border-brand-midnight/5 bg-white shadow-sm overflow-visible">
             {/* Desktop Table */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto overflow-y-visible">
               <table className="min-w-full text-left text-sm">
                 <thead className="bg-brand-bg/30 text-[11px] font-bold uppercase tracking-[0.15em] text-brand-midnight/40">
                   <tr className="border-b border-brand-midnight/5">
@@ -96,12 +96,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     <th className="px-5 py-3 text-right font-semibold">Acções</th>
                   </tr>
                 </thead>
-                <StaggerContainer as="tbody" className="divide-y divide-slate-100">
+                <StaggerContainer as="tbody" className="divide-y divide-brand-midnight/5">
                   {products.map((product) => (
                     <StaggerItem
                       as="tr"
                       key={product.id} 
-                      className="group hover:bg-slate-50/50"
+                      className="group hover:bg-brand-bg/30"
                     >
                       <td className="px-5 py-4">
                         <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-brand-bg/50 border border-brand-midnight/5 shadow-sm transition-transform group-hover:scale-105">

@@ -48,28 +48,30 @@ export default async function OrderDetailPage({
   return (
     <PageCanvas size="list" className="space-y-12 py-12 pb-32 overflow-x-hidden">
       {/* Header & Back Button */}
-      <FadeUp className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-6">
-          <Link
-            href="/encomendas"
-            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-brand-midnight/5 bg-white shadow-sm transition-all hover:bg-brand-bg/50 active:scale-95"
-          >
-            <ArrowLeft className="h-5 w-5 text-brand-midnight" />
-          </Link>
-          <div>
+      <FadeUp className="flex flex-col gap-6">
+        <Link
+          href="/encomendas"
+          className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40 transition hover:text-brand-midnight"
+        >
+          <ArrowLeft className="h-3 w-3 transition-transform group-hover:-translate-x-1" />
+          Voltar para a lista
+        </Link>
+        
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-midnight/30">
               Operações de Venda
             </p>
-            <h1 className="heading-luxury mt-1 text-4xl font-light text-brand-midnight">
+            <h1 className="heading-luxury text-4xl font-light text-brand-midnight">
               Gestão de Encomenda
             </h1>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-brand-midnight/20">
-            #{shortId(order.id)}
-          </span>
-          <StatusBadge status={order.status} />
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-brand-midnight/20">
+              #{shortId(order.id)}
+            </span>
+            <StatusBadge status={order.status} />
+          </div>
         </div>
       </FadeUp>
 
