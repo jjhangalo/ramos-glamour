@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Mail, Phone, MessageCircle } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/format";
 import { getClients } from "@/lib/actions/clients";
@@ -105,22 +106,37 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
                     </p>
                   </div>
 
-                  <div className="space-y-2 border-t border-brand-midnight/5 pt-4">
+                  <div className="space-y-3 border-t border-brand-midnight/5 pt-4">
+                    {/* Email */}
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/50 text-brand-midnight/40">
-                        <span className="text-[10px] font-bold">@</span>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/20 text-brand-midnight/40">
+                        <Mail className="h-3.5 w-3.5" />
                       </div>
-                      <span className="text-sm font-medium text-brand-midnight/70 truncate">
+                      <span className="text-xs font-medium text-brand-midnight/70 truncate">
                         {client.email || "Sem email"}
                       </span>
                     </div>
+
+                    {/* Phone */}
                     {client.phone && (
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/50 text-brand-midnight/40 text-[10px]">
-                          ☏
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/20 text-brand-midnight/40">
+                          <Phone className="h-3.5 w-3.5" />
                         </div>
-                        <span className="text-sm font-medium text-brand-midnight/70">
+                        <span className="text-xs font-medium text-brand-midnight/70">
                           {client.phone}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* WhatsApp */}
+                    {client.whatsapp && (
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-bg/20 text-brand-midnight/40">
+                          <MessageCircle className="h-3.5 w-3.5" />
+                        </div>
+                        <span className="text-xs font-medium text-brand-midnight/70">
+                          {client.whatsapp}
                         </span>
                       </div>
                     )}
@@ -131,8 +147,8 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
                 <div className="mt-8 flex items-center justify-between border-t border-brand-midnight/5 pt-4">
                   <span className={cn(
                     "inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest",
-                    client.is_active 
-                      ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
+                    client.is_active
+                      ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
                       : "bg-brand-midnight/5 text-brand-midnight/30 border border-brand-midnight/5"
                   )}>
                     {client.is_active ? "Activo" : "Inactivo"}

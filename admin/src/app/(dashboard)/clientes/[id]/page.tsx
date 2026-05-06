@@ -56,8 +56,8 @@ export default async function ClientDetailPage({
           {/* Main Profile Card */}
           <FadeUp delay={0.1}>
             <article className="rounded-[2.5rem] border border-brand-midnight/5 bg-white p-8 md:p-10 shadow-sm overflow-hidden">
-              <div className="flex flex-col gap-10 md:flex-row md:items-start">
-                <div className="flex flex-col gap-8 sm:flex-row sm:items-center">
+              <div className="flex flex-col gap-10 md:flex-col md:items-start">
+                <div className="flex flex-row gap-8 sm:flex-row sm:items-center">
                   <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-[2rem] border border-brand-midnight/5 bg-brand-bg/50 shadow-inner transition-transform hover:scale-105">
                     {client.avatar_url ? (
                       <Image
@@ -72,11 +72,12 @@ export default async function ClientDetailPage({
                       </div>
                     )}
                   </div>
+
                   <div className="space-y-1">
-                    <h2 className="text-2xl font-bold text-brand-midnight leading-tight">
-                      {client.full_name || "Nome Legal não registado"}
+                    <h2 className="text-xl font-bold text-brand-midnight leading-tight">
+                      {client.full_name || client.display_name || "Cliente sem nome"}
                     </h2>
-                    <p className="text-sm font-medium text-brand-midnight/40 tracking-wide">
+                    <p className="text-xs font-medium text-brand-midnight/40 tracking-wide">
                       @{client.display_name || "username_indisponivel"}
                     </p>
                   </div>
@@ -125,8 +126,8 @@ export default async function ClientDetailPage({
                     </p>
                     <span className={cn(
                       "inline-flex rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest",
-                      client.is_active 
-                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
+                      client.is_active
+                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
                         : "bg-brand-midnight/5 text-brand-midnight/20 border border-brand-midnight/5"
                     )}>
                       {client.is_active ? "Perfil Ativo" : "Perfil Inativo"}
