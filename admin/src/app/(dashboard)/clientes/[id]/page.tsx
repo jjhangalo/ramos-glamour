@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Mail, Phone, Calendar, Hash, MapPin, ShoppingBag, ChevronRight } from "lucide-react";
 
 import { AdminNotesCard } from "@/components/clients/AdminNotesCard";
+import { PromotionGovernanceCard } from "@/components/clients/PromotionGovernanceCard";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PageCanvas } from "@/components/ui/page-canvas";
 import { cn } from "@/lib/utils";
 import { formatDate, formatPrice, shortId } from "@/lib/format";
 import { getClient } from "@/lib/actions/clients";
+import { createClient } from "@/lib/supabase/server";
 import { FadeUp, StaggerContainer, StaggerItem } from "@/components/shared/Animations";
 
 type ClientDetailPageProps = {
@@ -21,12 +23,16 @@ export default async function ClientDetailPage({
   params,
 }: ClientDetailPageProps) {
   const { id } = await params;
-  const data = await getClient(id).catch(() => null);
+  const [data, supabase] = await Promise.all([
+    getClient(id).catch(() => null),
+    createClient()
+  ]);
 
   if (!data) {
     notFound();
   }
 
+  const { data: { user } } = await supabase.auth.getUser();
   const { client, addresses, orders } = data;
 
   return (
@@ -137,6 +143,9 @@ export default async function ClientDetailPage({
               </div>
             </article>
           </FadeUp>
+
+          {/* Governance Section */}
+          <PromotionGovernanceCard client={client} currentUserId={user?.id} />
 
           {/* Addresses Section */}
           <section className="space-y-6">

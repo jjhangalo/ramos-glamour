@@ -139,9 +139,158 @@ export async function getClients(filters: ClientFilters = {}) {
   };
 }
 
+export async function requestPromotion(candidateId: string) {
+  const supabase = createAdminClient();
+  const serverClient = await (await import("@/lib/supabase/server")).createClient();
+  const { data: { user } } = await serverClient.auth.getUser();
+
+  if (!user) throw new Error("Não autorizado");
+
+  // Verificar se já existe um pedido pendente
+  const { data: existing } = await supabase
+    .from("promotion_requests")
+    .select("id")
+    .eq("candidate_id", candidateId)
+    .eq("status", "pending")
+    .single();
+
+  if (existing) throw new Error("Já existe um pedido de promoção pendente para este cliente");
+
+  const { error } = await supabase
+    .from("promotion_requests")
+    .insert({
+      candidate_id: candidateId,
+      requester_id: user.id,
+      status: "pending"
+    });
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/clientes/${candidateId}`);
+  revalidatePath("/administradores");
+  return { success: true };
+}
+
+export async function submitPromotionVote(requestId: string, decision: "approve" | "reject") {
+  const supabase = createAdminClient();
+  const serverClient = await (await import("@/lib/supabase/server")).createClient();
+  const { data: { user } } = await serverClient.auth.getUser();
+
+  if (!user) throw new Error("Não autorizado");
+
+  // 1. Registar o voto
+  const { error: voteError } = await supabase
+    .from("promotion_votes")
+    .insert({
+      request_id: requestId,
+      voter_id: user.id,
+      decision
+    });
+
+  if (voteError) throw new Error("Erro ao registar voto ou já votou neste pedido");
+
+  // 2. Se for rejeição, encerrar o pedido imediatamente
+  if (decision === "reject") {
+    await supabase
+      .from("promotion_requests")
+      .update({ status: "rejected" })
+      .eq("id", requestId);
+  } else {
+    // 3. Se for aprovação, verificar se todos os admins votaram 'approve'
+    const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin");
+    const { data: votes } = await supabase.from("promotion_votes").select("voter_id").eq("request_id", requestId).eq("decision", "approve");
+
+    if (admins && votes && votes.length === admins.length) {
+      // Unanimidade alcançada!
+      const { data: request } = await supabase
+        .from("promotion_requests")
+        .select("candidate_id")
+        .eq("id", requestId)
+        .single();
+
+      if (request) {
+        // Atualizar estado do pedido
+        await supabase
+          .from("promotion_requests")
+          .update({ status: "approved" })
+          .eq("id", requestId);
+
+        // Promover o utilizador
+        await supabase
+          .from("profiles")
+          .update({ role: "admin" })
+          .eq("id", request.candidate_id);
+      }
+    }
+  }
+
+  revalidatePath("/administradores");
+  revalidatePath("/clientes");
+  return { success: true };
+}
+
+export async function getAllPendingPromotions() {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("promotion_requests")
+    .select(`
+      *,
+      candidate:profiles!candidate_id(full_name, display_name, avatar_url, email),
+      requester:profiles!requester_id(full_name, display_name),
+      votes:promotion_votes(
+        *,
+        voter:profiles!voter_id(full_name, display_name)
+      )
+    `)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) return [];
+  
+  // Note: email is in profiles but getClients handles manual email join. 
+  // For simplicity here, we'll assume the email is available or fetched if needed.
+  // Actually, profiles table does NOT have email. I need to join with emailMap.
+  
+  const emailMap = await getEmailMap();
+  return (data || []).map(req => ({
+    ...req,
+    candidate: {
+      ...req.candidate,
+      email: emailMap.get(req.candidate_id) || null
+    }
+  }));
+}
+
+export async function getPromotionStatus(candidateId: string) {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("promotion_requests")
+    .select(`
+      *,
+      requester:profiles!requester_id(full_name, display_name),
+      votes:promotion_votes(
+        *,
+        voter:profiles!voter_id(full_name, display_name)
+      )
+    `)
+    .eq("candidate_id", candidateId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) return null;
+  return data;
+}
+
 export async function getClient(id: string) {
   const supabase = createAdminClient();
-  const [{ data: profile, error: profileError }, { data: addresses, error: addressesError }, { data: orders, error: ordersError }, { data: userData, error: userError }] = await Promise.all([
+  const [
+    { data: profile, error: profileError }, 
+    { data: addresses, error: addressesError }, 
+    { data: orders, error: ordersError }, 
+    { data: userData, error: userError },
+    promotionRequest
+  ] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", id).single(),
     supabase.from("addresses").select("*").eq("user_id", id).order("created_at", { ascending: false }),
     supabase
@@ -150,6 +299,7 @@ export async function getClient(id: string) {
       .eq("user_id", id)
       .order("created_at", { ascending: false }),
     supabase.auth.admin.getUserById(id),
+    getPromotionStatus(id)
   ]);
 
   if (profileError) {
@@ -172,6 +322,7 @@ export async function getClient(id: string) {
     client: {
       ...(profile as ClientRecord),
       email: userData.user.email ?? null,
+      promotion_request: promotionRequest
     },
     addresses: (addresses ?? []) as AddressRecord[],
     orders: (orders ?? []).map((order: unknown) => {
