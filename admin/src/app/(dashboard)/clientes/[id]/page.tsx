@@ -44,7 +44,7 @@ export default async function ClientDetailPage({
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-midnight/30">
               Perfil do Cliente
             </p>
-            <h1 className="mt-1 text-3xl font-bold text-brand-midnight">
+            <h1 className="heading-luxury mt-1 text-4xl font-light text-brand-midnight">
               Gestão de Cliente
             </h1>
           </div>
@@ -74,10 +74,10 @@ export default async function ClientDetailPage({
                   </div>
 
                   <div className="space-y-1">
-                    <h2 className="text-xl font-bold text-brand-midnight leading-tight">
+                    <h2 className="heading-luxury text-3xl font-medium text-brand-midnight leading-tight">
                       {client.full_name || client.display_name || "Cliente sem nome"}
                     </h2>
-                    <p className="text-xs font-medium text-brand-midnight/40 tracking-wide">
+                    <p className="text-sm font-medium text-brand-midnight/40 tracking-wide">
                       @{client.display_name || "username_indisponivel"}
                     </p>
                   </div>
