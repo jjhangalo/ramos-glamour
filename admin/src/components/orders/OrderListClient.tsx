@@ -260,5 +260,3 @@ export function OrderListClient({ initialOrders }: OrderListClientProps) {
   );
 }
 
-// Reexport icons used in bulk bar for it to use the brand style
-export { CheckCircle2, Truck, Ban, Loader2, Info };
