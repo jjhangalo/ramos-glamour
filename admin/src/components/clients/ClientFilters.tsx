@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Filter, RotateCcw } from "lucide-react";
+import { Search, RotateCcw } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import {
@@ -256,10 +256,10 @@ export function ClientFilters({ params }: ClientFiltersProps) {
                 <Button
                   type="button"
                   variant={hasFilters ? "default" : "outline"}
-                  size="icon"
-                  className="rounded-full h-11 w-11 shadow-sm border-brand-midnight/5"
+                  className="flex h-11 items-center gap-3 rounded-full px-6 shadow-sm border-brand-midnight/5"
                 >
-                  <Filter className="h-4 w-4" />
+                  <Search className="h-4 w-4" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Pesquisa & Filtros</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80" align="start">

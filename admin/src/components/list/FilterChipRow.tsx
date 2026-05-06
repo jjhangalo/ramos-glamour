@@ -1,6 +1,6 @@
 "use client";
 
-import { Filter, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type FilterChip = {
@@ -36,11 +36,12 @@ export function FilterChipRow({
           <button
             onClick={onOpenSheet}
             className={cn(
-              "flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50",
+              "flex h-11 items-center gap-3 rounded-full border border-slate-200 bg-white px-6 text-slate-600 shadow-sm transition hover:bg-slate-50",
               hasFilters && "border-slate-900 bg-slate-900 text-white"
             )}
           >
-            <Filter className="h-4 w-4" />
+            <Search className="h-4 w-4" />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Pesquisa & Filtros</span>
           </button>
         )}
       </div>

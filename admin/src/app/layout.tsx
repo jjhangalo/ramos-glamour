@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import { AppToaster } from "@/components/shared/AppToaster";
 
@@ -20,9 +20,25 @@ const outfit = Outfit({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#0c0c0c",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: "Ramos Glamour | Administração",
   description: "Painel administrativo Ramos Glamour",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "RG Admin",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
@@ -38,17 +54,8 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <head>
-        <meta name="apple-mobile-web-app-title" content="Ramos Glamour | Administração" />
-        <script dangerouslySetInnerHTML={{ __html: `
-          // Unregister any service workers that might be lingering from other local apps (like the store)
-          if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-              for (let registration of registrations) {
-                registration.unregister();
-              }
-            });
-          }
-        ` }} />
+        <meta charSet="utf-8" />
+        <meta name="apple-mobile-web-app-title" content="RG Admin" />
       </head>
       <body className="min-h-full bg-brand-bg font-sans text-brand-midnight">
         {children}

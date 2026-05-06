@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Filter, Check } from "lucide-react";
+import { Search, Check } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -51,7 +51,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
 
   // Unique key to reset draft state when opening or when URL changes externally
   const filtersKey = `${isOpen}-${searchParams.toString()}`;
-  
+
   // Sync draft state when filtersKey changes (e.g. when opening the sheet/popover or URL changes)
   const [prevKey, setPrevKey] = useState(filtersKey);
   if (filtersKey !== prevKey) {
@@ -80,7 +80,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
   const handleApply = (e?: React.FormEvent) => {
     e?.preventDefault();
     const params = new URLSearchParams();
-    
+
     if (draft.estado && draft.estado !== "all") params.set("estado", draft.estado);
     if (draft.destaque && draft.destaque !== "all") params.set("destaque", draft.destaque);
     if (draft.pesquisa) params.set("pesquisa", draft.pesquisa);
@@ -188,8 +188,8 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
                 onClick={() => toggleCategory(category.id)}
                 className={cn(
                   "flex items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-medium transition cursor-pointer",
-                  isSelected 
-                    ? "border-brand-midnight bg-brand-midnight text-brand-white" 
+                  isSelected
+                    ? "border-brand-midnight bg-brand-midnight text-brand-white"
                     : "border-brand-midnight/5 bg-brand-bg/50 text-brand-midnight/60 hover:border-brand-midnight/10"
                 )}
               >
@@ -244,10 +244,10 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
                 <Button
                   type="button"
                   variant={hasFilters ? "default" : "outline"}
-                  size="icon"
-                  className="rounded-full"
+                  className="flex h-11 items-center gap-3 rounded-full px-6 shadow-sm border-brand-midnight/5"
                 >
-                  <Filter className="h-4 w-4" />
+                  <Search className="h-4 w-4" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Pesquisa & Filtros</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80" align="end">
