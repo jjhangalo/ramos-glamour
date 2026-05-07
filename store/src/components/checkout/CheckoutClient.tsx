@@ -82,7 +82,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
     if (items.length > 0) {
       trackBeginCheckout(items, totalPrice);
     }
-  }, []); // Run once on mount
+  }, [items, totalPrice]); // Run when items or total price change (usually once on mount)
 
   if (items.length === 0) {
     return (

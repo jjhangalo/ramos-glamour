@@ -2,19 +2,28 @@
 
 declare global {
   interface Window {
-    gtag: (...args: any[]) => void;
-    dataLayer: any[];
+    gtag: (...args: unknown[]) => void;
+    dataLayer: unknown[];
   }
 }
 
 export const GA_TRACKING_ID = "G-G98TS5PDM3";
 
 // Core tracking function
-export const trackEvent = (eventName: string, params?: Record<string, any>) => {
+export const trackEvent = (eventName: string, params?: Record<string, unknown>) => {
   if (typeof window !== "undefined" && window.gtag) {
     window.gtag("event", eventName, params);
   }
 };
+
+interface AnalyticsItem {
+  item_id: string;
+  item_name: string;
+  item_category?: string;
+  item_variant?: string;
+  price: number;
+  quantity: number;
+}
 
 // E-commerce specific events
 export const trackViewItem = (item: {
@@ -35,7 +44,7 @@ export const trackViewItem = (item: {
         item_variant: item.variant,
         price: item.price,
         quantity: 1,
-      },
+      } as AnalyticsItem,
     ],
   });
 };
@@ -58,12 +67,12 @@ export const trackAddToCart = (item: {
         item_variant: item.variant,
         price: item.price,
         quantity: quantity,
-      },
+      } as AnalyticsItem,
     ],
   });
 };
 
-export const trackBeginCheckout = (items: any[], total: number) => {
+export const trackBeginCheckout = (items: { id: string; name: string; category?: string; variant?: string; price: number; quantity: number }[], total: number) => {
   trackEvent("begin_checkout", {
     currency: "AOA",
     value: total,
@@ -74,14 +83,14 @@ export const trackBeginCheckout = (items: any[], total: number) => {
       item_variant: item.variant,
       price: item.price,
       quantity: item.quantity,
-    })),
+    } as AnalyticsItem)),
   });
 };
 
 export const trackPurchase = (order: {
   id: string;
   total: number;
-  items: any[];
+  items: { id: string; name: string; category?: string; variant?: string; price: number; quantity: number }[];
 }) => {
   trackEvent("purchase", {
     transaction_id: order.id,
@@ -94,6 +103,6 @@ export const trackPurchase = (order: {
       item_variant: item.variant,
       price: item.price,
       quantity: item.quantity,
-    })),
+    } as AnalyticsItem)),
   });
 };
