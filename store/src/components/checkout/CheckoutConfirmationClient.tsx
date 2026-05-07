@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 import Link from "next/link";
 
 import { CheckCircle2 } from "lucide-react";
 
 import { useCartStore } from "@/lib/store/cart";
+import { trackPurchase } from "@/lib/analytics";
 
 type CheckoutConfirmationClientProps = {
   whatsappUrl: string | null;
@@ -15,11 +17,28 @@ type CheckoutConfirmationClientProps = {
 export function CheckoutConfirmationClient({
   whatsappUrl,
 }: CheckoutConfirmationClientProps) {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get("order");
+  const items = useCartStore((state) => state.items);
+  const totalPrice = useCartStore((state) => state.totalPrice);
   const clearCart = useCartStore((state) => state.clearCart);
 
   useEffect(() => {
-    clearCart();
-  }, [clearCart]);
+    if (items.length > 0) {
+      trackPurchase({
+        id: orderId || "ORDER_" + Date.now(),
+        total: totalPrice,
+        items: items.map(item => ({
+          id: item.id,
+          name: item.displayName,
+          price: item.price,
+          quantity: item.quantity,
+          variant: `${item.variant?.size || ""}-${item.variant?.color || ""}`
+        })),
+      });
+      clearCart();
+    }
+  }, [items, totalPrice, clearCart, orderId]);
 
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">

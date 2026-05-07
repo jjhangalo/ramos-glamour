@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Star, User, ChevronRight } from "lucide-react";
@@ -9,6 +9,7 @@ import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ProductPrice } from "@/components/product/ProductPrice";
 import type { Product } from "@/lib/actions/products";
 import { cn } from "@/lib/utils";
+import { trackViewItem } from "@/lib/analytics";
 
 type ProductDetailViewProps = {
   product: Product;
@@ -17,6 +18,15 @@ type ProductDetailViewProps = {
 
 export function ProductDetailView({ product, promoPrice }: ProductDetailViewProps) {
   const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    trackViewItem({
+      id: product.id,
+      name: product.name,
+      price: promoPrice || product.promo_price || product.price,
+      category: product.categories?.[0]?.name,
+    });
+  }, [product, promoPrice]);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
