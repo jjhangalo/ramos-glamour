@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 
 import type { Product } from "@/lib/actions/products";
 import { useCartStore } from "@/lib/store/cart";
+import { trackAddToCart } from "@/lib/analytics";
 
 type AddToCartButtonProps = {
   product: Product;
@@ -42,6 +43,13 @@ export function AddToCartButton({
         event.stopPropagation();
         if (disabled) return;
         addItem(product, quantity, variant, variantImage);
+        trackAddToCart({
+          id: product.id,
+          name: product.name,
+          price: variant?.price_override || product.promo_price || product.price,
+          category: product.categories?.[0]?.name,
+          variant: variant ? `${variant.size || ""}-${variant.color || ""}` : undefined,
+        }, quantity);
         toast.success("Produto adicionado ao carrinho");
         onAdd?.();
       }}
