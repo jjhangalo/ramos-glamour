@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
+import Script from "next/script";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SplashScreen } from "@/components/layout/SplashScreen";
@@ -56,6 +57,19 @@ export default function RootLayout({
       <head>
         <meta charSet="utf-8" />
         <meta name="apple-mobile-web-app-title" content="Ramos Glamour" />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-G98TS5PDM3"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-G98TS5PDM3');
+          `}
+        </Script>
       </head>
       <body className="flex min-h-screen w-full flex-col overflow-x-hidden bg-brand-bg font-sans text-foreground">
         <SplashScreen />
