@@ -80,7 +80,16 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
 
   useEffect(() => {
     if (items.length > 0) {
-      trackBeginCheckout(items, totalPrice);
+      trackBeginCheckout(
+        items.map((item) => ({
+          id: item.id,
+          name: item.displayName,
+          price: item.price,
+          quantity: item.quantity,
+          variant: `${item.variantSize || ""}-${item.variantColor || ""}`,
+        })),
+        totalPrice
+      );
     }
   }, [items, totalPrice]); // Run when items or total price change (usually once on mount)
 

@@ -33,7 +33,7 @@ export function CheckoutConfirmationClient({
           name: item.displayName,
           price: item.price,
           quantity: item.quantity,
-          variant: `${item.variant?.size || ""}-${item.variant?.color || ""}`
+          variant: `${item.variantSize || ""}-${item.variantColor || ""}`
         })),
       });
       clearCart();
