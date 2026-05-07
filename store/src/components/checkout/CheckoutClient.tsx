@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { createOrder } from "@/lib/actions/orders";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils/format";
+import { trackBeginCheckout } from "@/lib/analytics";
 
 type StoredAddress = {
   id: string;
@@ -76,6 +77,21 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
   const [notes, setNotes] = useState("");
   const [manualAddress, setManualAddress] =
     useState<ManualAddress>(emptyManualAddress);
+
+  useEffect(() => {
+    if (items.length > 0) {
+      trackBeginCheckout(
+        items.map((item) => ({
+          id: item.id,
+          name: item.displayName,
+          price: item.price,
+          quantity: item.quantity,
+          variant: `${item.variantSize || ""}-${item.variantColor || ""}`,
+        })),
+        totalPrice
+      );
+    }
+  }, [items, totalPrice]); // Run when items or total price change (usually once on mount)
 
   if (items.length === 0) {
     return (
