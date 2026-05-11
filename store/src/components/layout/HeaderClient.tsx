@@ -4,11 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, User as UserIcon, LogOut } from "lucide-react";
+import { Menu, X, User as UserIcon, LogOut, Volume2, VolumeX } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { signOut, signInWithGoogle } from "@/lib/actions/auth";
 import { CartHeaderButton } from "@/components/cart/CartHeaderButton";
+import { useAudio } from "@/components/providers/AudioProvider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +28,7 @@ interface HeaderClientProps {
 }
 
 export function HeaderClient({ user }: HeaderClientProps) {
+  const { isMuted, toggleMute } = useAudio();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -242,6 +244,17 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   </button>
                 )}
               </div>
+
+              <button
+                onClick={toggleMute}
+                className={cn(
+                  "flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 focus:outline-none",
+                  useWhite ? "hover:bg-white/10 text-brand-white" : "hover:bg-brand-midnight/5 text-brand-midnight"
+                )}
+                aria-label={isMuted ? "Ativar som" : "Silenciar interface"}
+              >
+                {isMuted ? <VolumeX className="h-5 w-5" strokeWidth={1.5} /> : <Volume2 className="h-5 w-5" strokeWidth={1.5} />}
+              </button>
 
               <CartHeaderButton useWhite={useWhite} />
             </div>

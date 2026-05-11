@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import type { Product } from "@/lib/actions/products";
 import { useCartStore } from "@/lib/store/cart";
 import { trackAddToCart } from "@/lib/analytics";
+import { useUIFeedback } from "@/hooks/use-audio";
 
 type AddToCartButtonProps = {
   product: Product;
@@ -33,6 +34,7 @@ export function AddToCartButton({
   onAdd,
 }: AddToCartButtonProps) {
   const addItem = useCartStore((state) => state.addItem);
+  const { playSuccess } = useUIFeedback();
 
   return (
     <button
@@ -50,6 +52,7 @@ export function AddToCartButton({
           category: product.categories?.[0]?.name,
           variant: variant ? `${variant.size || ""}-${variant.color || ""}` : undefined,
         }, quantity);
+        playSuccess();
         toast.success("Produto adicionado ao carrinho");
         onAdd?.();
       }}

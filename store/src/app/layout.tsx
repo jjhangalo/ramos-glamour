@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { CartPreservedToast } from "@/components/auth/CartPreservedToast";
 import { ToastProvider } from "@/components/providers/ToastProvider";
+import { AudioProvider } from "@/components/providers/AudioProvider";
 import "./globals.css";
 
 const cormorantGaramond = Cormorant_Garamond({
@@ -72,14 +73,16 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="flex min-h-screen w-full flex-col overflow-x-hidden bg-brand-bg font-sans text-foreground">
-        <SplashScreen />
-        <CartPreservedToast />
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        <ToastProvider />
+        <AudioProvider>
+          <SplashScreen />
+          <CartPreservedToast />
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+          <ToastProvider />
+        </AudioProvider>
       </body>
     </html>
   );
