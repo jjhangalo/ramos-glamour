@@ -132,7 +132,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                 >
                   <Image
                     src={image.url}
-                    alt={`${product.name} - View ${index + 1}`}
+                    alt={`${product.name} - Vista ${index + 1}`}
                     fill
                     className="object-cover"
                     priority={index === 0}
@@ -162,7 +162,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
         <div className="lg:sticky lg:top-32 space-y-10">
           <div className="space-y-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-gold">
-              {product.categories?.[0]?.name ?? "COLEÇÃO EXCLUSIVA"}
+              {product.categories?.[0]?.name ?? "COLECÇÃO EXCLUSIVA"}
             </p>
             <h1 className="heading-luxury text-4xl font-light md:text-6xl">
               {product.name}
@@ -267,7 +267,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
               {currentStock > 0 ? (
                 <p className="text-[10px] font-bold text-green-600 tracking-widest">EM STOCK</p>
               ) : (
-                <p className="text-[10px] font-bold text-red-600 tracking-widest">SEM STOCK</p>
+                <p className="text-[10px] font-bold text-red-600 tracking-widest">ESGOTADO</p>
               )}
             </div>
 
@@ -300,16 +300,16 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                 <Plus className="h-4 w-4 transition-transform group-open:rotate-45" />
               </summary>
               <div className="pb-6 text-xs leading-relaxed text-brand-midnight/50 px-2">
-                Peça exclusiva da coleção Ramos Glamour, desenhada com foco em elegância e sofisticação. Materiais de alta qualidade selecionados para garantir durabilidade e conforto.
+                Peça exclusiva da colecção Ramos Glamour, desenhada com foco na elegância e sofisticação. Materiais de alta qualidade seleccionados para garantir durabilidade e conforto.
               </div>
             </details>
             <details className="group border-t border-brand-midnight/5">
               <summary className="flex cursor-pointer items-center justify-between list-none py-6 text-[10px] font-bold tracking-[0.2em] text-brand-midnight/60 hover:text-brand-midnight transition-colors touch-manipulation">
-                ENVIO & DEVOLUÇÕES
+                ENVIOS & DEVOLUÇÕES
                 <Plus className="h-4 w-4 transition-transform group-open:rotate-45" />
               </summary>
               <div className="pb-6 text-xs leading-relaxed text-brand-midnight/50 px-2">
-                Envios para todo o país. Entrega estimada entre 2 a 5 dias úteis. Devoluções gratuitas num prazo de 14 dias após a recepção do produto.
+                Envios para todo o território nacional. Tempo estimado de entrega entre 2 a 5 dias úteis. Devoluções gratuitas num prazo de 14 dias após a recepção do produto.
               </div>
             </details>
           </div>
@@ -337,7 +337,7 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                     ))}
                   </div>
                   <span className="text-[9px] font-bold tracking-widest text-brand-midnight/30">
-                    {new Date(review.created_at).toLocaleDateString("pt-PT")}
+                    {new Date(review.created_at).toLocaleDateString("pt-AO")}
                   </span>
                 </div>
                 <p className="text-sm italic leading-relaxed text-brand-midnight/70">&quot;{review.comment}&quot;</p>

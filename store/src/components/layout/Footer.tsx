@@ -5,9 +5,9 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   const shopLinks = [
-    { href: "/catalogo", label: "Coleções" },
+    { href: "/catalogo", label: "Colecções" },
     { href: "/novidades", label: "Novidades" },
-    { href: "/catalogo?promo=true", label: "Ofertas" },
+    { href: "/catalogo?promo=true", label: "Promoções" },
   ];
 
   const brandLinks = [
@@ -34,7 +34,7 @@ export function Footer() {
               </div>
             </Link>
             <p className="text-[11px] leading-relaxed tracking-widest text-brand-white/50 max-w-xs">
-              Elevando a essência feminina através de coleções exclusivas e curadoria de luxo. A sua boutique digital de referência em Angola.
+              Elevando a essência feminina através de colecções exclusivas e curadoria de luxo. A sua boutique digital de referência em Angola.
             </p>
           </div>
 
@@ -75,7 +75,7 @@ export function Footer() {
           {/* Column 4: Newsletter/Contact */}
           <div className="space-y-8">
             <h3 className="text-[10px] font-bold uppercase tracking-[0.3em]">NEWSLETTER</h3>
-            <p className="text-[11px] text-brand-white/40 tracking-widest">Subscreva para receber as nossas coleções exclusivas.</p>
+            <p className="text-[11px] text-brand-white/40 tracking-widest">Subscreva para receber as nossas colecções exclusivas.</p>
             <div className="flex border-b border-brand-white/20 py-2">
               <input 
                 type="email" 

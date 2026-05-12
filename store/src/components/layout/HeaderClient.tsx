@@ -82,7 +82,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
   }, [isMenuOpen]);
 
   const leftLinks = [
-    { href: "/catalogo", label: "COLEÇÕES" },
+    { href: "/catalogo", label: "COLECÇÕES" },
     { href: "/novidades", label: "NOVIDADES" },
   ];
 
@@ -115,7 +115,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                 "flex h-14 w-14 items-center justify-center rounded-full transition-all duration-300 lg:hidden touch-manipulation relative z-[110]",
                 useWhite ? "text-brand-white hover:bg-white/10" : "text-brand-midnight hover:bg-brand-midnight/5"
               )}
-              aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+              aria-label="Toggle Menu"
             >
               {isMenuOpen ? <X className="h-7 w-7" strokeWidth={1.5} /> : <Menu className="h-7 w-7" strokeWidth={1.5} />}
             </button>
@@ -201,7 +201,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                           <div className="h-9 w-9 overflow-hidden rounded-full border border-brand-midnight/5">
                             <Image
                               src={user.avatarUrl}
-                              alt={user.displayName || "Utilizador"}
+                              alt={user.displayName || "Usuário"}
                               width={36}
                               height={36}
                               className="h-full w-full object-cover"
@@ -223,7 +223,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                       <DropdownMenuItem asChild>
                         <Link href="/perfil" className="cursor-pointer">
                           <UserIcon className="mr-2 h-4 w-4" />
-                          <span>O meu perfil</span>
+                          <span>O Meu Perfil</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-brand-midnight/5" />
@@ -298,7 +298,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                       {user.avatarUrl ? (
                         <Image
                           src={user.avatarUrl}
-                          alt={user.displayName || "Utilizador"}
+                          alt={user.displayName || "Usuário"}
                           width={48}
                           height={48}
                           className="h-full w-full object-cover"
@@ -318,7 +318,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                     className="flex items-center gap-4 py-4 text-sm font-medium"
                   >
                     <UserIcon className="h-5 w-5" />
-                    O meu perfil
+                    O Meu Perfil
                   </Link>
                   <button
                     onClick={() => signOut()}
@@ -333,7 +333,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   onClick={() => signInWithGoogle(pathname)}
                   className="w-full rounded-full bg-brand-midnight py-4 text-sm font-semibold tracking-[0.2em] text-brand-white"
                 >
-                  ENTRAR COM GOOGLE
+                  ENTRAR COM O GOOGLE
                 </button>
               )}
             </div>

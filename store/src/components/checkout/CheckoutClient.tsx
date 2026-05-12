@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { createOrder } from "@/lib/actions/orders";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils/format";
+import { CheckoutButton } from "@/components/cart/CheckoutButton";
 import { trackBeginCheckout } from "@/lib/analytics";
 
 type StoredAddress = {
@@ -51,7 +52,7 @@ const emptyManualAddress: ManualAddress = {
 
 function formatAddress(address: StoredAddress | ManualAddress | null | undefined) {
   if (!address) {
-    return "Seleciona uma morada para continuar.";
+    return "Selecione uma morada para continuar.";
   }
 
   return [
@@ -91,16 +92,14 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
         totalPrice
       );
     }
-  }, [items, totalPrice]); // Run when items or total price change (usually once on mount)
+  }, [items, totalPrice]);
 
   if (items.length === 0) {
     return (
       <section className="rounded-[2rem] bg-white/85 px-6 py-16 text-center shadow-[0_16px_35px_rgba(98,98,96,0.08)]">
-        <h1 className="text-3xl font-semibold text-brand-charcoal">
-          O teu carrinho está vazio
-        </h1>
-        <p className="mt-3 text-brand-charcoal/75">
-          Volta ao catálogo antes de iniciar o checkout.
+        <h2 className="heading-luxury text-3xl font-light mb-4">O seu carrinho está vazio</h2>
+        <p className="text-[11px] font-medium tracking-widest text-brand-midnight/40 uppercase">
+          Adicione alguns itens ao carrinho antes de prosseguir para o checkout.
         </p>
         <button
           type="button"
@@ -116,16 +115,6 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
   }
 
   const selectedAddress = addresses.find((address) => address.id === selectedAddressId);
-  const hasAddressForConfirmation = useManualAddress
-    ? [
-        manualAddress.recipient_name,
-        manualAddress.phone,
-        manualAddress.province,
-        manualAddress.city,
-        manualAddress.neighborhood,
-        manualAddress.street,
-      ].every((value) => value.trim().length > 0)
-    : Boolean(selectedAddress);
 
   return (
     <div className="space-y-8">
@@ -136,10 +125,10 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           </span>
           <div>
             <h2 className="text-2xl font-semibold text-brand-charcoal">
-              Revisão do carrinho
+              Revisão do Pedido
             </h2>
             <p className="text-sm text-brand-charcoal/70">
-              Confirma os itens antes de seguir para a morada.
+              Confirme os seus itens antes de prosseguir.
             </p>
           </div>
         </div>
@@ -182,10 +171,10 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           </span>
           <div>
             <h2 className="text-2xl font-semibold text-brand-charcoal">
-              Selecionar morada de entrega
+              Morada de entrega
             </h2>
             <p className="text-sm text-brand-charcoal/70">
-              Escolhe uma morada guardada ou usa uma morada avulsa.
+              Selecione uma morada guardada ou utilize uma nova.
             </p>
           </div>
         </div>
@@ -229,7 +218,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           </div>
         ) : (
           <div className="rounded-[1.5rem] border border-dashed border-brand-charcoal/20 bg-brand-white/70 px-5 py-8">
-            <p className="text-brand-charcoal">Não tens moradas guardadas</p>
+            <p className="text-brand-charcoal">Sem moradas guardadas</p>
             <button
               type="button"
               onClick={() => {
@@ -251,7 +240,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
             }}
             className="rounded-full border border-brand-charcoal/15 px-8 py-4 text-[10px] font-bold tracking-[0.2em] text-brand-charcoal transition hover:bg-brand-bg active:bg-brand-midnight/5 touch-manipulation"
           >
-            {useManualAddress ? "CANCELAR" : "USAR OUTRA MORADA"}
+            {useManualAddress ? "CANCELAR" : "UTILIZAR OUTRA MORADA"}
           </button>
         </div>
 
@@ -348,7 +337,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
               Confirmação
             </h2>
             <p className="text-sm text-brand-charcoal/70">
-              Revê os dados finais antes de confirmar a encomenda.
+              Reveja os detalhes finais antes de confirmar a encomenda.
             </p>
           </div>
         </div>
@@ -407,46 +396,21 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
 
           <aside className="rounded-[1.5rem] bg-brand-bg/60 p-5">
             <div className="flex items-center justify-between text-brand-charcoal">
-              <span>Total da encomenda</span>
+              <span>Total da Encomenda</span>
               <span className="text-2xl font-semibold">
                 {formatPrice(totalPrice)}
               </span>
             </div>
             <p className="mt-3 text-sm text-brand-charcoal/70">
-              A confirmação cria a encomenda, prepara a notificação e gera o
-              link de WhatsApp para o seguimento.
+              A confirmação cria a encomenda, prepara a notificação e gera o link de WhatsApp para acompanhamento.
             </p>
-            <button
-              type="button"
-              disabled={isPending || !hasAddressForConfirmation}
-              onClick={() => {
-                startTransition(async () => {
-                  try {
-                    const result = await createOrder({
-                      items,
-                      addressId: useManualAddress ? null : selectedAddressId,
-                      manualAddress: useManualAddress ? manualAddress : null,
-                      notes,
-                    });
-
-                    router.push(
-                      `/checkout/confirmacao?whatsapp=${encodeURIComponent(
-                        result.whatsappUrl,
-                      )}&order=${encodeURIComponent(result.orderId)}`,
-                    );
-                  } catch (error) {
-                    toast.error(
-                      error instanceof Error
-                        ? error.message
-                        : "Não foi possível criar a encomenda.",
-                    );
-                  }
-                });
-              }}
-              className="mt-8 w-full rounded-full bg-brand-midnight px-6 py-5 text-[11px] font-bold tracking-[0.3em] text-brand-white transition-all hover:bg-brand-gold active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 shadow-2xl shadow-brand-midnight/20 touch-manipulation"
-            >
-              {isPending ? "A PROCESSAR..." : "CONFIRMAR ENCOMENDA"}
-            </button>
+            <div className="mt-8">
+              <CheckoutButton 
+                items={items}
+                addressId={useManualAddress ? (manualAddress ? "manual" : null) : selectedAddressId}
+                label="FINALIZAR COMPRA"
+              />
+            </div>
           </aside>
         </div>
       </section>

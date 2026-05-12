@@ -146,7 +146,7 @@ export function CartPageClient() {
             </div>
             <div className="flex items-center justify-between text-[11px] font-medium tracking-widest text-brand-midnight/60">
               <span>ENVIO ESTIMADO</span>
-              <span className="text-brand-gold">GRÁTIS</span>
+              <span className="text-brand-gold">GRATUITO</span>
             </div>
           </div>
 
@@ -166,7 +166,7 @@ export function CartPageClient() {
              onClick={() => isAuthenticated ? router.push("/checkout") : signInWithGoogle("/checkout")}
              className="w-full bg-brand-gold py-5 text-[11px] font-bold tracking-[0.3em] text-brand-white transition-all hover:bg-brand-midnight"
            >
-             FINALIZAR ENCOMENDA
+             FINALIZAR COMPRA
            </button>
 
            <Link

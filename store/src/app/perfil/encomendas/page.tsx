@@ -42,7 +42,7 @@ export default async function OrdersPage() {
     <div className="space-y-6">
       <ProfileSectionHeader
         title="As minhas encomendas"
-        description="Acompanha o estado de cada pedido e revê os itens de forma rápida."
+        description="Acompanhe o estado das suas encomendas e reveja os itens rapidamente."
       />
 
       <div className="space-y-5">
@@ -110,7 +110,7 @@ export default async function OrdersPage() {
         {orders?.length ? null : (
           <section className="rounded-[1.75rem] bg-white/90 px-6 py-16 text-center shadow-[0_16px_35px_rgba(98,98,96,0.08)]">
             <p className="text-brand-charcoal/75">
-              Ainda não tens encomendas registadas.
+              Ainda não tem encomendas.
             </p>
           </section>
         )}

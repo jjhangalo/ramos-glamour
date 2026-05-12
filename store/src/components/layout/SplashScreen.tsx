@@ -53,9 +53,6 @@ export function SplashScreen() {
 
   if (!isVisible) return null;
 
-  // Determining opacity: 
-  // - Always 100 on server (isMounted is false)
-  // - Stays 100 until (isInitialLoading is false AND minTimeElapsed is true)
   const isFadingOut = !isInitialLoading && minTimeElapsed;
 
   return (
@@ -65,14 +62,13 @@ export function SplashScreen() {
         isFadingOut ? "pointer-events-none opacity-0" : "opacity-100"
       )}
     >
-      <div className="relative flex flex-col items-center">
-        {/* Logo Container */}
-        <div
-          className={cn(
-            "relative h-24 w-64 transform transition-all duration-1000 ease-out lg:h-32 lg:w-96",
-            isAnimating ? "scale-100 opacity-100 translate-y-0" : "scale-110 opacity-0 translate-y-4"
-          )}
-        >
+      <div className={cn(
+        "relative flex flex-col items-center gap-8 transition-all duration-1000 ease-out",
+        isAnimating ? "scale-100 opacity-100 translate-y-0" : "scale-110 opacity-0 translate-y-4"
+      )}>
+        <span className="text-[10px] font-bold tracking-[0.5em] text-brand-gold/60 uppercase">BEM-VINDA À</span>
+        
+        <div className="relative h-12 w-48 md:h-16 md:w-64">
           <Image
             src="/logo-gold.png"
             alt="Ramos Glamour"
@@ -82,23 +78,18 @@ export function SplashScreen() {
           />
         </div>
 
-        {/* Decorative Line */}
-        <div
-          className={cn(
-            "mt-8 h-[1px] bg-brand-gold transition-all duration-[1500ms] ease-in-out",
-            isAnimating ? "w-32 lg:w-48 opacity-100" : "w-0 opacity-0"
-          )}
-        />
-
-        {/* Tagline */}
-        <p
-          className={cn(
-            "mt-6 text-[10px] font-light tracking-[0.5em] text-brand-gold/60 uppercase transition-all duration-1000 delay-500 ease-out",
-            isAnimating ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-          )}
-        >
-          Elegância & Estilo
-        </p>
+        <div className="flex items-center gap-4">
+          <div className="h-[1px] w-8 bg-brand-gold/20" />
+          <p
+            className={cn(
+              "text-[10px] font-medium tracking-[0.3em] text-brand-gold/40 uppercase transition-all duration-1000 delay-500 ease-out",
+              isAnimating ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+            )}
+          >
+            Elegância & Estilo
+          </p>
+          <div className="h-[1px] w-8 bg-brand-gold/20" />
+        </div>
       </div>
 
       {/* Shimmer Effect */}

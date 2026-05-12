@@ -20,6 +20,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  SheetDescription as SheetDesc,
 } from "@/components/ui/sheet";
 
 type Address = {
@@ -112,7 +113,7 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
     <div className="space-y-6">
       <ProfileSectionHeader
         title="As minhas moradas"
-        description="Guarda e organiza as moradas de entrega para acelerar o checkout."
+        description="Guarde e organize as suas moradas de entrega para um checkout mais rápido."
       />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -170,7 +171,7 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
                     startTransition(async () => {
                       try {
                         await setDefaultAddress(address.id);
-                        toast.success("Morada principal atualizada");
+                        toast.success("Morada principal actualizada");
                         router.refresh();
                       } catch (error) {
                         toast.error(
@@ -234,9 +235,9 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
             <SheetTitle>
               {editingAddress ? "Editar morada" : "Adicionar morada"}
             </SheetTitle>
-            <SheetDescription>
-              Guarda os dados de entrega para acelerar futuras encomendas.
-            </SheetDescription>
+            <SheetDesc>
+              Guarde os seus dados de entrega para acelerar futuras encomendas.
+            </SheetDesc>
           </SheetHeader>
 
           <form
@@ -250,7 +251,7 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
 
                   if (editingAddress) {
                     await updateAddress(editingAddress.id, formData);
-                    toast.success("Morada atualizada");
+                    toast.success("Morada actualizada");
                   } else {
                     await createAddress(formData);
                     toast.success("Morada criada");
@@ -273,7 +274,7 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
             {(
               [
                 ["label", "Etiqueta"],
-                ["recipient_name", "Nome do destinatário"],
+                ["recipient_name", "Nome do Destinatário"],
                 ["phone", "Telefone"],
                 ["province", "Província"],
                 ["city", "Cidade"],

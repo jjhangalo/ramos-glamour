@@ -58,7 +58,7 @@ function FilterContent({
       {/* Draft Chips (Visual Feedback inside the selector) */}
       {hasDraftFilters && (
         <div className="space-y-4 pb-10 border-b border-brand-midnight/5 animate-in fade-in slide-in-from-top-4 duration-500">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-gold">SELECIONADOS</h3>
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-gold">SELECCIONADOS</h3>
           <div className="flex flex-wrap gap-2">
             {draftFilters.categoria && draftFilters.categoria !== "todas" && (
               <button 
@@ -143,7 +143,7 @@ function FilterContent({
       <form onSubmit={handleApply} className="space-y-12 pt-12 border-t border-brand-midnight/5">
         {/* Search */}
         <div className="space-y-6">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em]">PESQUISAR</h3>
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em]">PESQUISA</h3>
           <div className="group relative border-b border-brand-midnight/10 pb-2 transition-colors focus-within:border-brand-gold">
             <input
               name="busca"
@@ -158,7 +158,7 @@ function FilterContent({
 
         {/* Sort */}
         <div className="space-y-6">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em]">ORDENAR</h3>
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em]">ORDENAÇÃO</h3>
           <div className="space-y-3">
             {[
               { value: "recentes", label: "MAIS RECENTES" },
@@ -311,7 +311,7 @@ export function CatalogFilters({
                 <SheetHeader>
                   <SheetTitle className="heading-luxury text-3xl font-light">Filtros</SheetTitle>
                   <SheetDescription className="sr-only">
-                    Ajuste os filtros para encontrar os produtos desejados.
+                    Ajuste os filtros para encontrar os produtos que deseja.
                   </SheetDescription>
                 </SheetHeader>
                 <FilterContent 
