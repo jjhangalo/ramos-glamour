@@ -1,3 +1,6 @@
 packages:
   - 'admin'
   - 'store'
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
