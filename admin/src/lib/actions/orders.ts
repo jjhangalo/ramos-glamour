@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 
 import { buildWhatsAppUrl } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendOrderStatusEmail } from "./notifications";
+import { sendPushNotification } from "@/lib/notifications/webpush";
 import type { OrderRecord } from "@/lib/types";
 
 export async function getOrders(
@@ -110,7 +112,7 @@ export async function updateOrderStatus(
   const supabase = createAdminClient();
   
   // State machine validation
-  const { data: order } = await supabase.from("orders").select("status").eq("id", id).single();
+  const { data: order } = await supabase.from("orders").select("status, user_id").eq("id", id).single();
   if (!order) return { success: false, error: "Encomenda não encontrada." };
   
   const currentStatus = order.status;
@@ -128,6 +130,43 @@ export async function updateOrderStatus(
 
   revalidatePath("/encomendas");
   revalidatePath(`/encomendas/${id}`);
+
+  // Enviar notificações (assíncrono)
+  if (order.user_id) {
+    // 1. Email
+    supabase.auth.admin.getUserById(order.user_id).then(({ data: userData }) => {
+      const email = userData?.user?.email;
+      if (email) {
+        sendOrderStatusEmail(id, status, email).catch((err) => {
+          console.error("Erro ao enviar email de notificação:", err);
+        });
+      }
+    });
+
+    // 2. Web Push
+    supabase
+      .from("profiles")
+      .select("push_subscription")
+      .eq("id", order.user_id)
+      .single()
+      .then(({ data: profile }) => {
+        if (profile?.push_subscription) {
+          let body = "";
+          if (status === "delivering") {
+            body = "A sua encomenda saiu para entrega. Elegância a caminho.";
+          } else if (status === "refused") {
+            body = "Atualização sobre o seu pedido. Por favor, verifique o seu perfil.";
+          } else if (status === "delivered") {
+            body = "A sua encomenda foi entregue. Esperamos que goste!";
+          }
+
+          if (body) {
+            sendPushNotification(order.user_id, profile.push_subscription, "Ramos Glamour", body).catch(console.error);
+          }
+        }
+      });
+  }
+
   return { success: true };
 }
 
@@ -140,7 +179,7 @@ export async function updateOrdersBulk(
   // Fetch all selected orders to validate their current state
   const { data: orders, error: fetchError } = await supabase
     .from("orders")
-    .select("id, status")
+    .select("id, status, user_id")
     .in("id", ids);
     
   if (fetchError) return { success: false, error: fetchError.message };
@@ -162,6 +201,43 @@ export async function updateOrdersBulk(
   }
 
   revalidatePath("/encomendas");
+
+  // Enviar notificações em massa (assíncrono)
+  orders?.forEach((order) => {
+    // 1. Email
+    supabase.auth.admin.getUserById(order.user_id).then(({ data: userData }) => {
+      const email = userData?.user?.email;
+      if (email) {
+        sendOrderStatusEmail(order.id, status, email).catch((err) => {
+          console.error(`Erro ao enviar email para encomenda ${order.id}:`, err);
+        });
+      }
+    });
+
+    // 2. Web Push
+    supabase
+      .from("profiles")
+      .select("push_subscription")
+      .eq("id", order.user_id)
+      .single()
+      .then(({ data: profile }) => {
+        if (profile?.push_subscription) {
+          let body = "";
+          if (status === "delivering") {
+            body = "A sua encomenda saiu para entrega. Elegância a caminho.";
+          } else if (status === "refused") {
+            body = "Atualização sobre o seu pedido. Por favor, verifique o seu perfil.";
+          } else if (status === "delivered") {
+            body = "A sua encomenda foi entregue. Esperamos que goste!";
+          }
+
+          if (body) {
+            sendPushNotification(order.user_id, profile.push_subscription, "Ramos Glamour", body).catch(console.error);
+          }
+        }
+      });
+  });
+
   return { success: true };
 }
 

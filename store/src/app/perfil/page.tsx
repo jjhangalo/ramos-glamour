@@ -3,9 +3,12 @@ import { ShoppingBag, ArrowRight, Compass, Sparkles } from "lucide-react";
 import { getDashboardData } from "@/lib/actions/profile";
 import { DashboardOrderCard } from "@/components/profile/DashboardOrderCard";
 import PageWithHeaderOffset from "@/components/layout/PageWithHeaderOffset";
+import { PushToggle } from "@/components/profile/PushToggle";
+import { getProfileSubscription } from "@/lib/notifications/actions";
 
 export default async function ProfileIndexPage() {
   const { latestOrder, defaultAddress } = await getDashboardData();
+  const pushSubscription = await getProfileSubscription();
 
   return (
     <PageWithHeaderOffset>
@@ -68,6 +71,9 @@ export default async function ProfileIndexPage() {
                 Gerir Moradas
               </Link>
             </div>
+            
+            {/* Push Notifications Toggle */}
+            <PushToggle initialSubscription={pushSubscription} />
 
             {/* Quick Actions */}
             <div className="rounded-2xl bg-brand-midnight p-6 text-white shadow-xl shadow-brand-midnight/10">
