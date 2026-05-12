@@ -107,9 +107,9 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           onClick={() => {
             router.push("/catalogo");
           }}
-          className="mt-6 rounded-full bg-brand-midnight px-6 py-3 text-sm font-medium text-brand-white transition hover:bg-brand-midnight/90 active:scale-95 shadow-md shadow-brand-midnight/10"
+          className="mt-8 rounded-full bg-brand-midnight px-10 py-5 text-[11px] font-bold tracking-[0.2em] text-brand-white transition-all hover:bg-brand-midnight/90 active:scale-95 shadow-xl shadow-brand-midnight/10 touch-manipulation"
         >
-          Ir para o catálogo
+          EXPLORAR CATÁLOGO
         </button>
       </section>
     );
@@ -168,10 +168,10 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           onClick={() => {
             router.push("/carrinho");
           }}
-          className="mt-5 inline-flex items-center gap-2 rounded-full border border-brand-charcoal px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
+          className="mt-6 inline-flex items-center gap-3 rounded-full border border-brand-charcoal px-6 py-3.5 text-[10px] font-bold tracking-[0.2em] text-brand-charcoal transition hover:bg-brand-bg active:bg-brand-midnight/5 touch-manipulation"
         >
           <Pencil className="h-4 w-4" />
-          Editar no carrinho
+          EDITAR NO CARRINHO
         </button>
       </section>
 
@@ -203,23 +203,23 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                     setUseManualAddress(false);
                     setSelectedAddressId(address.id);
                   }}
-                  className={`rounded-[1.5rem] border p-5 text-left transition ${
+                  className={`rounded-[1.5rem] border p-6 text-left transition-all active:scale-[0.98] touch-manipulation ${
                     isSelected
-                      ? "border-brand-olive bg-brand-bg/70 shadow-sm"
-                      : "border-brand-charcoal/10 bg-brand-white/70 hover:border-brand-mauve"
+                      ? "border-brand-olive bg-brand-bg/70 shadow-lg ring-1 ring-brand-olive"
+                      : "border-brand-charcoal/10 bg-brand-white/70 hover:border-brand-mauve active:bg-brand-midnight/5"
                   }`}
                 >
-                  <p className="text-sm uppercase tracking-[0.24em] text-brand-charcoal/60">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-brand-charcoal/40">
                     {address.label ?? "Morada guardada"}
                   </p>
-                  <p className="mt-3 font-semibold text-brand-charcoal">
+                  <p className="mt-4 font-bold text-brand-charcoal">
                     {address.recipient_name ?? userName}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-brand-charcoal/75">
+                  <p className="mt-3 text-[11px] leading-relaxed text-brand-charcoal/70 font-medium">
                     {formatAddress(address)}
                   </p>
                   {address.phone ? (
-                    <p className="mt-2 text-sm text-brand-charcoal/70">
+                    <p className="mt-3 text-[11px] font-bold text-brand-charcoal/60">
                       {address.phone}
                     </p>
                   ) : null}
@@ -235,9 +235,9 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
               onClick={() => {
                 router.push("/perfil/moradas");
               }}
-              className="mt-4 rounded-full border border-brand-charcoal/15 px-5 py-3 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
+              className="mt-6 rounded-full border border-brand-charcoal/15 px-8 py-4 text-[10px] font-bold tracking-[0.2em] text-brand-charcoal transition hover:bg-brand-bg active:bg-brand-midnight/5 touch-manipulation"
             >
-              Adicionar morada
+              ADICIONAR MORADA
             </button>
           </div>
         )}
@@ -249,9 +249,9 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
               setUseManualAddress((current) => !current);
               setSelectedAddressId(null);
             }}
-            className="rounded-full border border-brand-charcoal/15 px-5 py-3 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
+            className="rounded-full border border-brand-charcoal/15 px-8 py-4 text-[10px] font-bold tracking-[0.2em] text-brand-charcoal transition hover:bg-brand-bg active:bg-brand-midnight/5 touch-manipulation"
           >
-            Usar outra morada
+            {useManualAddress ? "CANCELAR" : "USAR OUTRA MORADA"}
           </button>
         </div>
 
@@ -443,9 +443,9 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                   }
                 });
               }}
-              className="mt-6 w-full rounded-full bg-brand-midnight px-5 py-4 text-sm font-medium text-brand-white transition hover:bg-brand-midnight/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 shadow-xl shadow-brand-midnight/20"
+              className="mt-8 w-full rounded-full bg-brand-midnight px-6 py-5 text-[11px] font-bold tracking-[0.3em] text-brand-white transition-all hover:bg-brand-gold active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 shadow-2xl shadow-brand-midnight/20 touch-manipulation"
             >
-              {isPending ? "A processar..." : "Confirmar encomenda"}
+              {isPending ? "A PROCESSAR..." : "CONFIRMAR ENCOMENDA"}
             </button>
           </aside>
         </div>

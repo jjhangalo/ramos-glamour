@@ -32,6 +32,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
   const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   const isHomePage = pathname === "/";
   const useWhite = isHomePage && !scrolled && !isMenuOpen;
@@ -63,7 +64,11 @@ export function HeaderClient({ user }: HeaderClientProps) {
   // Close menu on click outside
   useEffect(() => {
     function handleClickOutside(event: PointerEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      if (
+        menuRef.current && 
+        !menuRef.current.contains(event.target as Node) &&
+        !toggleRef.current?.contains(event.target as Node)
+      ) {
         setIsMenuOpen(false);
       }
     }
@@ -101,17 +106,18 @@ export function HeaderClient({ user }: HeaderClientProps) {
           <div className="flex flex-1 items-center">
             {/* Mobile Menu Toggle */}
             <button
+              ref={toggleRef}
               onClick={(e) => {
                 e.stopPropagation();
                 setIsMenuOpen(!isMenuOpen);
               }}
               className={cn(
-                "flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 lg:hidden touch-manipulation relative z-[110]",
+                "flex h-14 w-14 items-center justify-center rounded-full transition-all duration-300 lg:hidden touch-manipulation relative z-[110]",
                 useWhite ? "text-brand-white hover:bg-white/10" : "text-brand-midnight hover:bg-brand-midnight/5"
               )}
               aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
             >
-              {isMenuOpen ? <X className="h-6 w-6" strokeWidth={1.5} /> : <Menu className="h-6 w-6" strokeWidth={1.5} />}
+              {isMenuOpen ? <X className="h-7 w-7" strokeWidth={1.5} /> : <Menu className="h-7 w-7" strokeWidth={1.5} />}
             </button>
 
             {/* Left Navigation (Desktop) */}
@@ -263,7 +269,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block text-2xl font-light tracking-tight text-brand-midnight"
+                  className="block py-4 text-2xl font-light tracking-tight text-brand-midnight transition-colors active:bg-brand-midnight/5"
                 >
                   {link.label}
                 </Link>
@@ -277,7 +283,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block text-xl font-light tracking-tight text-brand-midnight"
+                  className="block py-3 text-xl font-light tracking-tight text-brand-midnight transition-colors active:bg-brand-midnight/5"
                 >
                   {link.label}
                 </Link>
@@ -309,16 +315,16 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   <Link
                     href="/perfil"
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-3 text-sm"
+                    className="flex items-center gap-4 py-4 text-sm font-medium"
                   >
-                    <UserIcon className="h-4 w-4" />
+                    <UserIcon className="h-5 w-5" />
                     O meu perfil
                   </Link>
                   <button
                     onClick={() => signOut()}
-                    className="flex items-center gap-3 text-sm text-red-600"
+                    className="flex items-center gap-4 py-4 text-sm font-medium text-red-600"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut className="h-5 w-5" />
                     Sair
                   </button>
                 </div>

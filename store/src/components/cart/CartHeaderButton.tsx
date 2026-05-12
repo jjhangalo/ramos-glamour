@@ -14,7 +14,7 @@ export function CartHeaderButton({ useWhite }: { useWhite?: boolean }) {
       href="/carrinho"
       aria-label="Carrinho de compras"
       className={cn(
-        "relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300",
+        "relative flex h-14 w-14 items-center justify-center rounded-full transition-all duration-300",
         useWhite ? "hover:bg-white/10" : "hover:bg-brand-midnight/5"
       )}
     >

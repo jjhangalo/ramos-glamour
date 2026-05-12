@@ -90,12 +90,12 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
   return (
     <div className="mx-auto max-w-[1400px] px-6 lg:px-12 py-12 lg:py-24">
       {/* Breadcrumbs */}
-      <nav className="mb-12 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
-        <Link href="/" className="hover:text-brand-midnight transition-colors">INÍCIO</Link>
-        <ChevronRight className="h-3 w-3" />
-        <Link href="/catalogo" className="hover:text-brand-midnight transition-colors">CATÁLOGO</Link>
-        <ChevronRight className="h-3 w-3" />
-        <span className="text-brand-midnight">{product.name}</span>
+      <nav className="mb-12 flex flex-wrap items-center gap-y-4 gap-x-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
+        <Link href="/" className="px-1 py-2 hover:text-brand-midnight transition-colors">INÍCIO</Link>
+        <ChevronRight className="h-3 w-3 shrink-0" />
+        <Link href="/catalogo" className="px-1 py-2 hover:text-brand-midnight transition-colors">CATÁLOGO</Link>
+        <ChevronRight className="h-3 w-3 shrink-0" />
+        <span className="px-1 py-2 text-brand-midnight">{product.name}</span>
       </nav>
 
       <div className="grid gap-16 lg:grid-cols-[1.2fr_1fr] lg:items-start">
@@ -206,10 +206,10 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                         key={size}
                         onClick={() => setSelectedSize(size === selectedSize ? null : size)}
                         className={cn(
-                          "min-w-[4rem] px-4 py-3 text-[11px] font-semibold border transition-all duration-300",
+                          "min-w-[4.5rem] min-h-[3rem] px-5 py-4 text-[11px] font-bold border transition-all duration-300 touch-manipulation",
                           selectedSize === size 
-                            ? "bg-brand-midnight text-brand-white border-brand-midnight" 
-                            : "border-brand-midnight/10 text-brand-midnight hover:border-brand-midnight"
+                            ? "bg-brand-midnight text-brand-white border-brand-midnight shadow-lg" 
+                            : "border-brand-midnight/10 text-brand-midnight hover:border-brand-midnight active:bg-brand-midnight/5"
                         )}
                       >
                         {size}
@@ -228,10 +228,10 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
                         key={color}
                         onClick={() => setSelectedColor(color === selectedColor ? null : color)}
                         className={cn(
-                          "px-6 py-3 text-[11px] font-semibold border transition-all duration-300",
+                          "min-h-[3rem] px-8 py-4 text-[11px] font-bold border transition-all duration-300 touch-manipulation",
                           selectedColor === color 
-                            ? "bg-brand-midnight text-brand-white border-brand-midnight" 
-                            : "border-brand-midnight/10 text-brand-midnight hover:border-brand-midnight"
+                            ? "bg-brand-midnight text-brand-white border-brand-midnight shadow-lg" 
+                            : "border-brand-midnight/10 text-brand-midnight hover:border-brand-midnight active:bg-brand-midnight/5"
                         )}
                       >
                         {color}
@@ -246,19 +246,21 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
           {/* Quantity & CTA */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center border border-brand-midnight/10">
+              <div className="flex items-center border border-brand-midnight/10 bg-brand-white">
                 <button
                   onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  className="p-4 transition-colors hover:bg-brand-midnight/5"
+                  className="p-5 transition-colors hover:bg-brand-midnight/5 active:bg-brand-midnight/10 touch-manipulation"
+                  aria-label="Diminuir quantidade"
                 >
-                  <Minus className="h-3 w-3" />
+                  <Minus className="h-4 w-4" />
                 </button>
-                <span className="w-12 text-center text-xs font-semibold">{quantity}</span>
+                <span className="w-14 text-center text-sm font-bold">{quantity}</span>
                 <button
                   onClick={() => setQuantity(q => Math.min(currentStock, q + 1))}
-                  className="p-4 transition-colors hover:bg-brand-midnight/5"
+                  className="p-5 transition-colors hover:bg-brand-midnight/5 active:bg-brand-midnight/10 touch-manipulation"
+                  aria-label="Aumentar quantidade"
                 >
-                  <Plus className="h-3 w-3" />
+                  <Plus className="h-4 w-4" />
                 </button>
               </div>
               
@@ -293,20 +295,20 @@ export function ProductDetailView({ product, promoPrice }: ProductDetailViewProp
           {/* Details Accordions */}
           <div className="pt-10 space-y-4 border-t border-brand-midnight/5">
             <details className="group">
-              <summary className="flex cursor-pointer items-center justify-between list-none py-4 text-[10px] font-bold tracking-[0.2em] text-brand-midnight/60 hover:text-brand-midnight transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between list-none py-6 text-[10px] font-bold tracking-[0.2em] text-brand-midnight/60 hover:text-brand-midnight transition-colors touch-manipulation">
                 DETALHES DO PRODUTO
-                <Plus className="h-3 w-3 transition-transform group-open:rotate-45" />
+                <Plus className="h-4 w-4 transition-transform group-open:rotate-45" />
               </summary>
-              <div className="pb-4 text-xs leading-relaxed text-brand-midnight/50">
+              <div className="pb-6 text-xs leading-relaxed text-brand-midnight/50 px-2">
                 Peça exclusiva da coleção Ramos Glamour, desenhada com foco em elegância e sofisticação. Materiais de alta qualidade selecionados para garantir durabilidade e conforto.
               </div>
             </details>
             <details className="group border-t border-brand-midnight/5">
-              <summary className="flex cursor-pointer items-center justify-between list-none py-4 text-[10px] font-bold tracking-[0.2em] text-brand-midnight/60 hover:text-brand-midnight transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between list-none py-6 text-[10px] font-bold tracking-[0.2em] text-brand-midnight/60 hover:text-brand-midnight transition-colors touch-manipulation">
                 ENVIO & DEVOLUÇÕES
-                <Plus className="h-3 w-3 transition-transform group-open:rotate-45" />
+                <Plus className="h-4 w-4 transition-transform group-open:rotate-45" />
               </summary>
-              <div className="pb-4 text-xs leading-relaxed text-brand-midnight/50">
+              <div className="pb-6 text-xs leading-relaxed text-brand-midnight/50 px-2">
                 Envios para todo o país. Entrega estimada entre 2 a 5 dias úteis. Devoluções gratuitas num prazo de 14 dias após a recepção do produto.
               </div>
             </details>

@@ -94,31 +94,34 @@ export function CartPageClient() {
                 <button
                   type="button"
                   onClick={() => removeItem(item.itemKey)}
-                  className="p-2 text-brand-midnight/20 hover:text-red-600 transition-colors"
+                  className="p-4 text-brand-midnight/20 hover:text-red-600 transition-all active:scale-95 touch-manipulation"
+                  aria-label="Remover item"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5" />
                 </button>
               </div>
 
               <div className="mt-8 flex items-end justify-between">
                 {/* Quantity Controller */}
-                <div className="flex items-center border border-brand-midnight/10">
+                <div className="flex items-center border border-brand-midnight/10 bg-brand-white">
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.itemKey, item.quantity - 1)}
-                    className="p-3 transition-colors hover:bg-brand-midnight/5"
+                    className="p-5 transition-colors hover:bg-brand-midnight/5 active:bg-brand-midnight/10 touch-manipulation"
+                    aria-label="Diminuir quantidade"
                   >
-                    <Minus className="h-3 w-3" />
+                    <Minus className="h-4 w-4" />
                   </button>
-                  <span className="w-10 text-center text-[11px] font-semibold">
+                  <span className="w-12 text-center text-sm font-bold">
                     {item.quantity}
                   </span>
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.itemKey, item.quantity + 1)}
-                    className="p-3 transition-colors hover:bg-brand-midnight/5"
+                    className="p-5 transition-colors hover:bg-brand-midnight/5 active:bg-brand-midnight/10 touch-manipulation"
+                    aria-label="Aumentar quantidade"
                   >
-                    <Plus className="h-3 w-3" />
+                    <Plus className="h-4 w-4" />
                   </button>
                 </div>
 
@@ -168,7 +171,7 @@ export function CartPageClient() {
 
            <Link
              href="/catalogo"
-             className="block text-center text-[10px] font-bold tracking-[0.3em] text-brand-midnight/40 hover:text-brand-midnight transition-colors"
+             className="block text-center py-4 text-[10px] font-bold tracking-[0.3em] text-brand-midnight/40 hover:text-brand-midnight transition-colors active:bg-brand-midnight/5"
            >
              CONTINUAR A COMPRAR
            </Link>
