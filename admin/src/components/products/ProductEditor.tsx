@@ -18,7 +18,7 @@ import { PageCanvas } from "@/components/ui/page-canvas";
 import { FadeUp } from "@/components/shared/Animations";
 import { useMemo, useState, useTransition, useEffect } from "react";
 import toast from "react-hot-toast";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import {
@@ -168,9 +168,13 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
   };
 
   // Image ordering
-  const [localProductImages, setLocalProductImages] = useState<{ id: string; url: string; position: number }[]>([]);
+  const [localProductImages, setLocalProductImages] = useState<{ id: string; url: string; position: number }[]>(
+    () => [...(product?.product_images ?? [])].sort((a, b) => a.position - b.position)
+  );
+  
   useEffect(() => {
     const sorted = [...(product?.product_images ?? [])].sort((a, b) => a.position - b.position);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalProductImages(sorted);
   }, [product?.product_images]);
 
@@ -198,7 +202,10 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
   const isPromoDirty = promoPrice !== (initialPromotion?.is_active ? initialPromotion.promo_price.toString() : "");
   const isDirty = isFormDirty || isImagesDirty || isPromoDirty;
 
-  const isActive = productForm.watch("is_active");
+  const isActive = useWatch({
+    control: productForm.control,
+    name: "is_active",
+  });
 
   // Submit
   const onProductSubmit = async (values: ProductFormValues) => {

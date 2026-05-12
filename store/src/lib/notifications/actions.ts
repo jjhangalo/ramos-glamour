@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export async function savePushSubscription(subscription: any) {
+export async function savePushSubscription(subscription: unknown) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 

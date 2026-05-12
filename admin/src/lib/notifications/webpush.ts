@@ -11,7 +11,7 @@ if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
 
 export async function sendPushNotification(
   userId: string,
-  subscription: any,
+  subscription: webpush.PushSubscription,
   title: string,
   body: string,
   url: string = "/perfil/encomendas"
@@ -27,11 +27,12 @@ export async function sendPushNotification(
 
     await webpush.sendNotification(subscription, payload);
     console.log(`Notificação push enviada para o utilizador ${userId}`);
-  } catch (error: any) {
-    console.error(`Erro ao enviar push para ${userId}:`, error.statusCode, error.message);
+  } catch (error: unknown) {
+    const pushError = error as { statusCode?: number; message?: string };
+    console.error(`Erro ao enviar push para ${userId}:`, pushError.statusCode, pushError.message);
 
     // Se o erro for 410 (Gone) ou 404 (Not Found), a subscrição expirou
-    if (error.statusCode === 410 || error.statusCode === 404) {
+    if (pushError.statusCode === 410 || pushError.statusCode === 404) {
       console.log(`Limpando subscrição expirada para o utilizador ${userId}`);
       const supabase = createAdminClient();
       await supabase

@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, BellOff, Loader2 } from "lucide-react";
 import { subscribeUserToPush, unsubscribeUserFromPush, getPushSubscription } from "@/lib/notifications/push";
 import { toast } from "react-hot-toast";
 
-export function PushToggle({ initialSubscription }: { initialSubscription: any }) {
+export function PushToggle({ initialSubscription }: { initialSubscription: unknown }) {
   const [isSubscribed, setIsSubscribed] = useState(!!initialSubscription);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,9 +32,10 @@ export function PushToggle({ initialSubscription }: { initialSubscription: any }
         setIsSubscribed(true);
         toast.success("Notificações ativadas com sucesso!");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(error.message || "Erro ao configurar notificações.");
+      const message = error instanceof Error ? error.message : "Erro ao configurar notificações.";
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
