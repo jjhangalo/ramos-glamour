@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
 import toast from "react-hot-toast";
 
-import { createOrder } from "@/lib/actions/orders";
+import type { CartItem } from "@/lib/actions/checkout";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils/format";
 import { CheckoutButton } from "@/components/cart/CheckoutButton";
@@ -405,9 +405,18 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
               A confirmação cria a encomenda, prepara a notificação e gera o link de WhatsApp para acompanhamento.
             </p>
             <div className="mt-8">
-              <CheckoutButton 
-                items={items}
-                addressId={useManualAddress ? (manualAddress ? "manual" : null) : selectedAddressId}
+              <CheckoutButton
+                items={items.map(
+                  (item): CartItem => ({
+                    id: item.id,
+                    variantId: item.variantId ?? undefined,
+                    variantSize: item.variantSize ?? undefined,
+                    variantColor: item.variantColor ?? undefined,
+                    quantity: item.quantity,
+                  }),
+                )}
+                addressId={useManualAddress ? null : selectedAddressId}
+                notes={notes}
                 label="FINALIZAR COMPRA"
               />
             </div>
