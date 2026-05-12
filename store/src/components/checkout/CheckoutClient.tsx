@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
-import toast from "react-hot-toast";
 
 import type { CartItem } from "@/lib/actions/checkout";
 import { useCartStore } from "@/lib/store/cart";
@@ -68,7 +67,6 @@ function formatAddress(address: StoredAddress | ManualAddress | null | undefined
 
 export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const items = useCartStore((state) => state.items);
   const totalPrice = useCartStore((state) => state.totalPrice);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
