@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { buildWhatsAppUrl } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendOrderStatusEmail } from "./notifications";
 import type { OrderRecord } from "@/lib/types";
 
 export async function getOrders(
@@ -110,7 +111,7 @@ export async function updateOrderStatus(
   const supabase = createAdminClient();
   
   // State machine validation
-  const { data: order } = await supabase.from("orders").select("status").eq("id", id).single();
+  const { data: order } = await supabase.from("orders").select("status, user_id").eq("id", id).single();
   if (!order) return { success: false, error: "Encomenda não encontrada." };
   
   const currentStatus = order.status;
@@ -128,6 +129,19 @@ export async function updateOrderStatus(
 
   revalidatePath("/encomendas");
   revalidatePath(`/encomendas/${id}`);
+
+  // Enviar email de notificação (assíncrono)
+  if (order.user_id) {
+    supabase.auth.admin.getUserById(order.user_id).then(({ data: userData }) => {
+      const email = userData?.user?.email;
+      if (email) {
+        sendOrderStatusEmail(id, status, email).catch((err) => {
+          console.error("Erro ao enviar email de notificação:", err);
+        });
+      }
+    });
+  }
+
   return { success: true };
 }
 
@@ -140,7 +154,7 @@ export async function updateOrdersBulk(
   // Fetch all selected orders to validate their current state
   const { data: orders, error: fetchError } = await supabase
     .from("orders")
-    .select("id, status")
+    .select("id, status, user_id")
     .in("id", ids);
     
   if (fetchError) return { success: false, error: fetchError.message };
@@ -162,6 +176,19 @@ export async function updateOrdersBulk(
   }
 
   revalidatePath("/encomendas");
+
+  // Enviar emails de notificação em massa (assíncrono)
+  orders?.forEach((order) => {
+    supabase.auth.admin.getUserById(order.user_id).then(({ data: userData }) => {
+      const email = userData?.user?.email;
+      if (email) {
+        sendOrderStatusEmail(order.id, status, email).catch((err) => {
+          console.error(`Erro ao enviar email para encomenda ${order.id}:`, err);
+        });
+      }
+    });
+  });
+
   return { success: true };
 }
 
