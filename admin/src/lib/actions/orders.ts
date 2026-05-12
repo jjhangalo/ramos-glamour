@@ -114,7 +114,7 @@ export async function updateOrderStatus(
   if (!order) return { success: false, error: "Encomenda não encontrada." };
   
   const currentStatus = order.status;
-  const terminalStates = ["delivered", "cancelled", "refused"];
+  const terminalStates = ["delivered", "refused"];
   
   if (terminalStates.includes(currentStatus)) {
     return { success: false, error: "Não é possível alterar o estado de uma encomenda finalizada." };
@@ -145,7 +145,7 @@ export async function updateOrdersBulk(
     
   if (fetchError) return { success: false, error: fetchError.message };
   
-  const terminalStates = ["delivered", "cancelled", "refused"];
+  const terminalStates = ["delivered", "refused"];
   const invalidOrders = orders?.filter(o => terminalStates.includes(o.status)) || [];
   
   if (invalidOrders.length > 0) {
@@ -168,11 +168,11 @@ export async function updateOrdersBulk(
 export async function migrateLegacyStatuses() {
   const supabase = createAdminClient();
   
-  // 1. Map 'delivering' to 'out_for_delivery'
+  // 1. Ensure all orders use valid DB statuses
   const { error: err1 } = await supabase
     .from("orders")
-    .update({ status: "out_for_delivery" })
-    .eq("status", "delivering");
+    .update({ status: "delivering" })
+    .in("status", ["shipped", "out_for_delivery", "shipping"]);
     
   // 2. Ensure all other legacy statuses are normalized if needed
   // (Assuming 'pending', 'delivered', 'refused' are already snake_case or match the new model)

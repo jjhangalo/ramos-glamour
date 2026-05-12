@@ -30,7 +30,7 @@ export function OrderContextualActions({
     });
   };
 
-  const terminalStates = ["delivered", "cancelled", "refused"];
+  const terminalStates = ["delivered", "refused"];
   if (terminalStates.includes(status)) {
     return null;
   }
@@ -38,18 +38,12 @@ export function OrderContextualActions({
   // Primary Action Mapping
   const primaryActions: Record<string, { label: string; icon: React.ElementType; target: OrderRecord["status"]; color: string }> = {
     pending: {
-      label: "Confirmar Encomenda",
-      icon: CheckCircle,
-      target: "confirmed",
+      label: "Despachar Encomenda",
+      icon: Truck,
+      target: "delivering",
       color: "bg-brand-midnight hover:bg-brand-midnight/90 text-white",
     },
-    confirmed: {
-      label: "Despachar para Entrega",
-      icon: Truck,
-      target: "out_for_delivery",
-      color: "bg-brand-gold hover:bg-brand-gold/90 text-brand-midnight",
-    },
-    out_for_delivery: {
+    delivering: {
       label: "Marcar como Entregue",
       icon: CheckCircle,
       target: "delivered",
@@ -62,10 +56,8 @@ export function OrderContextualActions({
   // Secondary/Alternative Actions
   const allStatuses: OrderRecord["status"][] = [
     "pending",
-    "confirmed",
-    "out_for_delivery",
+    "delivering",
     "delivered",
-    "cancelled",
     "refused",
   ];
 
@@ -93,7 +85,7 @@ export function OrderContextualActions({
 
       <div className="grid grid-cols-2 gap-2">
         {secondaryActions.map((s) => {
-          const isDestructive = s === "cancelled" || s === "refused";
+          const isDestructive = s === "refused";
           return (
             <button
               key={s}
@@ -104,17 +96,13 @@ export function OrderContextualActions({
                 isDestructive ? "text-red-600 hover:bg-red-50" : "text-brand-midnight/60"
               )}
             >
-              {s === "cancelled" && <Ban className="h-3 w-3" />}
-              {s === "refused" && <XCircle className="h-3 w-3" />}
-              {s === "confirmed" && <CheckCircle className="h-3 w-3" />}
-              {s === "out_for_delivery" && <Truck className="h-3 w-3" />}
+              {s === "refused" && <Ban className="h-3 w-3" />}
+              {s === "delivering" && <Truck className="h-3 w-3" />}
               {s === "delivered" && <Package className="h-3 w-3" />}
               {s === "pending" && <Package className="h-3 w-3" />}
               {s === "pending" ? "Mover para Pendente" : 
-               s === "confirmed" ? "Confirmar" :
-               s === "out_for_delivery" ? "Em Entrega" :
-               s === "delivered" ? "Entregue" :
-               s === "cancelled" ? "Cancelar" : "Recusar"}
+               s === "delivering" ? "Em Entrega" :
+               s === "delivered" ? "Entregue" : "Recusar / Cancelar"}
             </button>
           );
         })}
