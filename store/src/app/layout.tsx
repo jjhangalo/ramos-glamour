@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Ramos Glamour",
-  description: "Loja feminina de luxo Ramos Glamour - Elegância e Estilo",
+  description: "Loja Feminina de Luxo Ramos Glamour - Elegância e Estilo",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

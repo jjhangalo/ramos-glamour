@@ -58,7 +58,7 @@ function FilterContent({
       {/* Draft Chips (Visual Feedback inside the selector) */}
       {hasDraftFilters && (
         <div className="space-y-4 pb-10 border-b border-brand-midnight/5 animate-in fade-in slide-in-from-top-4 duration-500">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-gold">SELECIONADOS</h3>
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-gold">SELECCIONADOS</h3>
           <div className="flex flex-wrap gap-2">
             {draftFilters.categoria && draftFilters.categoria !== "todas" && (
               <button 
@@ -100,15 +100,15 @@ function FilterContent({
               type="button"
               onClick={() => setDraftFilters(prev => ({ ...prev, categoria: "todas" }))}
               className={cn(
-                "group flex items-center gap-3 text-[11px] font-semibold tracking-widest transition-all hover:text-brand-gold text-left",
+                "group flex w-full items-center gap-4 py-4 text-[11px] font-bold tracking-widest transition-all hover:text-brand-gold text-left touch-manipulation",
                 (!draftFilters.categoria || draftFilters.categoria === "todas") ? "text-brand-gold" : "text-brand-midnight/50"
               )}
             >
               <span className={cn(
-                "flex h-4 w-4 items-center justify-center border transition-all",
+                "flex h-5 w-5 shrink-0 items-center justify-center border transition-all",
                 (!draftFilters.categoria || draftFilters.categoria === "todas") ? "border-brand-gold bg-brand-gold text-brand-white" : "border-brand-midnight/10 group-hover:border-brand-gold"
               )}>
-                {(!draftFilters.categoria || draftFilters.categoria === "todas") && <Check className="h-2.5 w-2.5" />}
+                {(!draftFilters.categoria || draftFilters.categoria === "todas") && <Check className="h-3 w-3" />}
               </span>
               TODAS AS PEÇAS
             </button>
@@ -121,15 +121,15 @@ function FilterContent({
                   type="button"
                   onClick={() => toggleCategory(cat.slug)}
                   className={cn(
-                    "group flex items-center gap-3 text-[11px] font-semibold tracking-widest transition-all hover:text-brand-gold text-left",
+                    "group flex w-full items-center gap-4 py-4 text-[11px] font-bold tracking-widest transition-all hover:text-brand-gold text-left touch-manipulation",
                     isSelected ? "text-brand-gold" : "text-brand-midnight/50"
                   )}
                 >
                   <span className={cn(
-                    "flex h-4 w-4 items-center justify-center border transition-all",
+                    "flex h-5 w-5 shrink-0 items-center justify-center border transition-all",
                     isSelected ? "border-brand-gold bg-brand-gold text-brand-white" : "border-brand-midnight/10 group-hover:border-brand-gold"
                   )}>
-                    {isSelected && <Check className="h-2.5 w-2.5" />}
+                    {isSelected && <Check className="h-3 w-3" />}
                   </span>
                   {cat.name.toUpperCase()}
                 </button>
@@ -143,7 +143,7 @@ function FilterContent({
       <form onSubmit={handleApply} className="space-y-12 pt-12 border-t border-brand-midnight/5">
         {/* Search */}
         <div className="space-y-6">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em]">PESQUISAR</h3>
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em]">PESQUISA</h3>
           <div className="group relative border-b border-brand-midnight/10 pb-2 transition-colors focus-within:border-brand-gold">
             <input
               name="busca"
@@ -158,23 +158,23 @@ function FilterContent({
 
         {/* Sort */}
         <div className="space-y-6">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em]">ORDENAR</h3>
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em]">ORDENAÇÃO</h3>
           <div className="space-y-3">
             {[
               { value: "recentes", label: "MAIS RECENTES" },
               { value: "preco-asc", label: "MENOR PREÇO" },
               { value: "preco-desc", label: "MAIOR PREÇO" },
             ].map((opt) => (
-              <label key={opt.value} className="flex cursor-pointer items-center gap-3 group">
+              <label key={opt.value} className="flex cursor-pointer items-center gap-4 group py-3 touch-manipulation">
                 <input
                   type="radio"
                   name="ordem"
                   value={opt.value}
                   checked={draftFilters.ordem === opt.value || (!draftFilters.ordem && opt.value === "recentes")}
                   onChange={() => setDraftFilters(prev => ({ ...prev, ordem: opt.value }))}
-                  className="h-3 w-3 accent-brand-gold"
+                  className="h-5 w-5 accent-brand-gold"
                 />
-                <span className="text-[11px] font-semibold tracking-widest text-brand-midnight/50 transition-colors group-hover:text-brand-midnight">
+                <span className="text-[11px] font-bold tracking-widest text-brand-midnight/50 transition-colors group-hover:text-brand-midnight">
                   {opt.label}
                 </span>
               </label>
@@ -302,8 +302,8 @@ export function CatalogFilters({
           <div className="flex items-center gap-4 overflow-x-auto no-scrollbar py-1">
             <Sheet open={isOpen} onOpenChange={handleOpenChange}>
               <SheetTrigger asChild>
-                <button className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] shrink-0">
-                  <SlidersHorizontal className="h-4 w-4" />
+                <button className="flex items-center gap-3 px-4 py-3 text-[10px] font-bold tracking-[0.2em] shrink-0 active:bg-brand-midnight/5 rounded-lg transition-colors">
+                  <SlidersHorizontal className="h-5 w-5" />
                   FILTROS
                 </button>
               </SheetTrigger>
@@ -311,7 +311,7 @@ export function CatalogFilters({
                 <SheetHeader>
                   <SheetTitle className="heading-luxury text-3xl font-light">Filtros</SheetTitle>
                   <SheetDescription className="sr-only">
-                    Ajuste os filtros para encontrar os produtos desejados.
+                    Ajuste os filtros para encontrar os produtos que deseja.
                   </SheetDescription>
                 </SheetHeader>
                 <FilterContent 
@@ -349,10 +349,10 @@ export function CatalogFilters({
               {activeOrder && activeOrder !== "recentes" && (
                 <button 
                   onClick={() => removeFilter("ordem")}
-                  className="flex items-center gap-1.5 whitespace-nowrap bg-brand-midnight/5 px-3 py-1.5 text-[9px] font-bold tracking-widest text-brand-midnight uppercase"
+                  className="flex items-center gap-2 whitespace-nowrap bg-brand-midnight/5 px-4 py-3 text-[9px] font-bold tracking-widest text-brand-midnight uppercase rounded-full active:bg-brand-midnight/10"
                 >
                   {activeOrder === "preco-asc" ? "MENOR PREÇO" : "MAIOR PREÇO"}
-                  <X className="h-3 w-3" />
+                  <X className="h-4 w-4" />
                 </button>
               )}
             </div>

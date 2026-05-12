@@ -48,8 +48,7 @@ export function CheckoutConfirmationClient({
           Encomenda recebida!
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-brand-charcoal/75">
-          A tua encomenda foi registada com sucesso. Entraremos em contacto em
-          breve.
+          A sua encomenda foi registada com sucesso. Entraremos em contacto brevemente.
         </p>
 
         <div className="mt-8 flex flex-col gap-3">
@@ -60,7 +59,7 @@ export function CheckoutConfirmationClient({
               rel="noreferrer"
               className="rounded-full bg-brand-olive px-6 py-4 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"
             >
-              Abrir WhatsApp
+              Acompanhar via WhatsApp
             </a>
           ) : null}
 
