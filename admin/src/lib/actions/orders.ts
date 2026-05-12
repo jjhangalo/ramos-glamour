@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { buildWhatsAppUrl } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOrderStatusEmail } from "./notifications";
+import { sendPushNotification } from "@/lib/notifications/webpush";
 import type { OrderRecord } from "@/lib/types";
 
 export async function getOrders(
@@ -130,8 +131,9 @@ export async function updateOrderStatus(
   revalidatePath("/encomendas");
   revalidatePath(`/encomendas/${id}`);
 
-  // Enviar email de notificação (assíncrono)
+  // Enviar notificações (assíncrono)
   if (order.user_id) {
+    // 1. Email
     supabase.auth.admin.getUserById(order.user_id).then(({ data: userData }) => {
       const email = userData?.user?.email;
       if (email) {
@@ -140,6 +142,29 @@ export async function updateOrderStatus(
         });
       }
     });
+
+    // 2. Web Push
+    supabase
+      .from("profiles")
+      .select("push_subscription")
+      .eq("id", order.user_id)
+      .single()
+      .then(({ data: profile }) => {
+        if (profile?.push_subscription) {
+          let body = "";
+          if (status === "delivering") {
+            body = "A sua encomenda saiu para entrega. Elegância a caminho.";
+          } else if (status === "refused") {
+            body = "Atualização sobre o seu pedido. Por favor, verifique o seu perfil.";
+          } else if (status === "delivered") {
+            body = "A sua encomenda foi entregue. Esperamos que goste!";
+          }
+
+          if (body) {
+            sendPushNotification(order.user_id, profile.push_subscription, "Ramos Glamour", body).catch(console.error);
+          }
+        }
+      });
   }
 
   return { success: true };
@@ -177,8 +202,9 @@ export async function updateOrdersBulk(
 
   revalidatePath("/encomendas");
 
-  // Enviar emails de notificação em massa (assíncrono)
+  // Enviar notificações em massa (assíncrono)
   orders?.forEach((order) => {
+    // 1. Email
     supabase.auth.admin.getUserById(order.user_id).then(({ data: userData }) => {
       const email = userData?.user?.email;
       if (email) {
@@ -187,6 +213,29 @@ export async function updateOrdersBulk(
         });
       }
     });
+
+    // 2. Web Push
+    supabase
+      .from("profiles")
+      .select("push_subscription")
+      .eq("id", order.user_id)
+      .single()
+      .then(({ data: profile }) => {
+        if (profile?.push_subscription) {
+          let body = "";
+          if (status === "delivering") {
+            body = "A sua encomenda saiu para entrega. Elegância a caminho.";
+          } else if (status === "refused") {
+            body = "Atualização sobre o seu pedido. Por favor, verifique o seu perfil.";
+          } else if (status === "delivered") {
+            body = "A sua encomenda foi entregue. Esperamos que goste!";
+          }
+
+          if (body) {
+            sendPushNotification(order.user_id, profile.push_subscription, "Ramos Glamour", body).catch(console.error);
+          }
+        }
+      });
   });
 
   return { success: true };
