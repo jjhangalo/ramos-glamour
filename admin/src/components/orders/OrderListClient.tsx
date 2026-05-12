@@ -41,16 +41,14 @@ export function OrderListClient({ initialOrders }: OrderListClientProps) {
   };
 
   const getAvailableTransitions = (currentStatus: OrderRecord["status"]) => {
-    const terminalStates = ["delivered", "cancelled", "refused"];
+    const terminalStates = ["delivered", "refused"];
     if (terminalStates.includes(currentStatus)) return [];
 
     const allStatuses: { value: OrderRecord["status"]; label: string; icon: React.ElementType }[] = [
       { value: "pending", label: "Pendente", icon: Package },
-      { value: "confirmed", label: "Confirmar", icon: CheckCircle },
-      { value: "out_for_delivery", label: "Em Entrega", icon: Truck },
+      { value: "delivering", label: "Em Entrega", icon: Truck },
       { value: "delivered", label: "Entregar", icon: CheckCircle },
-      { value: "cancelled", label: "Cancelar", icon: Ban },
-      { value: "refused", label: "Recusar", icon: XCircle },
+      { value: "refused", label: "Cancelar / Recusar", icon: XCircle },
     ];
 
     return allStatuses.filter((s) => s.value !== currentStatus);
@@ -137,7 +135,7 @@ export function OrderListClient({ initialOrders }: OrderListClientProps) {
                               onClick={() => handleStatusUpdate(order.id, t.value)}
                               className={cn(
                                 "text-[10px] font-bold uppercase tracking-wider",
-                                t.value === "cancelled" || t.value === "refused" ? "text-red-600 hover:bg-red-50" : "text-brand-midnight/70"
+                                t.value === "refused" ? "text-red-600 hover:bg-red-50" : "text-brand-midnight/70"
                               )}
                             >
                               <t.icon className="h-4 w-4 opacity-40" />
@@ -197,7 +195,7 @@ export function OrderListClient({ initialOrders }: OrderListClientProps) {
                             onClick={() => handleStatusUpdate(order.id, t.value)}
                             className={cn(
                               "text-[10px] font-bold uppercase tracking-wider",
-                              t.value === "cancelled" || t.value === "refused" ? "text-red-600" : "text-brand-midnight/70"
+                              t.value === "refused" ? "text-red-600" : "text-brand-midnight/70"
                             )}
                           >
                             <t.icon className="h-4 w-4 opacity-40" />

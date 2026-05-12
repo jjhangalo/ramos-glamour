@@ -19,7 +19,7 @@ export default function MigratePage() {
     <div className="p-10 space-y-6">
       <h1 className="text-2xl font-bold">Migration Tool</h1>
       <p className="text-slate-600">
-        Esta ferramenta normaliza os estados das encomendas (ex: &apos;delivering&apos; para &apos;out_for_delivery&apos;).
+        Esta ferramenta normaliza os estados das encomendas (ex: &apos;delivering&apos; para &apos;shipped&apos;).
       </p>
       
       <button

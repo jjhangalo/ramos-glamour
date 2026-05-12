@@ -58,18 +58,7 @@ export function OrderBulkBar({
             {currentStatus === "pending" && (
               <button
                 disabled={isPending}
-                onClick={() => handleBulkUpdate("confirmed")}
-                className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-bold text-slate-950 transition hover:bg-slate-100 disabled:opacity-50"
-              >
-                {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
-                CONFIRMAR
-              </button>
-            )}
-
-            {currentStatus === "confirmed" && (
-              <button
-                disabled={isPending}
-                onClick={() => handleBulkUpdate("out_for_delivery")}
+                onClick={() => handleBulkUpdate("delivering")}
                 className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-bold text-slate-950 transition hover:bg-slate-100 disabled:opacity-50"
               >
                 {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Truck className="h-3 w-3" />}
@@ -77,12 +66,12 @@ export function OrderBulkBar({
               </button>
             )}
 
-            {(currentStatus === "pending" || currentStatus === "confirmed") && (
+            {currentStatus === "pending" && (
               <button
                 disabled={isPending}
                 onClick={() => {
                   if (confirm(`Cancelar ${selectedIds.length} encomendas?`)) {
-                    handleBulkUpdate("cancelled");
+                    handleBulkUpdate("refused");
                   }
                 }}
                 className="flex items-center gap-2 rounded-xl bg-red-600/20 px-4 py-2 text-xs font-bold text-red-400 transition hover:bg-red-600/30 disabled:opacity-50"

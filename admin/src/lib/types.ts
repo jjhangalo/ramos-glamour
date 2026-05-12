@@ -114,7 +114,7 @@ export type OrderRecord = {
   id: string;
   user_id: string;
   address_id: string | null;
-  status: "pending" | "confirmed" | "out_for_delivery" | "delivered" | "cancelled" | "refused";
+  status: "pending" | "delivering" | "delivered" | "refused";
   notes: string | null;
   total: number;
   created_at: string;

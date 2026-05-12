@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
-import toast from "react-hot-toast";
 
-import { createOrder } from "@/lib/actions/orders";
+import type { CartItem } from "@/lib/actions/checkout";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils/format";
 import { CheckoutButton } from "@/components/cart/CheckoutButton";
@@ -68,7 +67,6 @@ function formatAddress(address: StoredAddress | ManualAddress | null | undefined
 
 export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const items = useCartStore((state) => state.items);
   const totalPrice = useCartStore((state) => state.totalPrice);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
@@ -405,9 +403,18 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
               A confirmação cria a encomenda, prepara a notificação e gera o link de WhatsApp para acompanhamento.
             </p>
             <div className="mt-8">
-              <CheckoutButton 
-                items={items}
-                addressId={useManualAddress ? (manualAddress ? "manual" : null) : selectedAddressId}
+              <CheckoutButton
+                items={items.map(
+                  (item): CartItem => ({
+                    id: item.id,
+                    variantId: item.variantId ?? undefined,
+                    variantSize: item.variantSize ?? undefined,
+                    variantColor: item.variantColor ?? undefined,
+                    quantity: item.quantity,
+                  }),
+                )}
+                addressId={useManualAddress ? null : selectedAddressId}
+                notes={notes}
                 label="FINALIZAR COMPRA"
               />
             </div>
