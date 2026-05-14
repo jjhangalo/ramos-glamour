@@ -9,6 +9,39 @@ if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   );
 }
 
+export type AdminProfile = {
+  id: string;
+  push_subscription: webpush.PushSubscription | null;
+  dnd_enabled: boolean;
+  dnd_start_time: string | null;
+  dnd_end_time: string | null;
+};
+
+/**
+ * Pure function to evaluate if Do Not Disturb (DND) is active based on Africa/Luanda time.
+ */
+export function isDndActive(startTime: string, endTime: string): boolean {
+  if (!startTime || !endTime) return false;
+
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat("pt-AO", {
+    timeZone: "Africa/Luanda",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+  const timeString = formatter.format(now); // "HH:mm"
+  
+  if (startTime <= endTime) {
+    // Normal interval (e.g., 08:00 - 22:00)
+    return timeString >= startTime && timeString <= endTime;
+  } else {
+    // Midnight-crossing interval (e.g., 22:00 - 06:00)
+    return timeString >= startTime || timeString <= endTime;
+  }
+}
+
 export async function sendPushNotification(
   userId: string,
   subscription: webpush.PushSubscription,
@@ -26,14 +59,14 @@ export async function sendPushNotification(
     });
 
     await webpush.sendNotification(subscription, payload);
-    console.log(`Notificação push enviada para o utilizador ${userId}`);
+    console.log(`Push notification sent to user ${userId}`);
   } catch (error: unknown) {
     const pushError = error as { statusCode?: number; message?: string };
-    console.error(`Erro ao enviar push para ${userId}:`, pushError.statusCode, pushError.message);
+    console.error(`Error sending push to ${userId}:`, pushError.statusCode, pushError.message);
 
-    // Se o erro for 410 (Gone) ou 404 (Not Found), a subscrição expirou
+    // If error is 410 (Gone) or 404 (Not Found), the subscription has expired
     if (pushError.statusCode === 410 || pushError.statusCode === 404) {
-      console.log(`Limpando subscrição expirada para o utilizador ${userId}`);
+      console.log(`Cleaning up expired subscription for user ${userId}`);
       const supabase = createAdminClient();
       await supabase
         .from("profiles")
@@ -42,3 +75,60 @@ export async function sendPushNotification(
     }
   }
 }
+
+/**
+ * Broadcasts push notifications to multiple admins, respecting their DND settings.
+ */
+export async function broadcastAdminPush(
+  admins: AdminProfile[],
+  title: string,
+  body: string,
+  url: string = "/encomendas"
+) {
+  const eligibleAdmins = admins.filter((admin) => {
+    if (!admin.push_subscription) return false;
+    
+    if (admin.dnd_enabled && admin.dnd_start_time && admin.dnd_end_time) {
+      if (isDndActive(admin.dnd_start_time, admin.dnd_end_time)) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+
+  if (eligibleAdmins.length === 0) return;
+
+  const payload = JSON.stringify({ title, body, url });
+  
+  const results = await Promise.allSettled(
+    eligibleAdmins.map((admin) => 
+      webpush.sendNotification(admin.push_subscription!, payload)
+    )
+  );
+
+  const deadSubscriptionUserIds: string[] = [];
+
+  results.forEach((result, index) => {
+    if (result.status === "rejected") {
+      const error = result.reason as { statusCode?: number };
+      const admin = eligibleAdmins[index];
+      
+      console.error(`Error broadcasting push to ${admin.id}:`, error.statusCode);
+      
+      if (error.statusCode === 410 || error.statusCode === 404) {
+        deadSubscriptionUserIds.push(admin.id);
+      }
+    }
+  });
+
+  if (deadSubscriptionUserIds.length > 0) {
+    console.log(`Cleaning up ${deadSubscriptionUserIds.length} dead admin subscriptions`);
+    const supabase = createAdminClient();
+    await supabase
+      .from("profiles")
+      .update({ push_subscription: null })
+      .in("id", deadSubscriptionUserIds);
+  }
+}
+
