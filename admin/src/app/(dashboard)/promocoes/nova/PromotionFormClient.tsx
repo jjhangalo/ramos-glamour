@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Search, X, Info } from "lucide-react";
 import { formatPrice } from "@/lib/format";
@@ -73,9 +73,9 @@ export function PromotionFormClient({ products, initialData }: PromotionFormClie
     },
   });
 
-  const selectedProductId = form.watch("product_id");
-  const selectedVariantId = form.watch("variant_id");
-  const startsAt = form.watch("starts_at");
+  const selectedProductId = useWatch({ control: form.control, name: "product_id" });
+  const selectedVariantId = useWatch({ control: form.control, name: "variant_id" });
+  const startsAt = useWatch({ control: form.control, name: "starts_at" });
 
   const selectedProduct = products.find((p) => p.id === selectedProductId);
   const selectedVariant = selectedProduct?.variants.find((v) => v.id === selectedVariantId);
