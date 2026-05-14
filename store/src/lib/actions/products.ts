@@ -7,6 +7,7 @@ export type Category = {
   name: string;
   slug: string;
   parent_id: string | null;
+  image_url?: string | null;
 };
 
 export type ProductVariant = {
@@ -82,7 +83,7 @@ export async function getCategories(): Promise<Category[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, name, slug, parent_id")
+    .select("id, name, slug, parent_id, image_url")
     .order("name", { ascending: true });
 
   if (error) {
@@ -91,6 +92,21 @@ export async function getCategories(): Promise<Category[]> {
   }
 
   return data || [];
+}
+
+export async function getCategoryBySlug(slug: string): Promise<Category | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, name, slug, parent_id, image_url")
+    .eq("slug", slug)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return data;
 }
 
 export async function getProducts(filters: {
@@ -261,6 +277,63 @@ export async function getProduct(id: string): Promise<Product | null> {
       created_at: r.created_at,
       profiles: Array.isArray(r.profiles) ? r.profiles[0] : r.profiles,
     })),
+    rating_avg: avg,
+    review_count: ratings.length,
+  };
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const supabase = await createClient();
+  // Attempt to fetch by slug, fallback to ID if slug field is missing or it looks like a UUID
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(slug);
+  
+  const { data, error } = await supabase
+    .from("products")
+    .select(`
+      id,
+      name,
+      description,
+      price,
+      stock,
+      is_featured,
+      is_active,
+      created_at,
+      product_categories(
+        categories(id, name, slug, parent_id)
+      ),
+      product_images(url, position),
+      reviews(rating),
+      promotions(promo_price, is_active, ends_at)
+    `)
+    .or(`id.eq.${isUUID ? slug : "00000000-0000-0000-0000-000000000000"}${!isUUID ? `,slug.eq.${slug}` : ""}`)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  const typedData = data as unknown as DbProductBase;
+  const now = new Date();
+  const ratings = typedData.reviews?.map((r) => r.rating) || [];
+  const avg = ratings.length > 0 ? ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length : 5.0;
+
+  const activePromo = typedData.promotions?.find((promo) => {
+    return promo.is_active && (!promo.ends_at || new Date(promo.ends_at) > now);
+  });
+
+  return {
+    id: typedData.id,
+    name: typedData.name,
+    description: typedData.description,
+    price: typedData.price,
+    promo_price: activePromo?.promo_price || null,
+    is_featured: typedData.is_featured,
+    is_active: typedData.is_active,
+    stock: typedData.stock ?? 0,
+    created_at: typedData.created_at,
+    categories: typedData.product_categories.map((pc) => pc.categories),
+    images: (typedData.product_images || []).sort((a, b) => a.position - b.position),
     rating_avg: avg,
     review_count: ratings.length,
   };
