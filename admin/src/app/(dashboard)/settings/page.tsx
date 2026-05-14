@@ -2,9 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getClient } from "@/lib/actions/clients";
 import { ProfileForm } from "@/components/settings/ProfileForm";
 import { PasswordForm } from "@/components/settings/PasswordForm";
+import { DndForm } from "@/components/settings/DndForm";
 import { PageCanvas } from "@/components/ui/page-canvas";
 import { FadeUp } from "@/components/shared/Animations";
-import { Shield, UserCircle, Lock } from "lucide-react";
+import { Shield, UserCircle, Lock, Moon } from "lucide-react";
 import { notFound } from "next/navigation";
 
 export default async function SettingsPage() {
@@ -52,8 +53,29 @@ export default async function SettingsPage() {
             </div>
           </FadeUp>
 
-          {/* Security Section */}
+          {/* DND Section */}
           <FadeUp delay={0.2} className="space-y-8">
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-midnight/5 text-brand-midnight/40">
+                <Moon className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="heading-luxury text-xl font-medium text-brand-midnight">
+                  Notificações & Descanso
+                </h2>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
+                  Gestão do Modo Não Incomodar
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-[2.5rem] border border-brand-midnight/5 bg-white p-8 md:p-10 shadow-sm transition-shadow hover:shadow-md">
+              <DndForm admin={client} />
+            </div>
+          </FadeUp>
+
+          {/* Security Section */}
+          <FadeUp delay={0.3} className="space-y-8">
             <div className="flex items-center gap-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-midnight/5 text-brand-midnight/40">
                 <Lock className="h-5 w-5" />

@@ -60,6 +60,33 @@ export async function updateAdminProfile(formData: FormData) {
   return { success: true };
 }
 
+export async function updateDndSettings(enabled: boolean, startTime: string | null, endTime: string | null) {
+  const supabase = createAdminClient();
+  const serverClient = await createClient();
+  
+  const { data: { user } } = await serverClient.auth.getUser();
+  if (!user) throw new Error("Não autorizado");
+
+  if (enabled && (!startTime || !endTime)) {
+    throw new Error("Horários de início e fim são obrigatórios quando o DND está ativo.");
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      dnd_enabled: enabled,
+      dnd_start_time: startTime,
+      dnd_end_time: endTime,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (error) throw new Error(`Erro ao atualizar DND: ${error.message}`);
+
+  revalidatePath("/settings");
+  return { success: true };
+}
+
 export async function updateAdminPassword(newPassword: string) {
   const serverClient = await createClient();
   
