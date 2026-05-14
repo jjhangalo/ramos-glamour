@@ -1,6 +1,5 @@
 import { getClients } from "@/lib/actions/clients";
 import { EmptyState } from "@/components/ui/empty-state";
-import { AdminActions } from "@/components/administradores/AdminActions";
 import { PageCanvas } from "@/components/ui/page-canvas";
 import { FadeUp, StaggerContainer, StaggerItem } from "@/components/shared/Animations";
 import { Mail, Phone, Shield, Search } from "lucide-react";
@@ -101,7 +100,7 @@ export default async function AdminsPage({ searchParams }: AdminsPageProps) {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between border-t border-brand-midnight/5 pt-6">
+                    <div className="flex items-center border-t border-brand-midnight/5 pt-6">
                       <span className={cn(
                         "inline-flex rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-widest border",
                         admin.is_active 
@@ -110,7 +109,6 @@ export default async function AdminsPage({ searchParams }: AdminsPageProps) {
                       )}>
                         {admin.is_active ? "Ativo" : "Inativo"}
                       </span>
-                      <AdminActions userId={admin.id} />
                     </div>
                   </div>
                 </article>

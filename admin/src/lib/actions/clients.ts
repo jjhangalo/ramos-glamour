@@ -223,26 +223,3 @@ export async function toggleClientStatus(id: string, isActive: boolean) {
   return { success: true };
 }
 
-export async function toggleAdminRole(userId: string, newRole: "client" | "admin") {
-  if (userId === process.env.MASTER_ADMIN_ID) {
-    return {
-      success: false,
-      error: "Não é permitido alterar o papel do administrador mestre.",
-    };
-  }
-
-  const supabase = createAdminClient();
-  const { error } = await supabase
-    .from("profiles")
-    .update({ role: newRole, updated_at: new Date().toISOString() })
-    .eq("id", userId);
-
-  if (error) {
-    return { success: false, error: error.message };
-  }
-
-  revalidatePath("/clientes");
-  revalidatePath("/administradores");
-  revalidatePath(`/clientes/${userId}`);
-  return { success: true };
-}
