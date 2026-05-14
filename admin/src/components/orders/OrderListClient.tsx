@@ -9,7 +9,6 @@ import {
   ExternalLink, 
   CheckCircle, 
   Truck, 
-  Ban, 
   XCircle, 
   Package 
 } from "lucide-react";
@@ -41,14 +40,22 @@ export function OrderListClient({ initialOrders }: OrderListClientProps) {
   };
 
   const getAvailableTransitions = (currentStatus: OrderRecord["status"]) => {
-    const terminalStates = ["delivered", "refused"];
+    const terminalStates = [
+      "delivered", 
+      "refused", 
+      "delivery_failed", 
+      "cancelled_by_admin", 
+      "cancelled_by_customer"
+    ];
     if (terminalStates.includes(currentStatus)) return [];
 
     const allStatuses: { value: OrderRecord["status"]; label: string; icon: React.ElementType }[] = [
       { value: "pending", label: "Pendente", icon: Package },
       { value: "delivering", label: "Em Entrega", icon: Truck },
-      { value: "delivered", label: "Entregar", icon: CheckCircle },
-      { value: "refused", label: "Cancelar / Recusar", icon: XCircle },
+      { value: "delivered", label: "Entregue", icon: CheckCircle },
+      { value: "delivery_failed", label: "Falha na Entrega", icon: XCircle },
+      { value: "refused", label: "Recusada", icon: XCircle },
+      { value: "cancelled_by_admin", label: "Cancelar pela Loja", icon: XCircle },
     ];
 
     return allStatuses.filter((s) => s.value !== currentStatus);

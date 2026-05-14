@@ -30,7 +30,7 @@ export function OrderContextualActions({
     });
   };
 
-  const terminalStates = ["delivered", "refused"];
+  const terminalStates = ["delivered", "refused", "cancelled_by_admin", "cancelled_by_customer"];
   if (terminalStates.includes(status)) {
     return null;
   }
@@ -58,7 +58,10 @@ export function OrderContextualActions({
     "pending",
     "delivering",
     "delivered",
+    "delivery_failed",
     "refused",
+    "cancelled_by_admin",
+    "cancelled_by_customer",
   ];
 
   const secondaryActions = allStatuses.filter(s => 
@@ -85,7 +88,7 @@ export function OrderContextualActions({
 
       <div className="grid grid-cols-2 gap-2">
         {secondaryActions.map((s) => {
-          const isDestructive = s === "refused";
+          const isDestructive = ["refused", "cancelled_by_admin", "cancelled_by_customer", "delivery_failed"].includes(s);
           return (
             <button
               key={s}
@@ -96,13 +99,17 @@ export function OrderContextualActions({
                 isDestructive ? "text-red-600 hover:bg-red-50" : "text-brand-midnight/60"
               )}
             >
-              {s === "refused" && <Ban className="h-3 w-3" />}
+              {(s === "refused" || s.startsWith("cancelled")) && <Ban className="h-3 w-3" />}
               {s === "delivering" && <Truck className="h-3 w-3" />}
               {s === "delivered" && <Package className="h-3 w-3" />}
               {s === "pending" && <Package className="h-3 w-3" />}
+              {s === "delivery_failed" && <XCircle className="h-3 w-3" />}
               {s === "pending" ? "Mover para Pendente" : 
                s === "delivering" ? "Em Entrega" :
-               s === "delivered" ? "Entregue" : "Recusar / Cancelar"}
+               s === "delivered" ? "Entregue" : 
+               s === "delivery_failed" ? "Falha na Entrega" :
+               s === "cancelled_by_admin" ? "Cancelar (Loja)" :
+               s === "cancelled_by_customer" ? "Cancelar (Cliente)" : "Recusar"}
             </button>
           );
         })}

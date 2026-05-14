@@ -114,7 +114,7 @@ export type OrderRecord = {
   id: string;
   user_id: string;
   address_id: string | null;
-  status: "pending" | "delivering" | "delivered" | "refused";
+  status: "pending" | "delivering" | "delivered" | "delivery_failed" | "refused" | "cancelled_by_admin" | "cancelled_by_customer";
   notes: string | null;
   total: number;
   created_at: string;
@@ -130,30 +130,6 @@ export type OrderRecord = {
   order_items?: OrderItemRecord[];
 };
 
-export type PromotionVoteRecord = {
-  id: string;
-  request_id: string;
-  voter_id: string;
-  decision: "approve" | "reject";
-  created_at: string;
-  voter?: {
-    full_name: string | null;
-    display_name: string | null;
-  };
-};
-
-export type PromotionRequestRecord = {
-  id: string;
-  candidate_id: string;
-  requester_id: string;
-  status: "pending" | "approved" | "rejected";
-  created_at: string;
-  updated_at: string;
-  candidate?: ClientRecord;
-  requester?: ClientRecord;
-  votes?: PromotionVoteRecord[];
-};
-
 export type ClientRecord = {
   id: string;
   full_name: string | null;
@@ -167,5 +143,7 @@ export type ClientRecord = {
   updated_at: string;
   email?: string | null;
   role: "client" | "admin";
-  promotion_request?: PromotionRequestRecord | null;
+  dnd_enabled?: boolean;
+  dnd_start_time?: string | null;
+  dnd_end_time?: string | null;
 };

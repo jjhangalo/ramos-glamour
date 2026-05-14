@@ -42,40 +42,6 @@ export function isDndActive(startTime: string, endTime: string): boolean {
   }
 }
 
-export async function sendPushNotification(
-  userId: string,
-  subscription: webpush.PushSubscription,
-  title: string,
-  body: string,
-  url: string = "/perfil/encomendas"
-) {
-  if (!subscription) return;
-
-  try {
-    const payload = JSON.stringify({
-      title,
-      body,
-      url,
-    });
-
-    await webpush.sendNotification(subscription, payload);
-    console.log(`Push notification sent to user ${userId}`);
-  } catch (error: unknown) {
-    const pushError = error as { statusCode?: number; message?: string };
-    console.error(`Error sending push to ${userId}:`, pushError.statusCode, pushError.message);
-
-    // If error is 410 (Gone) or 404 (Not Found), the subscription has expired
-    if (pushError.statusCode === 410 || pushError.statusCode === 404) {
-      console.log(`Cleaning up expired subscription for user ${userId}`);
-      const supabase = createAdminClient();
-      await supabase
-        .from("profiles")
-        .update({ push_subscription: null })
-        .eq("id", userId);
-    }
-  }
-}
-
 /**
  * Broadcasts push notifications to multiple admins, respecting their DND settings.
  */
@@ -131,4 +97,3 @@ export async function broadcastAdminPush(
       .in("id", deadSubscriptionUserIds);
   }
 }
-
