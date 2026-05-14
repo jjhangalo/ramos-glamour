@@ -29,11 +29,12 @@ export function CategoryCombobox({
   const [search, setSearch] = useState("");
 
   const flatCategories = useMemo(() => {
-    const getPath = (c: Category, all: Category[]): string => {
+    const getPath = (c: Category, all: Category[], depth = 0): string => {
+      if (depth > 10) return c.name; // Safety break
       if (!c.parent_id) return c.name;
       const parent = all.find(p => p.id === c.parent_id);
       if (!parent) return c.name;
-      return `${getPath(parent, all)} > ${c.name}`;
+      return `${getPath(parent, all, depth + 1)} > ${c.name}`;
     };
 
     return categories.map(c => ({

@@ -32,13 +32,8 @@ async function validateParentCategory(parentId: string | null | undefined) {
     return { success: false as const, error: "Categoria pai inválida." };
   }
 
-  if (data.parent_id) {
-    return {
-      success: false as const,
-      error: "Só é possível usar categorias raiz como categoria pai.",
-    };
-  }
-
+  // Deep hierarchies are now allowed. Cycle prevention is handled in the update/create actions by checking
+  // if a category is being parented to itself or one of its descendants.
   return { success: true as const };
 }
 

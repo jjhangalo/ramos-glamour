@@ -17,7 +17,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence initial={false}>
       <motion.div
         key={pathname}
         initial={ready ? { opacity: 0, y: 8 } : false}

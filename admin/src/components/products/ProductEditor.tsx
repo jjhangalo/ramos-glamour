@@ -362,7 +362,7 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
         </div>
       </nav>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {/* ═══ Tab: Produto ═══ */}
         {activeTab === "produto" && (
           <motion.div
