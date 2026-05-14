@@ -53,8 +53,28 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: product.images.map((img) => img.url),
+    description: product.description,
+    sku: product.id,
+    offers: {
+      "@type": "Offer",
+      url: `https://ramosglamour.com/produtos/${slug}`,
+      priceCurrency: "AOA",
+      price: product.promo_price || product.price,
+      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    },
+  };
+
   return (
     <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <ProductDetailView product={product} />
     </main>
   );

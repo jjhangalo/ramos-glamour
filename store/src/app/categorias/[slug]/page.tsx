@@ -40,6 +40,14 @@ export async function generateMetadata({
       title,
       description,
       type: "website",
+      images: category.image_url ? [
+        {
+          url: category.image_url,
+          width: 1200,
+          height: 630,
+          alt: category.name,
+        },
+      ] : [],
     },
   };
 }
