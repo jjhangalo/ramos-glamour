@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { buildWhatsAppUrl } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOrderStatusEmail } from "./notifications";
-import { sendPushNotification } from "@/lib/notifications/webpush";
+import { sendPushNotification, broadcastAdminPush, type AdminProfile } from "@/lib/notifications/webpush";
 import type { OrderRecord } from "@/lib/types";
 
 export async function getOrders(
@@ -116,7 +116,7 @@ export async function updateOrderStatus(
   if (!order) return { success: false, error: "Encomenda não encontrada." };
   
   const currentStatus = order.status;
-  const terminalStates = ["delivered", "refused"];
+  const terminalStates = ["delivered", "refused", "cancelled_by_admin", "cancelled_by_customer"];
   
   if (terminalStates.includes(currentStatus)) {
     return { success: false, error: "Não é possível alterar o estado de uma encomenda finalizada." };
@@ -165,6 +165,27 @@ export async function updateOrderStatus(
           }
         }
       });
+
+    // 3. Broadcast to other admins
+    supabase.auth.getUser().then(({ data: { user: authUser } }) => {
+      if (authUser) {
+        supabase
+          .from("profiles")
+          .select("id, push_subscription, dnd_enabled, dnd_start_time, dnd_end_time")
+          .eq("role", "admin")
+          .neq("id", authUser.id)
+          .not("push_subscription", "is", null)
+          .then(({ data: admins }) => {
+            if (admins && admins.length > 0) {
+              broadcastAdminPush(
+                admins as unknown as AdminProfile[],
+                "Atualização logística",
+                `A encomenda ${id.slice(0, 8)} passou para o estado: ${status}`
+              ).catch(console.error);
+            }
+          });
+      }
+    });
   }
 
   return { success: true };
@@ -184,7 +205,7 @@ export async function updateOrdersBulk(
     
   if (fetchError) return { success: false, error: fetchError.message };
   
-  const terminalStates = ["delivered", "refused"];
+  const terminalStates = ["delivered", "refused", "cancelled_by_admin", "cancelled_by_customer"];
   const invalidOrders = orders?.filter(o => terminalStates.includes(o.status)) || [];
   
   if (invalidOrders.length > 0) {

@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import toast from "react-hot-toast";
-import { CheckCircle, Truck, Ban, Loader2, Info } from "lucide-react";
+import { Truck, Ban, Loader2, Info } from "lucide-react";
 
 import { updateOrdersBulk } from "@/lib/actions/orders";
 import type { OrderRecord } from "@/lib/types";

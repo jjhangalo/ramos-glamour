@@ -114,7 +114,7 @@ export type OrderRecord = {
   id: string;
   user_id: string;
   address_id: string | null;
-  status: "pending" | "delivering" | "delivered" | "refused";
+  status: "pending" | "delivering" | "delivered" | "delivery_failed" | "refused" | "cancelled_by_admin" | "cancelled_by_customer";
   notes: string | null;
   total: number;
   created_at: string;
@@ -167,5 +167,8 @@ export type ClientRecord = {
   updated_at: string;
   email?: string | null;
   role: "client" | "admin";
+  dnd_enabled?: boolean;
+  dnd_start_time?: string | null;
+  dnd_end_time?: string | null;
   promotion_request?: PromotionRequestRecord | null;
 };
