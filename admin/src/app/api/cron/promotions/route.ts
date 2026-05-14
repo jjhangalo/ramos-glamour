@@ -21,14 +21,20 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  type PromotionItem = {
+    id: string;
+    ends_at: string | null;
+    products: { name: string } | { name: string }[] | null;
+  };
+
   const now = new Date();
-  const expiredPromotions: any[] = [];
-  const expiringSoonPromotions: any[] = [];
+  const expiredPromotions: PromotionItem[] = [];
+  const expiringSoonPromotions: PromotionItem[] = [];
 
   const msIn24h = 24 * 60 * 60 * 1000;
   const msIn48h = 48 * 60 * 60 * 1000;
 
-  for (const promo of promotions || []) {
+  for (const promo of (promotions as unknown as PromotionItem[]) || []) {
     if (!promo.ends_at) continue;
 
     const endDate = new Date(promo.ends_at);
@@ -66,7 +72,10 @@ export async function GET(request: Request) {
 
     // Process expired notifications
     for (const promo of expiredPromotions) {
-      const productName = (promo.products as any)?.name || "Produto";
+      const productName = Array.isArray(promo.products) 
+        ? promo.products[0]?.name 
+        : promo.products?.name || "Produto";
+
       // We don't await each broadcast to speed up the cron, but allSettled is inside broadcastAdminPush
       broadcastAdminPush(
         adminProfiles,
@@ -78,7 +87,10 @@ export async function GET(request: Request) {
 
     // Process warnings (24h-48h window)
     for (const promo of expiringSoonPromotions) {
-      const productName = (promo.products as any)?.name || "Produto";
+      const productName = Array.isArray(promo.products) 
+        ? promo.products[0]?.name 
+        : promo.products?.name || "Produto";
+
       broadcastAdminPush(
         adminProfiles,
         "Aviso de Validade",

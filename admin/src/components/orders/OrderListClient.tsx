@@ -9,7 +9,6 @@ import {
   ExternalLink, 
   CheckCircle, 
   Truck, 
-  Ban, 
   XCircle, 
   Package 
 } from "lucide-react";
