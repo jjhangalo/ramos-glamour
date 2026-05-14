@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { broadcastAdminPush, type AdminProfile } from "@/lib/notifications/webpush";
 
 type CartItemPayload = {
   id: string;
@@ -214,6 +215,22 @@ export async function createOrder(input: CreateOrderInput) {
   if (notificationError) {
     throw new Error(notificationError.message);
   }
+
+  // 3. Broadcast to all admins
+  adminSupabase
+    .from("profiles")
+    .select("id, push_subscription, dnd_enabled, dnd_start_time, dnd_end_time")
+    .eq("role", "admin")
+    .not("push_subscription", "is", null)
+    .then(({ data: admins }) => {
+      if (admins && admins.length > 0) {
+        broadcastAdminPush(
+          admins as unknown as AdminProfile[],
+          "Nova Encomenda",
+          `A encomenda ${order.id.slice(0, 8)} aguarda processamento.`
+        ).catch(console.error);
+      }
+    });
 
   const whatsappUrl = buildWhatsAppUrl({
     customerName:
