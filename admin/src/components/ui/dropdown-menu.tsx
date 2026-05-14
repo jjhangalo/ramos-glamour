@@ -52,7 +52,7 @@ export function DropdownMenu({
       {isOpen && (
         <div
           className={cn(
-            "absolute mt-2 w-48 origin-top-right rounded-2xl border border-brand-midnight/5 !bg-white p-1.5 shadow-2xl outline-none ring-1 ring-black/5 z-[100] !opacity-100",
+            "absolute mt-2 w-48 origin-top-right rounded-2xl border border-brand-midnight/5 !bg-white p-1.5 shadow-2xl outline-none ring-1 ring-black/5 z-[9999] !opacity-100",
             align === "right" ? "right-0" : "left-0",
           )}
         >

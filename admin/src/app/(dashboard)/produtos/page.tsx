@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { formatPrice } from "@/lib/format";
 import { getCategories } from "@/lib/actions/categories";
 import { getProducts } from "@/lib/actions/products";
+import type { CategoryRecord } from "@/lib/types";
 
 import { ProductFilters } from "@/components/products/ProductFilters";
 import { ProductRowActions } from "@/components/products/ProductRowActions";
@@ -41,11 +42,19 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       : [];
 
   const categories = await getCategories();
-  const flatCategories = categories.flatMap((c) => [
-    { id: c.id, name: c.name },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...(c.children?.map((child: any) => ({ id: child.id, name: `↳ ${child.name}` })) || []),
-  ]);
+  
+  const getPath = (c: CategoryRecord, all: CategoryRecord[], depth = 0): string => {
+    if (depth > 10) return c.name; // Safety break
+    if (!c.parent_id) return c.name;
+    const parent = all.find(p => p.id === c.parent_id);
+    if (!parent) return c.name;
+    return `${getPath(parent, all, depth + 1)} > ${c.name}`;
+  };
+
+  const flatCategories = categories.map((c) => ({
+    id: c.id,
+    name: getPath(c, categories),
+  })).sort((a, b) => a.name.localeCompare(b.name));
 
   const { products, count } = await getProducts({
     category_ids: categoryIds,
@@ -83,7 +92,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         <StaggerContainer>
           <div className="rounded-xl border border-brand-midnight/5 bg-white shadow-sm overflow-visible">
             {/* Desktop Table */}
-            <div className="hidden md:block overflow-x-auto overflow-y-visible">
+            <div className="hidden md:block overflow-visible">
               <table className="min-w-full text-left text-sm">
                 <thead className="bg-brand-bg/30 text-[11px] font-bold uppercase tracking-[0.15em] text-brand-midnight/40">
                   <tr className="border-b border-brand-midnight/5">

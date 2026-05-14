@@ -29,13 +29,18 @@ export function CategoryCombobox({
   const [search, setSearch] = useState("");
 
   const flatCategories = useMemo(() => {
-    return categories.map(c => {
-      const parent = categories.find(p => p.id === c.parent_id);
-      return {
-        ...c,
-        displayName: parent ? `${parent.name} · ${c.name}` : c.name
-      };
-    });
+    const getPath = (c: Category, all: Category[], depth = 0): string => {
+      if (depth > 10) return c.name; // Safety break
+      if (!c.parent_id) return c.name;
+      const parent = all.find(p => p.id === c.parent_id);
+      if (!parent) return c.name;
+      return `${getPath(parent, all, depth + 1)} > ${c.name}`;
+    };
+
+    return categories.map(c => ({
+      ...c,
+      displayName: getPath(c, categories)
+    }));
   }, [categories]);
 
   const filteredCategories = useMemo(() => {
