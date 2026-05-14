@@ -55,6 +55,18 @@ const defaultValues: CategoryFormValues = {
 
 export function CategoryManager({ categories }: CategoryManagerProps) {
   const [isPending, startTransition] = useTransition();
+  const categoryTree = useMemo(() => {
+    const buildTree = (items: CategoryRecord[], parentId: string | null = null): CategoryRecord[] => {
+      return items
+        .filter((item) => item.parent_id === parentId)
+        .map((item) => ({
+          ...item,
+          children: buildTree(items, item.id),
+        }));
+    };
+    return buildTree(categories);
+  }, [categories]);
+
   const [expandedIds, setExpandedIds] = useState<string[]>(
     categories.map((c) => c.id)
   );
@@ -174,9 +186,9 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
         }
       });
     }
-    flatten(categories);
+    flatten(categoryTree);
     return list;
-  }, [categories]);
+  }, [categoryTree]);
 
   return (
     <div className="space-y-12">
@@ -256,7 +268,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
 
       {/* Main List Section */}
       <StaggerContainer className="space-y-4">
-        {categories.map((category) => (
+        {categoryTree.map((category) => (
           <CategoryItem 
             key={category.id} 
             category={category} 

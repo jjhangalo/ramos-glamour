@@ -59,6 +59,7 @@ import type {
   ProductRecord,
   ProductVariantRecord,
 } from "@/lib/types";
+import { compressImages } from "@/lib/image";
 import {
   productSchema,
   type ProductFormValues,
@@ -257,16 +258,40 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
   };
 
   // Image upload
-  const handleImageUpload = (fileList: FileList | null) => {
+  const handleImageUpload = async (fileList: FileList | null) => {
     if (!product || !fileList?.length) return;
-    const formData = new FormData();
-    Array.from(fileList).forEach((f) => formData.append("files", f));
-    startTransition(async () => {
-      const r = await uploadProductImages(product.id, formData);
-      if (!r.success) { toast.error(r.error ?? "Erro no upload."); return; }
-      toast.success("Imagens carregadas.");
-      router.refresh();
-    });
+
+    const compressionToast = toast.loading("A processar imagens...");
+    
+    try {
+      const { files, skippedCount } = await compressImages(fileList);
+      
+      if (files.length === 0) {
+        toast.error("Nenhuma imagem válida para upload (limite de 4MB atingido).", { id: compressionToast });
+        return;
+      }
+
+      if (skippedCount > 0) {
+        toast.error(`${skippedCount} imagens foram ignoradas por excederem o limite de tamanho.`, { id: compressionToast });
+      } else {
+        toast.dismiss(compressionToast);
+      }
+
+      const formData = new FormData();
+      files.forEach((f) => formData.append("files", f));
+
+      startTransition(async () => {
+        const r = await uploadProductImages(product.id, formData);
+        if (!r.success) { 
+          toast.error(r.error ?? "Erro no upload."); 
+          return; 
+        }
+        toast.success("Imagens carregadas.");
+        router.refresh();
+      });
+    } catch (error) {
+      toast.error("Erro ao processar imagens.", { id: compressionToast });
+    }
   };
 
   // DnD

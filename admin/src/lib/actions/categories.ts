@@ -53,14 +53,7 @@ export async function getCategories() {
     throw new Error(error.message);
   }
 
-  const categories = (data ?? []) as CategoryRecord[];
-
-  return categories
-    .filter((category) => !category.parent_id)
-    .map((category) => ({
-      ...category,
-      children: categories.filter((child) => child.parent_id === category.id),
-    }));
+  return (data ?? []) as CategoryRecord[];
 }
 
 export async function createCategory(input: CategoryInput) {

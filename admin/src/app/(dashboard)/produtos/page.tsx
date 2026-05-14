@@ -41,11 +41,18 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       : [];
 
   const categories = await getCategories();
-  const flatCategories = categories.flatMap((c) => [
-    { id: c.id, name: c.name },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...(c.children?.map((child: any) => ({ id: child.id, name: `↳ ${child.name}` })) || []),
-  ]);
+  
+  const getPath = (c: any, all: any[]): string => {
+    if (!c.parent_id) return c.name;
+    const parent = all.find(p => p.id === c.parent_id);
+    if (!parent) return c.name;
+    return `${getPath(parent, all)} > ${c.name}`;
+  };
+
+  const flatCategories = categories.map((c) => ({
+    id: c.id,
+    name: getPath(c, categories),
+  })).sort((a, b) => a.name.localeCompare(b.name));
 
   const { products, count } = await getProducts({
     category_ids: categoryIds,

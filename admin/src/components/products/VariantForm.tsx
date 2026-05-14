@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { ProductVariantRecord } from "@/lib/types";
 import { FadeUp } from "@/components/shared/Animations";
+import { compressImages } from "@/lib/image";
 
 type VariantFormProps = {
   productId: string;
@@ -108,17 +109,36 @@ export function VariantForm({
   const handleImageUpload = async (files: FileList | null) => {
     if (!files?.length || !variant?.id) return;
 
-    const formData = new FormData();
-    Array.from(files).forEach((file) => formData.append("files", file));
+    const compressionToast = toast.loading("A processar imagens...");
 
-    startTransition(async () => {
-      const result = await uploadVariantImages(variant.id, formData);
-      if (!result.success) {
-        toast.error(result.error ?? "Erro no upload.");
+    try {
+      const { files: compressedFiles, skippedCount } = await compressImages(files);
+
+      if (compressedFiles.length === 0) {
+        toast.error("Nenhuma imagem válida para upload (limite de 4MB atingido).", { id: compressionToast });
         return;
       }
-      toast.success("Imagens carregadas.");
-    });
+
+      if (skippedCount > 0) {
+        toast.error(`${skippedCount} imagens ignoradas por limite de tamanho.`, { id: compressionToast });
+      } else {
+        toast.dismiss(compressionToast);
+      }
+
+      const formData = new FormData();
+      compressedFiles.forEach((file) => formData.append("files", file));
+
+      startTransition(async () => {
+        const result = await uploadVariantImages(variant.id, formData);
+        if (!result.success) {
+          toast.error(result.error ?? "Erro no upload.");
+          return;
+        }
+        toast.success("Imagens carregadas.");
+      });
+    } catch (error) {
+      toast.error("Erro ao processar imagens.", { id: compressionToast });
+    }
   };
 
   return (
