@@ -31,6 +31,11 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single();
 
+  if (!profile || profile.role !== "admin") {
+    await supabase.auth.signOut();
+    redirect("/login?error=unauthorized");
+  }
+
   const displayName =
     profile?.display_name ??
     profile?.full_name ??
