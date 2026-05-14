@@ -37,7 +37,7 @@ export function DropdownMenu({
   }, [isOpen]);
 
   return (
-    <div className="relative inline-block text-left" ref={containerRef}>
+    <div className={cn("relative inline-block text-left", isOpen && "z-50")} ref={containerRef}>
       <div onClick={() => setIsOpen(!isOpen)}>
         {trigger ?? (
           <button
