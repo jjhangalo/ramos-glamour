@@ -2,35 +2,21 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const { pathname } = request.nextUrl;
-  const isPublicRoute = pathname === "/login" || pathname === "/update-password" || pathname === "/auth/callback";
-
-  if (
-    !supabaseUrl ||
-    !supabaseAnonKey ||
-    supabaseUrl === "your-supabase-url" ||
-    supabaseAnonKey === "your-supabase-anon-key"
-  ) {
-    if (isPublicRoute) {
-      return NextResponse.next({
-        request,
-      });
-    }
-
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
+  
+  // Public routes that don't require a session
+  const isPublicRoute = 
+    pathname === "/login" || 
+    pathname === "/update-password" || 
+    pathname === "/auth/callback";
 
   const response = NextResponse.next({
     request,
   });
 
   const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
@@ -43,20 +29,22 @@ export async function proxy(request: NextRequest) {
           });
         },
       },
-    },
+    }
   );
 
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!user && !isPublicRoute) {
+  // Session check: If no session and not a public route, redirect to login
+  if (!session && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname === "/login") {
+  // Redirect to home if already logged in and trying to access login
+  if (session && pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
