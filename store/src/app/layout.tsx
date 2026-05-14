@@ -32,8 +32,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Ramos Glamour",
-  description: "Loja Feminina de Luxo Ramos Glamour - Elegância e Estilo",
+  metadataBase: new URL("https://ramosglamour.com"),
+  title: {
+    default: "Ramos Glamour | Moda e Elegância em Luanda",
+    template: "%s | Ramos Glamour",
+  },
+  description: "Ramos Glamour - A sua boutique de luxo em Luanda. Descubra uma coleção exclusiva de moda feminina, acessórios e peças sofisticadas para realçar a sua elegância e estilo único.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -42,6 +46,18 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    locale: "pt_AO",
+    url: "https://ramosglamour.com",
+    siteName: "Ramos Glamour",
+    title: "Ramos Glamour | Moda e Elegância em Luanda",
+    description: "Ramos Glamour - A sua boutique de luxo em Luanda. Descubra uma coleção exclusiva de moda feminina, acessórios e peças sofisticadas.",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
