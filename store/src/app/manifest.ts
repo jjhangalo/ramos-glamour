@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Ramos Glamour",
+    name: "Ramos Glamour | Moda e Elegância",
     short_name: "Ramos Glamour",
-    description: "Loja feminina de luxo Ramos Glamour - Elegância e Estilo",
+    description: "Ramos Glamour - A sua boutique de luxo em Luanda. Moda feminina e acessórios exclusivos.",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
