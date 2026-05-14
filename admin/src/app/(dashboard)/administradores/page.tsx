@@ -1,9 +1,6 @@
-import { getClients, getAllPendingPromotions } from "@/lib/actions/clients";
-import { createClient } from "@/lib/supabase/server";
+import { getClients } from "@/lib/actions/clients";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AdminActions } from "@/components/administradores/AdminActions";
-import { AddAdminDialog } from "@/components/administradores/AddAdminDialog";
-import { PendingPromotionsList } from "@/components/administradores/PendingPromotionsList";
 import { PageCanvas } from "@/components/ui/page-canvas";
 import { FadeUp, StaggerContainer, StaggerItem } from "@/components/shared/Animations";
 import { Mail, Phone, Shield, Search } from "lucide-react";
@@ -18,20 +15,14 @@ type AdminsPageProps = {
 export default async function AdminsPage({ searchParams }: AdminsPageProps) {
   const params = (await searchParams) ?? {};
   const [
-    { clients: admins }, 
-    pendingRequests, 
-    supabase
+    { clients: admins }
   ] = await Promise.all([
     getClients({
       search: params.pesquisa,
       role: "admin",
       pageSize: 100,
-    }),
-    getAllPendingPromotions(),
-    createClient()
+    })
   ]);
-
-  const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <PageCanvas size="list" className="space-y-12 py-12 pb-32">
@@ -45,19 +36,11 @@ export default async function AdminsPage({ searchParams }: AdminsPageProps) {
             Gestão de Administradores
           </h1>
         </div>
-        <AddAdminDialog />
       </FadeUp>
-
-      {/* Pending Promotions Section */}
-      {pendingRequests.length > 0 && (
-        <FadeUp delay={0.1}>
-          <PendingPromotionsList requests={pendingRequests} currentUserId={user?.id} />
-        </FadeUp>
-      )}
 
       {/* Admins List Section */}
       <section className="space-y-8">
-        <FadeUp delay={0.2} className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <FadeUp className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-midnight/5 text-brand-midnight/40">
               <Shield className="h-5 w-5" />
@@ -135,10 +118,10 @@ export default async function AdminsPage({ searchParams }: AdminsPageProps) {
             ))}
           </StaggerContainer>
         ) : (
-          <FadeUp delay={0.3}>
+          <FadeUp delay={0.1}>
             <EmptyState
               title="Nenhum administrador encontrado"
-              description="Ajusta a tua pesquisa ou promove um cliente a administrador através do seu perfil."
+              description="Ajusta a tua pesquisa para encontrar o administrador pretendido."
             />
           </FadeUp>
         )}
