@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { LogOut, ShieldCheck, Settings } from "lucide-react";
 
 import { signOut } from "@/lib/actions/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,7 +25,11 @@ export function SidebarUser({
 
   return (
     <div className="mt-auto border-t border-brand-midnight/5 pt-5">
-      <div className="flex items-center gap-3 px-1">
+      <Link
+        href="/settings"
+        className="group flex items-center gap-3 rounded-xl px-1 py-1.5 transition-colors hover:bg-brand-midnight/5"
+        title="Ir para Definições"
+      >
         <Avatar className="h-10 w-10 border border-brand-midnight/10">
           <AvatarImage src={avatarUrl ?? ""} alt={name} />
           <AvatarFallback className="bg-brand-midnight/5 text-xs font-medium text-brand-midnight/60">
@@ -55,7 +60,8 @@ export function SidebarUser({
             {role === "admin" ? "Administrador" : role || "Utilizador"}
           </p>
         </div>
-      </div>
+        <Settings className="h-3.5 w-3.5 shrink-0 text-brand-midnight/20 transition-colors group-hover:text-brand-midnight/50" />
+      </Link>
 
       <form action={signOut} className="mt-4">
         <button

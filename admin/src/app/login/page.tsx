@@ -10,6 +10,9 @@ type LoginPageProps = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = (await searchParams) ?? {};
 
+  const isUnauthorized = params.error === "unauthorized";
+  const errorMessage = isUnauthorized ? undefined : params.error;
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-brand-bg px-6 py-16 relative grain-overlay">
       <div className="w-full max-w-md rounded-2xl bg-white/70 backdrop-blur-xl p-10 shadow-2xl border border-brand-midnight/5">
@@ -23,7 +26,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
         </div>
 
-        <LoginForm action={signIn} error={params.error} />
+        <LoginForm action={signIn} error={errorMessage} isUnauthorized={isUnauthorized} />
 
         <div className="mt-12 border-t border-brand-midnight/5 pt-8 text-center">
           <p className="text-[9px] font-medium text-brand-midnight/30 uppercase tracking-[0.4em]">

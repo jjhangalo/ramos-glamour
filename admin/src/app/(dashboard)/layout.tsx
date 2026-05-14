@@ -31,6 +31,14 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single();
 
+  if (!profile || profile.role !== "admin") {
+    // Redirect to the dedicated signout route so the Set-Cookie header
+    // (clearing the session) is flushed before the browser navigates to
+    // the login page. Calling signOut() directly in a Server Component
+    // layout can lose the cookie mutation when redirect() throws.
+    redirect("/api/auth/signout?error=unauthorized");
+  }
+
   const displayName =
     profile?.display_name ??
     profile?.full_name ??

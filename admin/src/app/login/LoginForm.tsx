@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, ShieldAlert } from "lucide-react";
 import toast from "react-hot-toast";
 import { createClient } from "@/lib/supabase/client";
 
@@ -30,9 +30,10 @@ function SubmitButton() {
 type LoginFormProps = {
   action: (formData: FormData) => Promise<void>;
   error?: string;
+  isUnauthorized?: boolean;
 };
 
-export function LoginForm({ action, error }: LoginFormProps) {
+export function LoginForm({ action, error, isUnauthorized }: LoginFormProps) {
   const [view, setView] = useState<"login" | "reset">("login");
   const [email, setEmail] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -160,7 +161,17 @@ export function LoginForm({ action, error }: LoginFormProps) {
         />
       </div>
 
-      {error ? (
+      {isUnauthorized ? (
+        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3.5 text-left">
+          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-700">Acesso Negado</p>
+            <p className="mt-0.5 text-xs font-medium text-amber-600">
+              Esta conta não possui privilégios de administrador.
+            </p>
+          </div>
+        </div>
+      ) : error ? (
         <div className="rounded-xl border border-red-200 bg-red-50/50 px-4 py-3 text-xs font-medium text-red-700 text-center">
           {error}
         </div>
