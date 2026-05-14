@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { formatPrice } from "@/lib/format";
 import { getCategories } from "@/lib/actions/categories";
 import { getProducts } from "@/lib/actions/products";
+import type { CategoryRecord } from "@/lib/types";
 
 import { ProductFilters } from "@/components/products/ProductFilters";
 import { ProductRowActions } from "@/components/products/ProductRowActions";
@@ -42,7 +43,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   const categories = await getCategories();
   
-  const getPath = (c: any, all: any[]): string => {
+  const getPath = (c: CategoryRecord, all: CategoryRecord[]): string => {
     if (!c.parent_id) return c.name;
     const parent = all.find(p => p.id === c.parent_id);
     if (!parent) return c.name;

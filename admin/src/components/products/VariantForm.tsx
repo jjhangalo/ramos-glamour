@@ -136,7 +136,7 @@ export function VariantForm({
         }
         toast.success("Imagens carregadas.");
       });
-    } catch (error) {
+    } catch {
       toast.error("Erro ao processar imagens.", { id: compressionToast });
     }
   };

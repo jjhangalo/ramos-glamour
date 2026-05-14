@@ -289,7 +289,7 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
         toast.success("Imagens carregadas.");
         router.refresh();
       });
-    } catch (error) {
+    } catch {
       toast.error("Erro ao processar imagens.", { id: compressionToast });
     }
   };
