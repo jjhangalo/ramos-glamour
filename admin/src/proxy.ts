@@ -8,7 +8,8 @@ export async function proxy(request: NextRequest) {
   const isPublicRoute = 
     pathname === "/login" || 
     pathname === "/update-password" || 
-    pathname === "/auth/callback";
+    pathname === "/auth/callback" ||
+    pathname.startsWith("/api/auth/signout");
 
   const response = NextResponse.next({
     request,
