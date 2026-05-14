@@ -1,34 +1,19 @@
 import Link from "next/link";
-
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate, formatPrice, shortId } from "@/lib/format";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PageCanvas } from "@/components/ui/page-canvas";
 import { StaggerContainer, StaggerItem, FadeUp } from "@/components/shared/Animations";
+import { getDashboardMetrics } from "@/lib/actions/dashboard";
 
 export default async function DashboardPage() {
   const supabase = createAdminClient();
 
   const [
-    { count: clientsCount },
-    { count: ordersCount },
-    { count: pendingOrdersCount },
-    { count: activeProductsCount },
+    metricsData,
     { data: recentOrders },
   ] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id", { count: "exact", head: true })
-      .eq("is_active", true),
-    supabase.from("orders").select("id", { count: "exact", head: true }),
-    supabase
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "pending"),
-    supabase
-      .from("products")
-      .select("id", { count: "exact", head: true })
-      .eq("is_active", true),
+    getDashboardMetrics(),
     supabase
       .from("orders")
       .select(
@@ -39,10 +24,10 @@ export default async function DashboardPage() {
   ]);
 
   const metrics = [
-    { label: "Clientes registados", value: clientsCount ?? 0 },
-    { label: "Total de encomendas", value: ordersCount ?? 0 },
-    { label: "Encomendas pendentes", value: pendingOrdersCount ?? 0 },
-    { label: "Produtos activos", value: activeProductsCount ?? 0 },
+    { label: "Clientes activos", value: metricsData.clientsCount },
+    { label: "Receita Total", value: formatPrice(metricsData.totalRevenue) },
+    { label: "Encomendas pendentes", value: metricsData.pendingOrdersCount },
+    { label: "Falhas Logísticas", value: metricsData.failuresCount },
   ];
 
   return (
