@@ -114,7 +114,7 @@ export type OrderRecord = {
   id: string;
   user_id: string;
   address_id: string | null;
-  status: "pending" | "delivering" | "delivered" | "delivery_failed" | "refused" | "cancelled_by_admin" | "cancelled_by_customer";
+  status: "pending" | "processing" | "delivering" | "delivered" | "delivery_failed" | "refused" | "cancelled_by_admin" | "cancelled_by_customer";
   notes: string | null;
   total: number;
   created_at: string;
@@ -146,4 +146,14 @@ export type ClientRecord = {
   dnd_enabled?: boolean;
   dnd_start_time?: string | null;
   dnd_end_time?: string | null;
+  push_subscription?: PushSubscriptionRecord | null;
+};
+
+export type PushSubscriptionRecord = {
+  endpoint: string;
+  expirationTime?: number | null;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
 };

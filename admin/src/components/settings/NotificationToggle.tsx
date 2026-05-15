@@ -5,7 +5,9 @@ import { subscribeUserToPush, unsubscribeUserFromPush, getPushSubscription } fro
 import { toast } from "react-hot-toast";
 import { Bell, BellOff, Loader2 } from "lucide-react";
  
-export function NotificationToggle({ initialSubscription }: { initialSubscription: PushSubscription | null }) {
+import { PushSubscriptionRecord } from "@/lib/types";
+ 
+ export function NotificationToggle({ initialSubscription }: { initialSubscription: PushSubscriptionRecord | null }) {
   const [isSubscribed, setIsSubscribed] = useState(!!initialSubscription);
   const [isLoading, setIsLoading] = useState(false);
   const [isSupported, setIsSupported] = useState(true);

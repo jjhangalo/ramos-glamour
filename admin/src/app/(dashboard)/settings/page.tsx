@@ -72,7 +72,7 @@ export default async function SettingsPage() {
  
             <div className="grid gap-6 md:grid-cols-2">
               <div className="rounded-[2.5rem] border border-brand-midnight/5 bg-white p-8 md:p-10 shadow-sm transition-shadow hover:shadow-md">
-                <NotificationToggle initialSubscription={client.push_subscription} />
+                <NotificationToggle initialSubscription={client.push_subscription ?? null} />
               </div>
               <div className="rounded-[2.5rem] border border-brand-midnight/5 bg-white p-8 md:p-10 shadow-sm transition-shadow hover:shadow-md">
                 <DndForm admin={client} />

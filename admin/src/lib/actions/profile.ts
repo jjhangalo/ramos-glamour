@@ -3,10 +3,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
  
+import { PushSubscriptionRecord } from "../types";
+ 
 /**
  * Atualiza a subscrição de notificações push do administrador autenticado.
  */
-export async function updatePushSubscription(subscription: PushSubscription | null) {
+export async function updatePushSubscription(subscription: PushSubscriptionRecord | null) {
   try {
     const supabase = await createClient();
  
