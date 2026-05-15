@@ -5,7 +5,7 @@ import { subscribeUserToPush, unsubscribeUserFromPush, getPushSubscription } fro
 import { toast } from "react-hot-toast";
 import { Bell, BellOff, Loader2 } from "lucide-react";
  
-export function NotificationToggle({ initialSubscription }: { initialSubscription: any }) {
+export function NotificationToggle({ initialSubscription }: { initialSubscription: PushSubscription | null }) {
   const [isSubscribed, setIsSubscribed] = useState(!!initialSubscription);
   const [isLoading, setIsLoading] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
@@ -13,6 +13,7 @@ export function NotificationToggle({ initialSubscription }: { initialSubscriptio
   useEffect(() => {
     // Verificar suporte do navegador
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsSupported(false);
       return;
     }
@@ -35,7 +36,7 @@ export function NotificationToggle({ initialSubscription }: { initialSubscriptio
         setIsSubscribed(true);
         toast.success("Notificações ativadas com sucesso!");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       const message = error instanceof Error ? error.message : "Erro ao configurar notificações.";
       toast.error(message);

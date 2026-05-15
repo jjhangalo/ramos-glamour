@@ -8,7 +8,7 @@ declare global {
   }
 }
  
-declare const self: any;
+declare const self: ServiceWorkerGlobalScope;
  
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -19,7 +19,7 @@ const serwist = new Serwist({
 });
  
 // Push Notification Logic
-(self as any).addEventListener("push", (event: any) => {
+self.addEventListener("push", (event: PushEvent) => {
   console.log("[ServiceWorker] Evento push recebido.");
 
   if (!event.data) {
@@ -57,7 +57,7 @@ const serwist = new Serwist({
   }
 });
 
-(self as any).addEventListener("notificationclick", (event: any) => {
+self.addEventListener("notificationclick", (event: NotificationEvent) => {
   console.log("[ServiceWorker] Notificação clicada.");
   event.notification.close();
 

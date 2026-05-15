@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 /**
  * Atualiza a subscrição de notificações push do administrador autenticado.
  */
-export async function updatePushSubscription(subscription: any) {
+export async function updatePushSubscription(subscription: PushSubscription | null) {
   try {
     const supabase = await createClient();
  
