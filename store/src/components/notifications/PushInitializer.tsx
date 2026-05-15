@@ -8,11 +8,13 @@ export function PushInitializer() {
       navigator.serviceWorker
         .register("/sw.js")
         .then((registration) => {
-          console.log("Service Worker registrado com sucesso:", registration.scope);
+          console.log("[ServiceWorker] Registado com sucesso no scope:", registration.scope);
         })
         .catch((error) => {
-          console.error("Falha ao registar o Service Worker:", error);
+          console.error("[ServiceWorker] Erro crítico no registo:", error);
         });
+    } else {
+      console.warn("[ServiceWorker] Notificações push não são suportadas neste navegador.");
     }
   }, []);
 

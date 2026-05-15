@@ -32,7 +32,7 @@ function extractAddressPayload(formData: FormData) {
 }
 
 function revalidateAddressPaths() {
-  revalidatePath("/perfil/moradas");
+  revalidatePath("/profile/addresses");
   revalidatePath("/checkout");
 }
 

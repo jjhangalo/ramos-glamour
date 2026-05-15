@@ -1,3 +1,5 @@
+import type { PushSubscriptionRecord } from "../types";
+
 /**
  * Converte a chave VAPID pública de base64 para Uint8Array
  * O método pushManager.subscribe() exige este formato específico.
@@ -47,8 +49,8 @@ export async function subscribeUserToPush() {
     console.log("[WebPush] Subscrição efetuada com sucesso:", subscription);
 
     // Enviar a subscrição para o servidor (Server Action)
-    const { savePushSubscription } = await import("./actions");
-    await savePushSubscription(subscription.toJSON());
+    const { updatePushSubscription } = await import("../actions/profile");
+    await updatePushSubscription(subscription.toJSON() as PushSubscriptionRecord);
 
     return subscription;
   } catch (error) {
@@ -72,8 +74,8 @@ export async function unsubscribeUserFromPush() {
     const subscription = await getPushSubscription();
     if (subscription) {
       await subscription.unsubscribe();
-      const { savePushSubscription } = await import("./actions");
-      await savePushSubscription(null);
+      const { updatePushSubscription } = await import("../actions/profile");
+      await updatePushSubscription(null);
       console.log("[WebPush] Subscrição removida com sucesso.");
     }
   } catch (error) {

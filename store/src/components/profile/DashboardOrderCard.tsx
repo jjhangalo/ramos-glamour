@@ -7,19 +7,21 @@ import { formatPrice } from "@/lib/utils/format";
 
 const statusStyles = {
   pending: "bg-brand-bg text-brand-midnight/60",
+  processing: "bg-brand-gold/10 text-brand-gold",
   delivering: "bg-blue-50 text-blue-700",
   delivered: "bg-green-50 text-green-700",
   refused: "bg-red-50 text-red-700",
 } as const;
 
 const statusLabels = {
-  pending: "Pendente",
-  delivering: "Em entrega",
-  delivered: "Entregue",
-  refused: "Recusada",
+  pending: "Pending",
+  processing: "Processing",
+  delivering: "Out for Delivery",
+  delivered: "Delivered",
+  refused: "Refused",
 } as const;
 
-const dateFormatter = new Intl.DateTimeFormat("pt-AO", {
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
   month: "long",
   year: "numeric",
@@ -54,7 +56,7 @@ export function DashboardOrderCard({ order }: DashboardOrderCardProps) {
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
-              Última Encomenda
+              Latest Order
             </p>
             <h3 className="text-sm font-medium text-brand-midnight">
               #{order.id.slice(0, 8).toUpperCase()}
@@ -72,7 +74,7 @@ export function DashboardOrderCard({ order }: DashboardOrderCardProps) {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-3">
           <div className="space-y-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
-              Data
+              Date
             </p>
             <p className="text-sm text-brand-midnight/70">
               {dateFormatter.format(new Date(order.created_at))}
@@ -88,10 +90,10 @@ export function DashboardOrderCard({ order }: DashboardOrderCardProps) {
           </div>
           <div className="hidden space-y-1 md:block">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
-              Itens
+              Items
             </p>
             <p className="text-sm text-brand-midnight/70">
-              {itemsCount} {itemsCount === 1 ? "item" : "itens"}
+              {itemsCount} {itemsCount === 1 ? "item" : "items"}
             </p>
           </div>
         </div>
@@ -99,17 +101,17 @@ export function DashboardOrderCard({ order }: DashboardOrderCardProps) {
         {/* Footer Action */}
         <div className="flex items-center justify-between border-t border-brand-midnight/5 pt-6">
           <Link 
-            href="/perfil/encomendas" 
+            href="/profile/orders" 
             className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-gold hover:text-brand-gold/80 transition-colors"
           >
-            Ver Detalhes
+            View Details
             <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
           </Link>
           
           {status !== 'delivered' && status !== 'refused' && (
             <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
               <Package className="h-3 w-3" />
-              Acompanhar Envio
+              Track Delivery
             </span>
           )}
         </div>
@@ -117,4 +119,3 @@ export function DashboardOrderCard({ order }: DashboardOrderCardProps) {
     </div>
   );
 }
-

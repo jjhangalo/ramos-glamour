@@ -152,14 +152,18 @@ export async function updateOrderStatus(
       .then(({ data: profile }) => {
         if (profile?.push_subscription) {
           let body = "";
-          if (status === "delivering") {
+          if (status === "processing") {
+            body = "A sua encomenda encontra-se agora em processamento.";
+          } else if (status === "delivering") {
             body = "A sua encomenda saiu para entrega. Elegância a caminho.";
-          } else if (status === "refused") {
-            body = "Atualização sobre o seu pedido. Por favor, verifique o seu perfil.";
           } else if (status === "delivered") {
             body = "A sua encomenda foi entregue. Esperamos que goste!";
+          } else if (status === "refused") {
+            body = "Houve um problema com a entrega da sua encomenda. Por favor, verifique os detalhes.";
+          } else if (status === "cancelled_by_admin") {
+            body = "A sua encomenda foi cancelada. Por favor, consulte o seu perfil para mais informações.";
           }
-
+ 
           if (body) {
             sendPushNotification(order.user_id, profile.push_subscription, "Ramos Glamour", body).catch(console.error);
           }
@@ -244,14 +248,18 @@ export async function updateOrdersBulk(
       .then(({ data: profile }) => {
         if (profile?.push_subscription) {
           let body = "";
-          if (status === "delivering") {
+          if (status === "processing") {
+            body = "A sua encomenda encontra-se agora em processamento.";
+          } else if (status === "delivering") {
             body = "A sua encomenda saiu para entrega. Elegância a caminho.";
-          } else if (status === "refused") {
-            body = "Atualização sobre o seu pedido. Por favor, verifique o seu perfil.";
           } else if (status === "delivered") {
             body = "A sua encomenda foi entregue. Esperamos que goste!";
+          } else if (status === "refused") {
+            body = "Houve um problema com a entrega da sua encomenda. Por favor, verifique os detalhes.";
+          } else if (status === "cancelled_by_admin") {
+            body = "A sua encomenda foi cancelada. Por favor, consulte o seu perfil para mais informações.";
           }
-
+ 
           if (body) {
             sendPushNotification(order.user_id, profile.push_subscription, "Ramos Glamour", body).catch(console.error);
           }

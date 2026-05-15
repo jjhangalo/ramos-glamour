@@ -1,8 +1,10 @@
 "use server";
-
+ 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getProduct } from "./products";
-
+import { broadcastAdminPush, type AdminProfile } from "@/lib/notifications/webpush";
+ 
 export type CartItem = {
   id: string;
   variantId?: string;
@@ -10,7 +12,7 @@ export type CartItem = {
   variantColor?: string;
   quantity: number;
 };
-
+ 
 export async function processCheckout(
   cartItems: CartItem[],
   addressId: string,
@@ -19,19 +21,19 @@ export async function processCheckout(
   if (cartItems.length === 0) {
     throw new Error("O carrinho está vazio.");
   }
-
+ 
   const supabase = await createClient();
-
+ 
   // 1. Validate User Session
   const {
     data: { user },
     error: authError,
   } = await supabase.auth.getUser();
-
+ 
   if (authError || !user) {
     throw new Error("Acesso não autorizado. Por favor, faça login.");
   }
-
+ 
   // 2. Server-Side Price Calculation — never trust client prices
   let calculatedTotal = 0;
   const processedItems: {
@@ -43,37 +45,37 @@ export async function processCheckout(
     variant_size: string | null;
     variant_color: string | null;
   }[] = [];
-
+ 
   for (const item of cartItems) {
     const product = await getProduct(item.id);
-
+ 
     if (!product) {
       throw new Error(`Produto não encontrado: ${item.id}`);
     }
-
+ 
     // Base price: use active promo price if available, otherwise regular price
     let unitPrice = product.promo_price ?? product.price;
     let variantSize: string | null = item.variantSize ?? null;
     let variantColor: string | null = item.variantColor ?? null;
-
+ 
     if (item.variantId) {
       const variant = product.variants?.find((v) => v.id === item.variantId);
-
+ 
       if (!variant) {
         throw new Error(`Variante não encontrada: ${item.variantId}`);
       }
-
+ 
       // Variant price_override takes precedence over product price
       if (variant.price_override !== null && variant.price_override !== undefined) {
         unitPrice = variant.price_override;
       }
-
+ 
       variantSize = variant.size ?? null;
       variantColor = variant.color ?? null;
     }
-
+ 
     calculatedTotal += unitPrice * item.quantity;
-
+ 
     processedItems.push({
       product_id: product.id,
       product_name: product.name,
@@ -84,7 +86,7 @@ export async function processCheckout(
       variant_color: variantColor,
     });
   }
-
+ 
   // 3. Insert primary order record
   const { data: order, error: orderError } = await supabase
     .from("orders")
@@ -97,26 +99,48 @@ export async function processCheckout(
     })
     .select("id")
     .single();
-
+ 
   if (orderError || !order) {
     throw new Error(orderError?.message ?? "Falha ao criar a encomenda.");
   }
-
+ 
   try {
     // 4. Insert all order items in a single batch
     const itemsToInsert = processedItems.map((item) => ({
       ...item,
       order_id: order.id,
     }));
-
+ 
     const { error: itemsError } = await supabase
       .from("order_items")
       .insert(itemsToInsert);
-
+ 
     if (itemsError) {
       throw itemsError;
     }
-
+ 
+    // Notificar administradores (assíncrono)
+    const adminClient = createAdminClient();
+    adminClient
+      .from("profiles")
+      .select("id, push_subscription, dnd_enabled, dnd_start_time, dnd_end_time")
+      .eq("role", "admin")
+      .not("push_subscription", "is", null)
+      .then(({ data: admins }) => {
+        if (admins && admins.length > 0) {
+          const resumo = processedItems
+            .map((item) => `${item.quantity}x ${item.product_name}`)
+            .join(", ");
+          
+          broadcastAdminPush(
+            admins as unknown as AdminProfile[],
+            "Nova Encomenda",
+            `Resumo: ${resumo}`,
+            `/encomendas/${order.id}`
+          ).catch(console.error);
+        }
+      });
+ 
     return { success: true as const, orderId: order.id };
   } catch (error) {
     // 5. Compensate — delete the orphaned order on item insertion failure

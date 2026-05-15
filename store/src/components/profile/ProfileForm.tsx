@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { User, Mail, Phone, MessageSquare, ArrowRight } from "lucide-react";
-
+import { Mail, Phone, MessageSquare, ArrowRight } from "lucide-react";
 import { updateProfile } from "@/lib/actions/profile";
+import { ProfileSectionHeader } from "./ProfileSectionHeader";
 
 type ProfileFormProps = {
   profile: {
@@ -30,35 +29,23 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   });
 
   return (
-    <div className="space-y-16 animate-fade-in">
-      {/* Profile Header section within form if needed, but we have the layout header */}
+    <div className="space-y-12">
+      <ProfileSectionHeader 
+        title="Personal Data"
+        description="Manage your identity and contact information for a better experience."
+      />
 
-      <div className="grid gap-16 lg:grid-cols-[1fr_2fr]">
-        {/* Identity Card */}
+      <div className="grid gap-16 lg:grid-cols-[240px_1fr]">
+        {/* Status Info */}
         <div className="space-y-8">
-          <div className="relative aspect-square w-32 overflow-hidden bg-brand-midnight/5 border border-brand-midnight/5">
-            {profile.avatar_url ? (
-              <Image
-                src={profile.avatar_url}
-                alt={profile.full_name ?? profile.display_name ?? "Avatar"}
-                fill
-                className="object-cover"
-                sizes="128px"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <User className="h-12 w-12 text-brand-midnight/10" strokeWidth={1} />
-              </div>
-            )}
-          </div>
           <div className="space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-gold">AUTENTICAÇÃO</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-gold">AUTHENTICATION</p>
             <div className="flex items-center gap-3 text-[11px] font-medium tracking-widest text-brand-midnight/60">
               <Mail className="h-3 w-3" />
               {profile.email}
             </div>
             <p className="text-[9px] text-brand-midnight/30 tracking-widest mt-4 leading-relaxed uppercase">
-              A sua conta está protegida pelo Google. Os dados de login não podem ser alterados aqui.
+              Your account is protected. Login credentials cannot be changed here.
             </p>
           </div>
         </div>
@@ -73,13 +60,13 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             startTransition(async () => {
               try {
                 await updateProfile(formData);
-                toast.success("Perfil atualizado com sucesso");
+                toast.success("Profile updated successfully");
                 router.refresh();
               } catch (error) {
                 toast.error(
                   error instanceof Error
                     ? error.message
-                    : "Não foi possível atualizar o perfil.",
+                    : "Unable to update profile.",
                 );
               }
             });
@@ -88,7 +75,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           <div className="grid gap-x-8 gap-y-10 md:grid-cols-2">
             <div className="space-y-3">
               <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
-                NOME COMPLETO
+                FULL NAME
               </label>
               <input
                 name="full_name"
@@ -100,7 +87,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
             <div className="space-y-3">
               <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
-                NOME DE APRESENTAÇÃO
+                DISPLAY NAME
               </label>
               <input
                 name="display_name"
@@ -112,7 +99,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
             <div className="space-y-3">
               <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
-                TELEFONE
+                PHONE
               </label>
               <div className="flex items-center gap-3 border-b border-brand-midnight/10 focus-within:border-brand-gold transition">
                 <Phone className="h-3 w-3 text-brand-midnight/20" />
@@ -141,13 +128,13 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             </div>
           </div>
 
-          <div className="pt-8">
+          <div className="pt-4">
             <button
               type="submit"
               disabled={isPending}
               className="group flex items-center gap-4 bg-brand-midnight px-10 py-5 text-[10px] font-bold tracking-[0.3em] text-brand-white transition-all hover:bg-brand-gold disabled:opacity-50"
             >
-              {isPending ? "GUARDANDO..." : "GUARDAR ALTERAÇÕES"}
+              {isPending ? "SAVING..." : "SAVE CHANGES"}
               {!isPending && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
             </button>
           </div>

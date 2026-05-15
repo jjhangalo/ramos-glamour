@@ -51,7 +51,7 @@ const emptyManualAddress: ManualAddress = {
 
 function formatAddress(address: StoredAddress | ManualAddress | null | undefined) {
   if (!address) {
-    return "Selecione uma morada para continuar.";
+    return "Select an address to continue.";
   }
 
   return [
@@ -95,9 +95,9 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
   if (items.length === 0) {
     return (
       <section className="rounded-[2rem] bg-white/85 px-6 py-16 text-center shadow-[0_16px_35px_rgba(98,98,96,0.08)]">
-        <h2 className="heading-luxury text-3xl font-light mb-4">O seu carrinho está vazio</h2>
+        <h2 className="heading-luxury text-3xl font-light mb-4">Your cart is empty</h2>
         <p className="text-[11px] font-medium tracking-widest text-brand-midnight/40 uppercase">
-          Adicione alguns itens ao carrinho antes de prosseguir para o checkout.
+          Add some items to your cart before proceeding to checkout.
         </p>
         <button
           type="button"
@@ -106,7 +106,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           }}
           className="mt-8 rounded-full bg-brand-midnight px-10 py-5 text-[11px] font-bold tracking-[0.2em] text-brand-white transition-all hover:bg-brand-midnight/90 active:scale-95 shadow-xl shadow-brand-midnight/10 touch-manipulation"
         >
-          EXPLORAR CATÁLOGO
+          EXPLORE CATALOG
         </button>
       </section>
     );
@@ -123,10 +123,10 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           </span>
           <div>
             <h2 className="text-2xl font-semibold text-brand-charcoal">
-              Revisão do Pedido
+              Order Review
             </h2>
             <p className="text-sm text-brand-charcoal/70">
-              Confirme os seus itens antes de prosseguir.
+              Confirm your items before proceeding.
             </p>
           </div>
         </div>
@@ -158,7 +158,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           className="mt-6 inline-flex items-center gap-3 rounded-full border border-brand-charcoal px-6 py-3.5 text-[10px] font-bold tracking-[0.2em] text-brand-charcoal transition hover:bg-brand-bg active:bg-brand-midnight/5 touch-manipulation"
         >
           <Pencil className="h-4 w-4" />
-          EDITAR NO CARRINHO
+          EDIT IN CART
         </button>
       </section>
 
@@ -169,10 +169,10 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           </span>
           <div>
             <h2 className="text-2xl font-semibold text-brand-charcoal">
-              Morada de entrega
+              Delivery Address
             </h2>
             <p className="text-sm text-brand-charcoal/70">
-              Selecione uma morada guardada ou utilize uma nova.
+              Select a saved address or use a new one.
             </p>
           </div>
         </div>
@@ -197,7 +197,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                   }`}
                 >
                   <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-brand-charcoal/40">
-                    {address.label ?? "Morada guardada"}
+                    {address.label ?? "Saved Address"}
                   </p>
                   <p className="mt-4 font-bold text-brand-charcoal">
                     {address.recipient_name ?? userName}
@@ -216,15 +216,15 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           </div>
         ) : (
           <div className="rounded-[1.5rem] border border-dashed border-brand-charcoal/20 bg-brand-white/70 px-5 py-8">
-            <p className="text-brand-charcoal">Sem moradas guardadas</p>
+            <p className="text-brand-charcoal">No saved addresses</p>
             <button
               type="button"
               onClick={() => {
-                router.push("/perfil/moradas");
+                router.push("/profile/addresses");
               }}
               className="mt-6 rounded-full border border-brand-charcoal/15 px-8 py-4 text-[10px] font-bold tracking-[0.2em] text-brand-charcoal transition hover:bg-brand-bg active:bg-brand-midnight/5 touch-manipulation"
             >
-              ADICIONAR MORADA
+              ADD ADDRESS
             </button>
           </div>
         )}
@@ -238,7 +238,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
             }}
             className="rounded-full border border-brand-charcoal/15 px-8 py-4 text-[10px] font-bold tracking-[0.2em] text-brand-charcoal transition hover:bg-brand-bg active:bg-brand-midnight/5 touch-manipulation"
           >
-            {useManualAddress ? "CANCELAR" : "UTILIZAR OUTRA MORADA"}
+            {useManualAddress ? "CANCEL" : "USE ANOTHER ADDRESS"}
           </button>
         </div>
 
@@ -252,7 +252,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                   recipient_name: event.target.value,
                 }));
               }}
-              placeholder="Nome do destinatário"
+              placeholder="Recipient name"
               className="rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
             />
             <input
@@ -263,7 +263,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                   phone: event.target.value,
                 }));
               }}
-              placeholder="Telefone"
+              placeholder="Phone"
               className="rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
             />
             <input
@@ -274,7 +274,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                   province: event.target.value,
                 }));
               }}
-              placeholder="Província"
+              placeholder="Province"
               className="rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
             />
             <input
@@ -285,7 +285,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                   city: event.target.value,
                 }));
               }}
-              placeholder="Cidade"
+              placeholder="City"
               className="rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
             />
             <input
@@ -296,7 +296,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                   neighborhood: event.target.value,
                 }));
               }}
-              placeholder="Bairro"
+              placeholder="Neighborhood"
               className="rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
             />
             <input
@@ -307,7 +307,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                   street: event.target.value,
                 }));
               }}
-              placeholder="Rua"
+              placeholder="Street"
               className="rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
             />
             <textarea
@@ -318,7 +318,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                   reference: event.target.value,
                 }));
               }}
-              placeholder="Ponto de referência"
+              placeholder="Reference point"
               className="md:col-span-2 min-h-28 rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
             />
           </div>
@@ -332,10 +332,10 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
           </span>
           <div>
             <h2 className="text-2xl font-semibold text-brand-charcoal">
-              Confirmação
+              Confirmation
             </h2>
             <p className="text-sm text-brand-charcoal/70">
-              Reveja os detalhes finais antes de confirmar a encomenda.
+              Review final details before confirming your order.
             </p>
           </div>
         </div>
@@ -343,7 +343,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)]">
           <div className="space-y-5">
             <div>
-              <h3 className="text-lg font-semibold text-brand-charcoal">Itens</h3>
+              <h3 className="text-lg font-semibold text-brand-charcoal">Items</h3>
               <div className="mt-3 space-y-3">
                 {items.map((item) => (
                   <div
@@ -365,7 +365,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-brand-charcoal">Morada</h3>
+              <h3 className="text-lg font-semibold text-brand-charcoal">Address</h3>
               <div className="mt-3 rounded-2xl border border-brand-charcoal/10 bg-brand-white/70 px-4 py-4 text-sm leading-6 text-brand-charcoal/80">
                 {useManualAddress
                   ? formatAddress(manualAddress)
@@ -378,7 +378,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                 htmlFor="checkout-notes"
                 className="text-lg font-semibold text-brand-charcoal"
               >
-                Notas opcionais
+                Optional Notes
               </label>
               <textarea
                 id="checkout-notes"
@@ -386,7 +386,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                 onChange={(event) => {
                   setNotes(event.target.value);
                 }}
-                placeholder="Ex.: horário preferencial de entrega, observações..."
+                placeholder="E.g.: preferred delivery time, special instructions..."
                 className="mt-3 min-h-28 w-full rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
               />
             </div>
@@ -394,13 +394,13 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
 
           <aside className="rounded-[1.5rem] bg-brand-bg/60 p-5">
             <div className="flex items-center justify-between text-brand-charcoal">
-              <span>Total da Encomenda</span>
+              <span>Order Total</span>
               <span className="text-2xl font-semibold">
                 {formatPrice(totalPrice)}
               </span>
             </div>
             <p className="mt-3 text-sm text-brand-charcoal/70">
-              A confirmação cria a encomenda, prepara a notificação e gera o link de WhatsApp para acompanhamento.
+              Confirmation creates the order, prepares notifications, and generates a WhatsApp link for tracking.
             </p>
             <div className="mt-8">
               <CheckoutButton
@@ -415,7 +415,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
                 )}
                 addressId={useManualAddress ? null : selectedAddressId}
                 notes={notes}
-                label="FINALIZAR COMPRA"
+                label="COMPLETE PURCHASE"
               />
             </div>
           </aside>
