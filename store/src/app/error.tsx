@@ -1,8 +1,8 @@
 "use client";
-
+ 
 import { useEffect } from "react";
-import { AlertTriangle, RotateCcw } from "lucide-react";
-
+import { RefreshCw, AlertCircle } from "lucide-react";
+ 
 export default function Error({
   error,
   reset,
@@ -11,28 +11,48 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
-    console.error(error);
+    // Log do erro para monitorização
+    console.error("[GlobalError] Ocorreu um erro inesperado:", error);
   }, [error]);
-
+ 
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
-      <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-brand-mauve/10 shadow-sm">
-        <AlertTriangle className="h-12 w-12 text-brand-mauve" />
+    <div className="flex min-h-[60vh] flex-col items-center justify-center p-6 text-center">
+      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-midnight/5 text-brand-midnight/40">
+        <AlertCircle className="h-8 w-8" />
       </div>
-      <h1 className="mb-2 text-3xl font-bold tracking-tight text-brand-charcoal">Algo correu mal</h1>
-      <p className="mb-10 max-w-md text-muted-foreground">
-        Não foi possível carregar esta secção devido a um erro inesperado. 
-        Por favor, tente novamente ou contacte o suporte se o problema persistir.
-      </p>
-      <button
-        type="button"
-        onClick={() => reset()}
-        className="inline-flex items-center gap-2 rounded-full bg-brand-olive px-10 py-4 text-lg font-medium text-brand-white shadow-lg transition duration-300 hover:bg-[#8a904d] hover:shadow-xl active:scale-95"
-      >
-        <RotateCcw className="h-5 w-5" />
-        Tentar novamente
-      </button>
+      
+      <div className="space-y-2">
+        <h2 className="heading-luxury text-2xl font-light text-brand-midnight">
+          Algo não correu bem
+        </h2>
+        <p className="max-w-[400px] text-sm text-brand-midnight/40 leading-relaxed uppercase tracking-wider">
+          Ocorreu um erro inesperado no processamento desta página. 
+          Pode tentar recuperar o estado sem recarregar.
+        </p>
+      </div>
+ 
+      <div className="mt-10 flex flex-col items-center gap-4">
+        <button
+          onClick={() => reset()}
+          className="group flex items-center gap-2 rounded-full bg-brand-midnight px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-brand-gold active:scale-95"
+        >
+          <RefreshCw className="h-3 w-3 transition-transform group-hover:rotate-180 duration-500" />
+          Tentar Novamente
+        </button>
+ 
+        <button
+          onClick={() => window.location.reload()}
+          className="text-[9px] font-bold uppercase tracking-widest text-brand-midnight/30 hover:text-brand-midnight transition-colors"
+        >
+          Ou recarregar a página inteira
+        </button>
+      </div>
+ 
+      {error.digest && (
+        <p className="mt-12 text-[8px] font-mono text-brand-midnight/20">
+          ID do Erro: {error.digest}
+        </p>
+      )}
     </div>
   );
 }

@@ -122,7 +122,12 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
   const [isVariantEditorOpen, setIsVariantEditorOpen] = useState(false);
   const [expandedVariantId, setExpandedVariantId] = useState<string | null>(null);
   const isDesktop = useMediaQuery("(min-width: 768px)");
-
+  const [mounted, setMounted] = useState(false);
+ 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+ 
   // Promotion state
   const [promoPrice, setPromoPrice] = useState<string>(
     initialPromotion?.is_active ? initialPromotion.promo_price.toString() : ""
@@ -561,7 +566,7 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
                       </button>
 
                       <AnimatePresence>
-                        {isDesktop && expandedVariantId === variant.id && (
+                        {mounted && isDesktop && expandedVariantId === variant.id && (
                           <motion.div 
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
@@ -578,7 +583,7 @@ export function ProductEditor({ product, categories, initialPromotion }: Product
                   ))}
 
                   <AnimatePresence>
-                    {isDesktop && expandedVariantId === "new" && (
+                    {mounted && isDesktop && expandedVariantId === "new" && (
                       <motion.div 
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
