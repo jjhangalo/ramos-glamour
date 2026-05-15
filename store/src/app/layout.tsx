@@ -7,6 +7,7 @@ import { SplashScreen } from "@/components/layout/SplashScreen";
 import { CartPreservedToast } from "@/components/auth/CartPreservedToast";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { PushInitializer } from "@/components/notifications/PushInitializer";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const cormorantGaramond = Cormorant_Garamond({
@@ -98,6 +99,7 @@ export default function RootLayout({
         </main>
         <Footer />
         <ToastProvider />
+        <SpeedInsights />
       </body>
     </html>
   );

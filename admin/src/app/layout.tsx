@@ -4,6 +4,8 @@ import { AppToaster } from "@/components/shared/AppToaster";
 
 import { Cormorant_Garamond, Outfit } from "next/font/google";
 
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 import "./globals.css";
 
 const cormorantGaramond = Cormorant_Garamond({
@@ -47,8 +49,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html 
-      lang="pt" 
+    <html
+      lang="pt"
       className={`${cormorantGaramond.variable} ${outfit.variable} h-full antialiased`}
       suppressHydrationWarning
       data-scroll-behavior="smooth"
@@ -60,6 +62,7 @@ export default function RootLayout({
       <body className="min-h-full bg-brand-bg font-sans text-brand-midnight">
         {children}
         <AppToaster />
+        <SpeedInsights />
       </body>
     </html>
   );
