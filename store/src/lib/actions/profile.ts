@@ -104,5 +104,5 @@ export async function updateProfile(formData: FormData) {
     throw new Error(error.message);
   }
 
-  revalidatePath("/perfil");
+  revalidatePath("/profile");
 }

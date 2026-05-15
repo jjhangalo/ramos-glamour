@@ -38,7 +38,7 @@ self.addEventListener("push", (event: PushEvent) => {
       icon: "/web-app-manifest-192x192.png",
       badge: "/logo-gold.png",
       data: {
-        url: data.url || "/perfil/encomendas",
+        url: data.url || "/profile/orders",
       },
       vibrate: [100, 50, 100],
     };
@@ -62,7 +62,7 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
   console.log("[ServiceWorker] Notificação clicada.");
   event.notification.close();
 
-  const urlToOpen = event.notification.data?.url || "/perfil/encomendas";
+  const urlToOpen = event.notification.data?.url || "/profile/orders";
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {

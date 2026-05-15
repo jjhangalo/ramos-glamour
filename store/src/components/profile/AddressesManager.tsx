@@ -1,11 +1,9 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-
 import { ProfileSectionHeader } from "@/components/profile/ProfileSectionHeader";
 import {
   createAddress,
@@ -80,11 +78,9 @@ function toFormState(address?: Address | null): AddressFormState {
 
 function buildFormData(values: AddressFormState) {
   const formData = new FormData();
-
   Object.entries(values).forEach(([key, value]) => {
     formData.set(key, value);
   });
-
   return formData;
 }
 
@@ -98,21 +94,17 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
   const orderedAddresses = useMemo(
     () =>
       [...addresses].sort((a, b) => {
-        if (a.is_default === b.is_default) {
-          return 0;
-        }
-
+        if (a.is_default === b.is_default) return 0;
         return a.is_default ? -1 : 1;
       }),
     [addresses],
   );
 
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-12">
       <ProfileSectionHeader
-        title="As minhas moradas"
-        description="Guarde e organize as suas moradas de entrega para um checkout mais rápido."
+        title="Delivery Addresses"
+        description="Save and organize your delivery locations for a faster checkout."
       />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -123,45 +115,43 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
             setFormValues(emptyAddress);
             setIsSheetOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-olive px-5 py-3 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"
+          className="group flex items-center justify-center gap-4 bg-brand-midnight px-8 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-brand-white transition-all hover:bg-brand-gold"
         >
           <Plus className="h-4 w-4" />
-          Adicionar morada
+          Add New Address
         </button>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid gap-8 xl:grid-cols-2">
         {orderedAddresses.map((address) => (
           <article
             key={address.id}
-            className="rounded-[1.75rem] bg-white/90 p-6 shadow-[0_16px_35px_rgba(98,98,96,0.08)]"
+            className="rounded-[1.75rem] bg-white/90 p-8 shadow-[0_16px_35px_rgba(98,98,96,0.08)] border border-brand-midnight/5"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.24em] text-brand-charcoal/60">
-                  {address.label ?? "Morada"}
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
+                  {address.label ?? "Address"}
                 </p>
-                <h2 className="mt-2 text-xl font-semibold text-brand-charcoal">
+                <h2 className="mt-2 text-xl font-light tracking-tight text-brand-midnight">
                   {address.recipient_name}
                 </h2>
               </div>
               {address.is_default ? (
-                <span className="rounded-full bg-brand-olive px-3 py-1 text-xs font-medium text-brand-white">
-                  Principal
+                <span className="rounded-full bg-brand-gold/10 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-brand-gold">
+                  Default
                 </span>
               ) : null}
             </div>
 
-            <div className="mt-5 space-y-2 text-sm leading-6 text-brand-charcoal/75">
+            <div className="mt-6 space-y-2 text-[11px] font-medium leading-relaxed text-brand-midnight/60 uppercase tracking-wider">
               <p>{address.phone}</p>
-              <p>{address.province}</p>
-              <p>{address.city}</p>
-              <p>{address.neighborhood}</p>
-              <p>{address.street}</p>
-              <p>{address.reference}</p>
+              <p>{address.province}, {address.city}</p>
+              <p>{address.neighborhood}{address.street ? ` · ${address.street}` : ""}</p>
+              {address.reference && <p className="mt-2 text-brand-midnight/30 italic">Ref: {address.reference}</p>}
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-4 pt-6 border-t border-brand-midnight/5">
               {!address.is_default ? (
                 <button
                   type="button"
@@ -170,20 +160,16 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
                     startTransition(async () => {
                       try {
                         await setDefaultAddress(address.id);
-                        toast.success("Morada principal actualizada");
+                        toast.success("Default address updated");
                         router.refresh();
                       } catch (error) {
-                        toast.error(
-                          error instanceof Error
-                            ? error.message
-                            : "Não foi possível definir a morada principal.",
-                        );
+                        toast.error(error instanceof Error ? error.message : "Unable to set default address.");
                       }
                     });
                   }}
-                  className="rounded-full border border-brand-charcoal/15 px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
+                  className="text-[10px] font-bold uppercase tracking-[0.1em] text-brand-midnight/40 hover:text-brand-gold transition"
                 >
-                  Definir como principal
+                  Set as Default
                 </button>
               ) : null}
 
@@ -194,34 +180,31 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
                   setFormValues(toFormState(address));
                   setIsSheetOpen(true);
                 }}
-                className="inline-flex items-center gap-2 rounded-full border border-brand-charcoal/15 px-4 py-2 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
+                className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.1em] text-brand-midnight/40 hover:text-brand-midnight transition"
               >
-                <Pencil className="h-4 w-4" />
-                Editar
+                <Pencil className="h-3 w-3" />
+                Edit
               </button>
 
               <button
                 type="button"
                 disabled={isPending}
                 onClick={() => {
+                  if (!confirm("Are you sure you want to remove this address?")) return;
                   startTransition(async () => {
                     try {
                       await deleteAddress(address.id);
-                      toast.success("Morada removida");
+                      toast.success("Address removed");
                       router.refresh();
                     } catch (error) {
-                      toast.error(
-                        error instanceof Error
-                          ? error.message
-                          : "Não foi possível remover a morada.",
-                      );
+                      toast.error(error instanceof Error ? error.message : "Unable to remove address.");
                     }
                   });
                 }}
-                className="inline-flex items-center gap-2 rounded-full border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.1em] text-red-400 hover:text-red-500 transition ml-auto"
               >
-                <Trash2 className="h-4 w-4" />
-                Remover
+                <Trash2 className="h-3 w-3" />
+                Remove
               </button>
             </div>
           </article>
@@ -231,58 +214,51 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent className="w-full max-w-xl">
           <SheetHeader>
-            <SheetTitle>
-              {editingAddress ? "Editar morada" : "Adicionar morada"}
+            <SheetTitle className="text-xl font-light tracking-tight text-brand-midnight">
+              {editingAddress ? "Edit Address" : "Add Address"}
             </SheetTitle>
-            <SheetDesc>
-              Guarde os seus dados de entrega para acelerar futuras encomendas.
+            <SheetDesc className="text-xs uppercase tracking-wider text-brand-midnight/40">
+              Save your delivery details for faster checkout.
             </SheetDesc>
           </SheetHeader>
 
           <form
-            className="grid gap-4"
+            className="grid gap-6 mt-8"
             onSubmit={(event) => {
               event.preventDefault();
-
               startTransition(async () => {
                 try {
                   const formData = buildFormData(formValues);
-
                   if (editingAddress) {
                     await updateAddress(editingAddress.id, formData);
-                    toast.success("Morada actualizada");
+                    toast.success("Address updated");
                   } else {
                     await createAddress(formData);
-                    toast.success("Morada criada");
+                    toast.success("Address created");
                   }
-
                   setIsSheetOpen(false);
                   setEditingAddress(null);
                   setFormValues(emptyAddress);
                   router.refresh();
                 } catch (error) {
-                  toast.error(
-                    error instanceof Error
-                      ? error.message
-                      : "Não foi possível guardar a morada.",
-                  );
+                  toast.error(error instanceof Error ? error.message : "Unable to save address.");
                 }
               });
             }}
           >
             {(
               [
-                ["label", "Etiqueta"],
-                ["recipient_name", "Nome do Destinatário"],
-                ["phone", "Telefone"],
-                ["province", "Província"],
-                ["city", "Cidade"],
-                ["neighborhood", "Bairro"],
-                ["street", "Rua"],
+                ["label", "Label (Home, Work, etc)"],
+                ["recipient_name", "Recipient Name"],
+                ["phone", "Phone Number"],
+                ["province", "Province"],
+                ["city", "City"],
+                ["neighborhood", "Neighborhood"],
+                ["street", "Street"],
               ] as const
             ).map(([key, label]) => (
               <label key={key} className="space-y-2">
-                <span className="text-sm font-medium text-brand-charcoal">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
                   {label}
                 </span>
                 <input
@@ -293,14 +269,14 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
                       [key]: event.target.value,
                     }));
                   }}
-                  className="w-full rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
+                  className="w-full border-b border-brand-midnight/10 bg-transparent py-3 text-[11px] font-semibold tracking-widest outline-none transition focus:border-brand-gold"
                 />
               </label>
             ))}
 
             <label className="space-y-2">
-              <span className="text-sm font-medium text-brand-charcoal">
-                Ponto de referência
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
+                Reference Point
               </span>
               <textarea
                 value={formValues.reference}
@@ -310,26 +286,24 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
                     reference: event.target.value,
                   }));
                 }}
-                className="min-h-28 w-full rounded-2xl border border-brand-charcoal/15 bg-brand-white px-4 py-3 outline-none transition focus:border-brand-olive"
+                className="min-h-24 w-full border-b border-brand-midnight/10 bg-transparent py-3 text-[11px] font-semibold tracking-widest outline-none transition focus:border-brand-gold resize-none"
               />
             </label>
 
-            <SheetFooter>
+            <SheetFooter className="mt-8">
               <button
                 type="button"
-                onClick={() => {
-                  setIsSheetOpen(false);
-                }}
-                className="rounded-full border border-brand-charcoal/15 px-5 py-3 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
+                onClick={() => setIsSheetOpen(false)}
+                className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40 hover:text-brand-midnight transition"
               >
-                Cancelar
+                Cancel
               </button>
               <button
                 type="submit"
                 disabled={isPending}
-                className="rounded-full bg-brand-olive px-5 py-3 text-sm font-medium text-brand-white transition hover:bg-[#8a904d] disabled:cursor-not-allowed disabled:opacity-60"
+                className="bg-brand-midnight px-8 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-brand-white transition-all hover:bg-brand-gold disabled:opacity-50"
               >
-                {isPending ? "A guardar..." : "Guardar morada"}
+                {isPending ? "SAVING..." : "SAVE ADDRESS"}
               </button>
             </SheetFooter>
           </form>

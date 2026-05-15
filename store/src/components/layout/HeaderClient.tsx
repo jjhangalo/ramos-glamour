@@ -215,15 +215,15 @@ export function HeaderClient({ user }: HeaderClientProps) {
                     <DropdownMenuContent align="end" className="w-56 glass border-none shadow-xl">
                       <DropdownMenuLabel className="font-normal">
                         <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium">{user.displayName || "Cliente"}</p>
+                          <p className="text-sm font-medium">{user.displayName || "Customer"}</p>
                           <p className="text-xs text-brand-midnight/50">{user.email}</p>
                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-brand-midnight/5" />
                       <DropdownMenuItem asChild>
-                        <Link href="/perfil" className="cursor-pointer">
+                        <Link href="/profile" className="cursor-pointer">
                           <UserIcon className="mr-2 h-4 w-4" />
-                          <span>O Meu Perfil</span>
+                          <span>My Profile</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-brand-midnight/5" />
@@ -232,7 +232,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                         className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50"
                       >
                         <LogOut className="mr-2 h-4 w-4" />
-                        <span>Sair</span>
+                        <span>Logout</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -244,7 +244,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                       useWhite ? "text-brand-white/80 hover:text-brand-white" : "text-brand-midnight/70 hover:text-brand-midnight"
                     )}
                   >
-                    ENTRAR
+                    SIGN IN
                   </button>
                 )}
               </div>
@@ -263,7 +263,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
         >
           <div className="flex flex-col p-8 space-y-8">
             <div className="space-y-4">
-              <p className="text-[10px] font-bold tracking-[0.3em] text-brand-midnight/40">LOJA</p>
+              <p className="text-[10px] font-bold tracking-[0.3em] text-brand-midnight/40">SHOP</p>
               {leftLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -298,7 +298,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                       {user.avatarUrl ? (
                         <Image
                           src={user.avatarUrl}
-                          alt={user.displayName || "Usuário"}
+                          alt={user.displayName || "User"}
                           width={48}
                           height={48}
                           className="h-full w-full object-cover"
@@ -308,24 +308,24 @@ export function HeaderClient({ user }: HeaderClientProps) {
                       )}
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold">{user.displayName || "Cliente"}</span>
+                      <span className="text-sm font-semibold">{user.displayName || "Customer"}</span>
                       <span className="text-xs text-brand-midnight/50">{user.email}</span>
                     </div>
                   </div>
                   <Link
-                    href="/perfil"
+                    href="/profile"
                     onClick={() => setIsMenuOpen(false)}
                     className="flex items-center gap-4 py-4 text-sm font-medium"
                   >
                     <UserIcon className="h-5 w-5" />
-                    O Meu Perfil
+                    My Profile
                   </Link>
                   <button
                     onClick={() => signOut()}
                     className="flex items-center gap-4 py-4 text-sm font-medium text-red-600"
                   >
                     <LogOut className="h-5 w-5" />
-                    Sair
+                    Logout
                   </button>
                 </div>
               ) : (
@@ -333,7 +333,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                   onClick={() => signInWithGoogle(pathname)}
                   className="w-full rounded-full bg-brand-midnight py-4 text-sm font-semibold tracking-[0.2em] text-brand-white"
                 >
-                  ENTRAR COM O GOOGLE
+                  SIGN IN WITH GOOGLE
                 </button>
               )}
             </div>

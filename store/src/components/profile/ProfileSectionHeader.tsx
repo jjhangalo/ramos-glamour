@@ -1,5 +1,4 @@
 import Link from "next/link";
-
 import { ChevronLeft } from "lucide-react";
 
 type ProfileSectionHeaderProps = {
@@ -12,24 +11,25 @@ export function ProfileSectionHeader({
   description,
 }: ProfileSectionHeaderProps) {
   return (
-    <div className="space-y-4">
+    <div className="mb-8 space-y-6">
+      {/* Mobile Back Button — visible only on small screens */}
       <Link
-        href="/perfil"
-        className="inline-flex items-center gap-2 text-sm font-medium text-brand-charcoal transition hover:text-brand-olive md:hidden"
+        href="/profile"
+        className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40 transition hover:text-brand-gold md:hidden"
       >
-        <ChevronLeft className="h-4 w-4" />
-        Voltar
+        <ChevronLeft className="h-3 w-3" />
+        Back to Profile
       </Link>
 
       <div>
-        <p className="text-sm uppercase tracking-[0.24em] text-brand-charcoal/60">
-          Área do cliente
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-midnight/30">
+          Customer Area
         </p>
-        <h1 className="mt-2 text-3xl font-semibold text-brand-charcoal">
+        <h1 className="mt-2 text-2xl font-light tracking-tight text-brand-midnight md:text-3xl">
           {title}
         </h1>
         {description ? (
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-brand-charcoal/70">
+          <p className="mt-2 max-w-2xl text-[11px] leading-relaxed text-brand-midnight/50 uppercase tracking-wider">
             {description}
           </p>
         ) : null}

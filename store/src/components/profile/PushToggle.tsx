@@ -9,12 +9,12 @@ export function PushToggle({ initialSubscription }: { initialSubscription: unkno
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Verificar se o navegador suporta push
+    // Check if browser supports push
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       return;
     }
 
-    // Sincronizar estado real da subscrição no navegador
+    // Sync real subscription state
     getPushSubscription().then(sub => {
       setIsSubscribed(!!sub);
     });
@@ -26,15 +26,15 @@ export function PushToggle({ initialSubscription }: { initialSubscription: unkno
       if (isSubscribed) {
         await unsubscribeUserFromPush();
         setIsSubscribed(false);
-        toast.success("Notificações desativadas.");
+        toast.success("Notifications deactivated.");
       } else {
         await subscribeUserToPush();
         setIsSubscribed(true);
-        toast.success("Notificações ativadas com sucesso!");
+        toast.success("Notifications activated successfully!");
       }
     } catch (error: unknown) {
       console.error(error);
-      const message = error instanceof Error ? error.message : "Erro ao configurar notificações.";
+      const message = error instanceof Error ? error.message : "Error configuring notifications.";
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -46,14 +46,14 @@ export function PushToggle({ initialSubscription }: { initialSubscription: unkno
   }
 
   return (
-    <div className="rounded-2xl bg-white border border-brand-midnight/5 p-6">
+    <div className="rounded-2xl bg-white border border-brand-midnight/5 p-8 shadow-[0_16px_35px_rgba(98,98,96,0.08)]">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
-            Notificações
+            NOTIFICATIONS
           </h4>
-          <p className="text-sm font-medium text-brand-midnight">
-            Alertas no Telemóvel
+          <p className="text-base font-light tracking-tight text-brand-midnight">
+            Mobile Push Alerts
           </p>
         </div>
         <button
@@ -70,10 +70,10 @@ export function PushToggle({ initialSubscription }: { initialSubscription: unkno
           />
         </button>
       </div>
-      <p className="mt-4 text-[10px] leading-relaxed text-brand-midnight/40 uppercase tracking-wider">
+      <p className="mt-4 text-[10px] leading-relaxed text-brand-midnight/40 uppercase tracking-[0.1em]">
         {isSubscribed 
-          ? "Receberá atualizações sobre o estado das suas encomendas."
-          : "Ative para receber atualizações em tempo real sobre os seus pedidos."}
+          ? "You will receive real-time updates about your order status."
+          : "Enable to receive real-time updates about your orders directly on your device."}
       </p>
     </div>
   );
