@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/actions/auth";
 
 const links = [
-  { href: "/profile/orders", label: "ORDERS", icon: Package },
-  { href: "/profile/data", label: "PERSONAL DATA", icon: User },
-  { href: "/profile/addresses", label: "ADDRESSES", icon: MapPin },
-  { href: "/profile/settings", label: "SETTINGS", icon: Settings },
+  { href: "/perfil/encomendas", label: "ENCOMENDAS", icon: Package },
+  { href: "/perfil/dados", label: "DADOS PESSOAIS", icon: User },
+  { href: "/perfil/moradas", label: "MORADAS", icon: MapPin },
+  { href: "/perfil/definicoes", label: "DEFINIÇÕES", icon: Settings },
 ];
 
 export function ProfileNav() {
@@ -46,7 +46,7 @@ export function ProfileNav() {
           className="flex items-center gap-3 py-3.5 text-[10px] font-bold tracking-[0.3em] text-red-600/60 hover:text-red-600 transition-all w-full"
         >
           <LogOut className="h-4 w-4 shrink-0 text-red-600/20 group-hover:text-red-600" />
-          SIGN OUT
+          TERMINAR SESSÃO
         </button>
       </form>
     </nav>

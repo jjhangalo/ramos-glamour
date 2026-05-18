@@ -43,11 +43,11 @@ export function ProfileIdentity({ profile, location }: ProfileIdentityProps) {
         </h2>
         
         <div className="flex flex-wrap items-center gap-x-2 text-[10px] font-bold uppercase tracking-[0.1em] text-brand-midnight/40">
-          <span>Member since {memberSince}</span>
+          <span>Membro desde {memberSince}</span>
           {profile.email_verified && (
             <>
               <span className="text-brand-midnight/20">•</span>
-              <span className="text-brand-gold/80">Verified</span>
+              <span className="text-brand-gold/80">Verificado</span>
             </>
           )}
         </div>

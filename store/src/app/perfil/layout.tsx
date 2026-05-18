@@ -24,7 +24,7 @@ export default async function ProfileLayout({
   ]);
 
   return (
-    <main className="flex flex-1 flex-col">
+    <main className="flex flex-1 flex-col pt-20">
       <div className="mx-auto w-full max-w-[1400px] flex-1 px-6 py-8 lg:px-12 lg:py-16">
         <div className="flex gap-16 lg:items-start">
           {/* Desktop Sidebar — hidden on mobile */}

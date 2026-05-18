@@ -2,7 +2,7 @@ import { ProfileSectionHeader } from "@/components/profile/ProfileSectionHeader"
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils/format";
 
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
+const dateFormatter = new Intl.DateTimeFormat("pt-AO", {
   day: "numeric",
   month: "long",
   year: "numeric",
@@ -17,11 +17,11 @@ const statusStyles = {
 } as const;
 
 const statusLabels = {
-  pending: "Pending",
-  processing: "Processing",
-  delivering: "Out for Delivery",
-  delivered: "Delivered",
-  refused: "Refused",
+  pending: "Pendente",
+  processing: "A processar",
+  delivering: "Em entrega",
+  delivered: "Entregue",
+  refused: "Recusada",
 } as const;
 
 export default async function OrdersPage() {
@@ -43,8 +43,8 @@ export default async function OrdersPage() {
   return (
     <div className="space-y-6">
       <ProfileSectionHeader
-        title="My Orders"
-        description="Track the status of your orders and review your items quickly."
+        title="As minhas encomendas"
+        description="Acompanhe o estado das suas encomendas e reveja os itens rapidamente."
       />
 
       <div className="space-y-5">
@@ -56,7 +56,7 @@ export default async function OrdersPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
-                  Order #{order.id.slice(0, 8)}
+                  Encomenda #{order.id.slice(0, 8)}
                 </p>
                 <p className="mt-2 text-xs font-medium text-brand-midnight/60">
                   {dateFormatter.format(new Date(order.created_at))}
@@ -66,7 +66,7 @@ export default async function OrdersPage() {
               <span
                 className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${statusStyles[order.status as keyof typeof statusStyles] ?? statusStyles.pending}`}
               >
-                {statusLabels[order.status as keyof typeof statusLabels] ?? "Pending"}
+                {statusLabels[order.status as keyof typeof statusLabels] ?? "Pendente"}
               </span>
             </div>
 
@@ -82,18 +82,18 @@ export default async function OrdersPage() {
 
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
-                  Address
+                  Morada
                 </p>
                 <p className="mt-2 text-[11px] leading-relaxed text-brand-midnight/60 uppercase tracking-wider">
-                  {order.addresses?.label ?? "Address"}
+                  {order.addresses?.label ?? "Morada"}
                   <br />
-                  {order.addresses?.city ?? "Undefined city"}
+                  {order.addresses?.city ?? "Cidade não definida"}
                 </p>
               </div>
 
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
-                  Items
+                  Itens
                 </p>
                 <ul className="mt-2 space-y-2 text-[11px] font-medium text-brand-midnight/70">
                   {(order.order_items ?? []).map(
@@ -112,7 +112,7 @@ export default async function OrdersPage() {
         {orders?.length ? null : (
           <section className="rounded-[1.75rem] bg-white/30 px-6 py-16 text-center border border-dashed border-brand-midnight/10">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
-              No orders found.
+              Ainda não tem encomendas.
             </p>
           </section>
         )}

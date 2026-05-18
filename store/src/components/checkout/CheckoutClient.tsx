@@ -220,7 +220,7 @@ export function CheckoutClient({ addresses, userName }: CheckoutClientProps) {
             <button
               type="button"
               onClick={() => {
-                router.push("/profile/addresses");
+                router.push("/perfil/moradas");
               }}
               className="mt-6 rounded-full border border-brand-charcoal/15 px-8 py-4 text-[10px] font-bold tracking-[0.2em] text-brand-charcoal transition hover:bg-brand-bg active:bg-brand-midnight/5 touch-manipulation"
             >

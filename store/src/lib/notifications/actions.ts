@@ -20,7 +20,7 @@ export async function savePushSubscription(subscription: unknown) {
     throw new Error(`Erro ao guardar subscrição: ${error.message}`);
   }
 
-  revalidatePath("/profile");
+  revalidatePath("/perfil");
   return { success: true };
 }
 

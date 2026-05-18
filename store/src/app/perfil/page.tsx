@@ -8,23 +8,23 @@ import { signOut } from "@/lib/actions/auth";
 
 const navItems = [
   {
-    href: "/profile/orders",
-    label: "ORDERS",
+    href: "/perfil/encomendas",
+    label: "ENCOMENDAS",
     icon: Package,
   },
   {
-    href: "/profile/data",
-    label: "PERSONAL DATA",
+    href: "/perfil/dados",
+    label: "DADOS PESSOAIS",
     icon: User,
   },
   {
-    href: "/profile/addresses",
-    label: "ADDRESSES",
+    href: "/perfil/moradas",
+    label: "MORADAS",
     icon: MapPin,
   },
   {
-    href: "/profile/settings",
-    label: "SETTINGS",
+    href: "/perfil/definicoes",
+    label: "DEFINIÇÕES",
     icon: Settings,
   },
 ];
@@ -84,7 +84,7 @@ export default async function ProfilePage() {
             >
               <LogOut className="w-5 h-5 text-red-400 shrink-0" />
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-red-500">
-                SIGN OUT
+                TERMINAR SESSÃO
               </span>
             </button>
           </form>

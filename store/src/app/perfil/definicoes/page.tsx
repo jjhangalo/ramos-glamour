@@ -8,8 +8,8 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-12">
       <ProfileSectionHeader 
-        title="Settings"
-        description="Manage your system preferences and notification settings."
+        title="Definições"
+        description="Gira as suas preferências de sistema e definições de notificações."
       />
 
       <div className="max-w-2xl">
