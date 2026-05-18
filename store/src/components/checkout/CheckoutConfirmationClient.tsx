@@ -45,10 +45,10 @@ export function CheckoutConfirmationClient({
       <div className="w-full rounded-[2rem] bg-white/90 p-8 text-center shadow-[0_16px_35px_rgba(98,98,96,0.08)] md:p-12">
         <CheckCircle2 className="mx-auto h-16 w-16 text-brand-olive" />
         <h1 className="mt-6 text-4xl font-semibold text-brand-charcoal">
-          Order Received!
+          Encomenda Recebida!
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-brand-charcoal/75">
-          Your order has been successfully registered. We will contact you shortly.
+          A sua encomenda foi registada com sucesso. Entraremos em contacto brevemente.
         </p>
 
         <div className="mt-8 flex flex-col gap-3">
@@ -59,21 +59,21 @@ export function CheckoutConfirmationClient({
               rel="noreferrer"
               className="rounded-full bg-brand-olive px-6 py-4 text-sm font-medium text-brand-white transition hover:bg-[#8a904d]"
             >
-              Track via WhatsApp
+              Acompanhar via WhatsApp
             </a>
           ) : null}
 
           <Link
-            href="/profile/orders"
+            href="/perfil/encomendas"
             className="rounded-full border border-brand-charcoal/15 px-6 py-4 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
           >
-            View My Orders
+            Ver as Minhas Encomendas
           </Link>
           <Link
             href="/catalogo"
             className="rounded-full border border-brand-charcoal/15 px-6 py-4 text-sm font-medium text-brand-charcoal transition hover:bg-brand-bg"
           >
-            Continue Shopping
+            Continuar a Comprar
           </Link>
         </div>
       </div>

@@ -39,12 +39,12 @@ export function AuthButton() {
         onClick={() => signInWithGoogle(pathname)}
         className="rounded-full bg-brand-charcoal px-5 py-2 text-sm font-medium text-brand-white transition hover:bg-brand-olive"
       >
-        Sign in with Google
+        Entrar com Google
       </button>
     );
   }
 
-  const userName = user.user_metadata.full_name ?? user.email ?? "Customer";
+  const userName = user.user_metadata.full_name ?? user.email ?? "Cliente";
 
   return (
     <div className="flex items-center gap-3">
@@ -52,18 +52,18 @@ export function AuthButton() {
         {userName}
       </span>
       <Link
-        href="/profile"
+        href="/perfil"
         className="inline-flex items-center gap-2 text-sm text-brand-charcoal transition hover:text-brand-gold"
       >
         <UserCircle className="h-4 w-4" />
-        <span className="hidden sm:inline">My Profile</span>
+        <span className="hidden sm:inline">O Meu Perfil</span>
       </Link>
       <form action={signOut}>
         <button
           type="submit"
           className="rounded-full border border-brand-charcoal px-4 py-2 text-sm text-brand-charcoal transition hover:bg-brand-charcoal hover:text-brand-white"
         >
-          Logout
+          Terminar Sessão
         </button>
       </form>
     </div>

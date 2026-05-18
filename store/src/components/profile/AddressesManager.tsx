@@ -103,8 +103,8 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
   return (
     <div className="space-y-12">
       <ProfileSectionHeader
-        title="Delivery Addresses"
-        description="Save and organize your delivery locations for a faster checkout."
+        title="Moradas de Entrega"
+        description="Guarde e organize as suas moradas de entrega para uma finalização de compra mais rápida."
       />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -118,7 +118,7 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
           className="group flex items-center justify-center gap-4 bg-brand-midnight px-8 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-brand-white transition-all hover:bg-brand-gold"
         >
           <Plus className="h-4 w-4" />
-          Add New Address
+          Adicionar Nova Morada
         </button>
       </div>
 
@@ -131,7 +131,7 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
-                  {address.label ?? "Address"}
+                  {address.label ?? "Morada"}
                 </p>
                 <h2 className="mt-2 text-xl font-light tracking-tight text-brand-midnight">
                   {address.recipient_name}
@@ -139,7 +139,7 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
               </div>
               {address.is_default ? (
                 <span className="rounded-full bg-brand-gold/10 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-brand-gold">
-                  Default
+                  Principal
                 </span>
               ) : null}
             </div>
@@ -160,16 +160,16 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
                     startTransition(async () => {
                       try {
                         await setDefaultAddress(address.id);
-                        toast.success("Default address updated");
+                        toast.success("Morada principal atualizada");
                         router.refresh();
                       } catch (error) {
-                        toast.error(error instanceof Error ? error.message : "Unable to set default address.");
+                        toast.error(error instanceof Error ? error.message : "Não foi possível definir a morada principal.");
                       }
                     });
                   }}
                   className="text-[10px] font-bold uppercase tracking-[0.1em] text-brand-midnight/40 hover:text-brand-gold transition"
                 >
-                  Set as Default
+                  Definir como Principal
                 </button>
               ) : null}
 
@@ -183,28 +183,28 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
                 className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.1em] text-brand-midnight/40 hover:text-brand-midnight transition"
               >
                 <Pencil className="h-3 w-3" />
-                Edit
+                Editar
               </button>
 
               <button
                 type="button"
                 disabled={isPending}
                 onClick={() => {
-                  if (!confirm("Are you sure you want to remove this address?")) return;
+                  if (!confirm("Tem a certeza de que deseja remover esta morada?")) return;
                   startTransition(async () => {
                     try {
                       await deleteAddress(address.id);
-                      toast.success("Address removed");
+                      toast.success("Morada removida com sucesso");
                       router.refresh();
                     } catch (error) {
-                      toast.error(error instanceof Error ? error.message : "Unable to remove address.");
+                      toast.error(error instanceof Error ? error.message : "Não foi possível remover a morada.");
                     }
                   });
                 }}
                 className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.1em] text-red-400 hover:text-red-500 transition ml-auto"
               >
                 <Trash2 className="h-3 w-3" />
-                Remove
+                Remover
               </button>
             </div>
           </article>
@@ -215,10 +215,10 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
         <SheetContent className="w-full max-w-xl">
           <SheetHeader>
             <SheetTitle className="text-xl font-light tracking-tight text-brand-midnight">
-              {editingAddress ? "Edit Address" : "Add Address"}
+              {editingAddress ? "Editar Morada" : "Adicionar Morada"}
             </SheetTitle>
             <SheetDesc className="text-xs uppercase tracking-wider text-brand-midnight/40">
-              Save your delivery details for faster checkout.
+              Guarde os seus dados de entrega para uma compra mais rápida.
             </SheetDesc>
           </SheetHeader>
 
@@ -231,30 +231,30 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
                   const formData = buildFormData(formValues);
                   if (editingAddress) {
                     await updateAddress(editingAddress.id, formData);
-                    toast.success("Address updated");
+                    toast.success("Morada atualizada");
                   } else {
                     await createAddress(formData);
-                    toast.success("Address created");
+                    toast.success("Morada criada");
                   }
                   setIsSheetOpen(false);
                   setEditingAddress(null);
                   setFormValues(emptyAddress);
                   router.refresh();
                 } catch (error) {
-                  toast.error(error instanceof Error ? error.message : "Unable to save address.");
+                  toast.error(error instanceof Error ? error.message : "Não foi possível guardar a morada.");
                 }
               });
             }}
           >
             {(
               [
-                ["label", "Label (Home, Work, etc)"],
-                ["recipient_name", "Recipient Name"],
-                ["phone", "Phone Number"],
-                ["province", "Province"],
-                ["city", "City"],
-                ["neighborhood", "Neighborhood"],
-                ["street", "Street"],
+                ["label", "Identificador (Casa, Trabalho, etc)"],
+                ["recipient_name", "Nome do Destinatário"],
+                ["phone", "Número de Telefone"],
+                ["province", "Província"],
+                ["city", "Cidade"],
+                ["neighborhood", "Bairro"],
+                ["street", "Rua"],
               ] as const
             ).map(([key, label]) => (
               <label key={key} className="space-y-2">
@@ -276,7 +276,7 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
 
             <label className="space-y-2">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40">
-                Reference Point
+                Ponto de Referência
               </span>
               <textarea
                 value={formValues.reference}
@@ -296,14 +296,14 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
                 onClick={() => setIsSheetOpen(false)}
                 className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/40 hover:text-brand-midnight transition"
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isPending}
                 className="bg-brand-midnight px-8 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-brand-white transition-all hover:bg-brand-gold disabled:opacity-50"
               >
-                {isPending ? "SAVING..." : "SAVE ADDRESS"}
+                {isPending ? "A GUARDAR..." : "GUARDAR MORADA"}
               </button>
             </SheetFooter>
           </form>

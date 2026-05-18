@@ -26,15 +26,15 @@ export function PushToggle({ initialSubscription }: { initialSubscription: unkno
       if (isSubscribed) {
         await unsubscribeUserFromPush();
         setIsSubscribed(false);
-        toast.success("Notifications deactivated.");
+        toast.success("Notificações desativadas.");
       } else {
         await subscribeUserToPush();
         setIsSubscribed(true);
-        toast.success("Notifications activated successfully!");
+        toast.success("Notificações ativadas com sucesso!");
       }
     } catch (error: unknown) {
       console.error(error);
-      const message = error instanceof Error ? error.message : "Error configuring notifications.";
+      const message = error instanceof Error ? error.message : "Erro ao configurar notificações.";
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -50,10 +50,10 @@ export function PushToggle({ initialSubscription }: { initialSubscription: unkno
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-midnight/30">
-            NOTIFICATIONS
+            NOTIFICAÇÕES
           </h4>
           <p className="text-base font-light tracking-tight text-brand-midnight">
-            Mobile Push Alerts
+            Alertas Push no Telemóvel
           </p>
         </div>
         <button
@@ -72,8 +72,8 @@ export function PushToggle({ initialSubscription }: { initialSubscription: unkno
       </div>
       <p className="mt-4 text-[10px] leading-relaxed text-brand-midnight/40 uppercase tracking-[0.1em]">
         {isSubscribed 
-          ? "You will receive real-time updates about your order status."
-          : "Enable to receive real-time updates about your orders directly on your device."}
+          ? "Irá receber atualizações em tempo real sobre o estado das suas encomendas."
+          : "Ative para receber atualizações em tempo real sobre as suas encomendas diretamente no seu dispositivo."}
       </p>
     </div>
   );

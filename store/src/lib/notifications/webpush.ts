@@ -47,7 +47,7 @@ export async function sendPushNotification(
   subscription: webpush.PushSubscription,
   title: string,
   body: string,
-  url: string = "/profile/orders"
+  url: string = "/perfil/encomendas"
 ) {
   if (!subscription) return;
  
