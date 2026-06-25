@@ -48,6 +48,7 @@ jobs:
         working-directory: ./admin
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: lint
     runs-on: ubuntu-latest
     steps:
